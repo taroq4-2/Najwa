@@ -15,8 +15,9 @@ Najwa is an open-source Android app for prayer times, reminders and automatic si
 
 ## البناء والتعديل · Build and contribute
 
-يتطلب البناء JDK 17 وAndroid SDK 36. الشفرة متاحة للجميع للتعديل وفق [Apache 2.0](LICENSE).  
-Build with JDK 17 and Android SDK 36. Anyone can modify the source under the [Apache 2.0 license](LICENSE).
+لتشغيل الاختبارات استخدم JDK 21 وAndroid SDK 36. الشفرة متاحة للجميع للتعديل وفق [Apache 2.0](LICENSE).
+
+Use JDK 21 and Android SDK 36 to run the verification suite. Anyone can modify the source under the [Apache 2.0 license](LICENSE).
 
 ```sh
 ./gradlew -PplatformTests=true :core:test :app:testDebugUnitTest :app:assembleDebug :app:lintRelease
