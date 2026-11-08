@@ -19,6 +19,8 @@ jobs:
           SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           "$SDKMANAGER" 'platforms;android-36' 'build-tools;35.0.0'
       - run: sh gradlew --no-daemon -PplatformTests=true :core:test :app:testDebugUnitTest :app:assembleDebug :app:lintRelease
+        env:
+          NAJWA_ROBOLECTRIC_REPO: https://maven-central.storage-download.googleapis.com/maven2
       - run: python3 scripts/audit_privacy.py --require-merged
       - run: sh gradlew :app:dependencies --configuration debugRuntimeClasspath > dependency-tree.txt
       - uses: actions/upload-artifact@v4

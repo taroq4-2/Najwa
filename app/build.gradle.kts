@@ -81,5 +81,5 @@ if (platformTests) tasks.withType<Test>().configureEach {
     doFirst {testHome.mkdirs();testTemp.mkdirs()}
     systemProperty("user.home",testHome.absolutePath)
     systemProperty("java.io.tmpdir",testTemp.canonicalPath)
-    systemProperty("robolectric.dependency.repo.url","https://repo.maven.apache.org/maven2")
+    systemProperty("robolectric.dependency.repo.url",System.getenv("NAJWA_ROBOLECTRIC_REPO") ?: "https://repo.maven.apache.org/maven2")
 }
