@@ -6,12 +6,13 @@
   <meta name="description" content="نجوى لأندرويد، تطبيق مفتوح المصدر لمواقيت الصلاة وتنبيهات الأذان والإقامة والصمت التلقائي.">
   <meta name="theme-color" content="#0b1423">
   <title>Najwa · نجوى</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
   <header class="shell top">
     <a class="brand" href="./"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M32 4c8 0 13 7 11 15C39 34 28 43 13 46c-1 0-1-1 0-2 6-10 9-20 7-26C18 10 24 4 32 4Z"/></svg>نجوى <span>NAJWA</span></a>
-    <a class="language" href="en.html" lang="en" hreflang="en">English</a>
+    <nav class="top-links" aria-label="روابط الصفحة"><a class="guide-link" href="#setup">دليل التثبيت</a>
+    <a class="language" href="en.html" lang="en" hreflang="en">English</a></nav>
   </header>
   <main class="shell">
     <section class="hero" aria-labelledby="title">
@@ -19,7 +20,7 @@
         <p class="eyebrow">أندرويد · الإصدار 1.1.0</p>
         <h1 id="title">صلاتك أولاً،<br><em>وضجيجك لاحقاً.</em></h1>
         <p class="lead">تابع مواقيت الصلاة، واسمع الأذان بالنغمة التي تختارها. يعرض نجوى المتبقي على الإقامة ويضبط صمت الهاتف للمدة التي تحددها.</p>
-        <div class="actions"><a class="button primary" href="https://github.com/taroq4-2/Najwa/releases/latest/download/Najwa.apk">تحميل APK مباشرةً</a><a class="button" href="https://github.com/taroq4-2/Najwa">الشفرة على GitHub</a></div>
+        <div class="actions"><a class="button primary" href="https://github.com/taroq4-2/Najwa/releases/latest/download/Najwa.apk">تنزيل نجوى لأندرويد</a><a class="button" href="https://github.com/taroq4-2/Najwa">الشفرة على GitHub</a></div>
         <p class="hint">Android 8.0 فأحدث · يعمل دون إنترنت · ملف تثبيت موقّع</p>
       </div>
       <figure class="phone"><img src="assets/home.png" width="461" height="1000" alt="واجهة نجوى الرئيسية تعرض وقت الظهر والعد التنازلي للإقامة"></figure>
@@ -32,7 +33,7 @@
         <article><h3>صمت تلقائي</h3><p>يبدأ بعد 20 ثانية من وقت الأذان للصلوات التي تختارها، ثم يستعيد وضع الرنين السابق. فعّل المنبّهات الدقيقة وإذن التحكم في الرنين عند الإعداد.</p></article>
       </div>
     </section>
-    <h2>نجوى على الشاشة</h2>
+    <p class="eyebrow">معرض التطبيق</p><h2>لحظة الصلاة كما تظهر على هاتفك</h2>
     <section class="gallery" aria-label="صور معاينة نجوى">
       <figure><img loading="lazy" src="assets/widget.png" alt="ويدجت نجوى الطولي يعرض التاريخ الهجري ووقت الإقامة"><figcaption>الويدجت على الشاشة الرئيسية</figcaption></figure>
       <figure><img loading="lazy" src="assets/notification.png" alt="إشعار أذان الظهر الموسّع مع عداد الإقامة"><figcaption>الأذان والعد التنازلي للإقامة</figcaption></figure>
@@ -40,7 +41,14 @@
       <figure><img loading="lazy" src="assets/friday.png" alt="إشعار الجمعة بالهوية الذهبية"><figcaption>تذكير صلاة الجمعة</figcaption></figure>
     </section>
     <section class="details">
-      <article><h2>ابدأ استخدام نجوى</h2><ol><li>نزّل ملف APK وافتحه. وافق على التثبيت من المصدر إذا طلب Android ذلك.</li><li>افتح نجوى واختر مدينتك وطريقة الحساب المناسبة.</li><li>اسمح بالإشعارات والمنبّهات الدقيقة لتلقي التنبيهات. امنح إذن التحكم في الرنين لتفعيل الصمت التلقائي.</li><li>لإضافة الويدجت، اضغط مطولًا على الشاشة الرئيسية وابحث عن نجوى في الأدوات.</li></ol></article>
+      <article class="setup" id="setup"><p class="eyebrow">دليل التثبيت</p><h2>من أول موعد إلى أول أذان</h2><p>خطوات قصيرة تضبط بها المواقيت والتنبيهات على ما يناسبك.</p>
+        <ol class="steps">
+          <li><strong>ثبّت النسخة الموقّعة</strong><p>حمّل ملف نجوى لأندرويد، ثم ثبّته. إذا طلب الهاتف السماح بالتثبيت من مصدر التنزيل، وافق من إعدادات Android.</p></li>
+          <li><strong>اضبط مواقيت مدينتك</strong><p>اختر مدينتك وأكّد المنطقة الزمنية، ثم راجع طريقة الحساب وفق التقويم المعتمد لديك.</p></li>
+          <li><strong>اختر ما تريد سماعه</strong><p>فعّل تنبيهات الصلاة بإتاحة الإشعارات والمنبّهات الدقيقة. إذا رغبت في الصمت التلقائي، يمنحك الإعداد خطوة منفصلة للتحكم في الرنين.</p></li>
+          <li><strong>ضع الموعد أمامك</strong><p>اضغط مطولًا على الشاشة الرئيسية، واختر ويدجت نجوى بالحجم المناسب لعرض الصلاة القادمة والوقت المتبقي.</p></li>
+        </ol>
+      </article>
       <article><h2>مفتوح المصدر للجميع</h2><p>شفرة نجوى لأندرويد متاحة للجميع للاطلاع والتعديل وإعادة التوزيع وفق <a href="https://github.com/taroq4-2/Najwa/blob/main/LICENSE">ترخيص Apache 2.0</a>. يمكنك اقتراح تعديل أو الإبلاغ عن مشكلة عبر <a href="https://github.com/taroq4-2/Najwa/issues">GitHub</a>.</p><p>تُحسب المواقيت وتُحفظ التفضيلات على جهازك. بيانات الأماكن من <a href="https://www.geonames.org/export/">GeoNames</a>.</p></article>
     </section>
   </main>

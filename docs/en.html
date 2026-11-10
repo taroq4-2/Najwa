@@ -6,12 +6,13 @@
   <meta name="description" content="Najwa is an open-source Android app for prayer times, adhan and iqama reminders, and automatic silent mode.">
   <meta name="theme-color" content="#0b1423">
   <title>Najwa for Android</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
   <header class="shell top">
     <a class="brand" href="en.html"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M32 4c8 0 13 7 11 15C39 34 28 43 13 46c-1 0-1-1 0-2 6-10 9-20 7-26C18 10 24 4 32 4Z"/></svg>Najwa <span lang="ar">نجوى</span></a>
-    <a class="language" href="./" lang="ar" hreflang="ar">العربية</a>
+    <nav class="top-links" aria-label="Page links"><a class="guide-link" href="#setup">Setup guide</a>
+    <a class="language" href="./" lang="ar" hreflang="ar">العربية</a></nav>
   </header>
   <main class="shell">
     <section class="hero" aria-labelledby="title">
@@ -19,7 +20,7 @@
         <p class="eyebrow">Android · Version 1.1.0</p>
         <h1 id="title">Prayer first.<br><em>Noise can wait.</em></h1>
         <p class="lead">See your local prayer times, hear the adhan with a sound you choose, and follow the countdown to iqama. Najwa can silence your phone for the duration you set.</p>
-        <div class="actions"><a class="button primary" href="https://github.com/taroq4-2/Najwa/releases/latest/download/Najwa.apk">Download APK</a><a class="button" href="https://github.com/taroq4-2/Najwa">View source on GitHub</a></div>
+        <div class="actions"><a class="button primary" href="https://github.com/taroq4-2/Najwa/releases/latest/download/Najwa.apk">Download Najwa for Android</a><a class="button" href="https://github.com/taroq4-2/Najwa">View source on GitHub</a></div>
         <p class="hint">Android 8.0 or later · Works offline · Signed APK</p>
       </div>
       <figure class="phone"><img src="assets/home.png" width="461" height="1000" alt="Najwa’s Arabic home screen showing Dhuhr and the iqama countdown"></figure>
@@ -32,7 +33,7 @@
         <article><h3>Automatic silent mode</h3><p>For the prayers you select, Najwa silences your phone 20 seconds after the scheduled adhan and restores its previous ringer mode when the interval ends. Exact alarm and ringer access are required.</p></article>
       </div>
     </section>
-    <h2>Najwa at a glance</h2>
+    <p class="eyebrow">App gallery</p><h2>Prayer time on your screen</h2>
     <section class="gallery" aria-label="Najwa app previews">
       <figure><img loading="lazy" src="assets/widget.png" alt="Vertical widget with a Hijri date and iqama timer"><figcaption>Home screen widget</figcaption></figure>
       <figure><img loading="lazy" src="assets/notification.png" alt="Expanded Dhuhr adhan notification with an iqama countdown"><figcaption>Adhan and iqama countdown</figcaption></figure>
@@ -40,7 +41,14 @@
       <figure><img loading="lazy" src="assets/friday.png" alt="Friday reminder with a gold accent"><figcaption>Friday prayer reminder</figcaption></figure>
     </section>
     <section class="details">
-      <article><h2>Getting started</h2><ol><li>Download and open the APK. If prompted, allow installation from the source you used.</li><li>Open Najwa and select your city and calculation method.</li><li>Allow notifications and exact alarms for reminders. Grant ringer access for automatic silent mode.</li><li>To add the widget, press and hold your home screen and find Najwa in the widget picker.</li></ol></article>
+      <article class="setup" id="setup"><p class="eyebrow">Setup guide</p><h2>From your first setup to your first adhan</h2><p>A few steps to set prayer times and alerts around your routine.</p>
+        <ol class="steps">
+          <li><strong>Install the signed release</strong><p>Download Najwa for Android and install the APK. If Android asks for permission to install from your download source, approve it in system settings.</p></li>
+          <li><strong>Set your local prayer times</strong><p>Select your city, confirm its time zone, and check the calculation method against the calendar you follow.</p></li>
+          <li><strong>Choose the alerts you want</strong><p>Allow notifications and exact alarms for prayer reminders. If you choose automatic silent mode, setup guides you through the separate ringer permission.</p></li>
+          <li><strong>Keep the next prayer in view</strong><p>Press and hold your home screen, then choose a Najwa widget size to see the next prayer and time remaining.</p></li>
+        </ol>
+      </article>
       <article><h2>Open source for everyone</h2><p>Anyone can inspect, modify and redistribute Najwa’s Android source under the <a href="https://github.com/taroq4-2/Najwa/blob/main/LICENSE">Apache 2.0 license</a>. Suggest improvements or report an issue on <a href="https://github.com/taroq4-2/Najwa/issues">GitHub</a>.</p><p>Prayer times are calculated on your device and preferences are stored locally. Place data comes from <a href="https://www.geonames.org/export/">GeoNames</a>.</p></article>
     </section>
   </main>
