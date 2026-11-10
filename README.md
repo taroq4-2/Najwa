@@ -9,7 +9,7 @@ Najwa is an open-source Android app for prayer times, reminders and automatic si
 | العربية | English |
 | --- | --- |
 | [صفحة التطبيق](https://taroq4-2.github.io/Najwa/) | [App website](https://taroq4-2.github.io/Najwa/en.html) |
-| [تحميل APK الرسمي](https://github.com/taroq4-2/Najwa/releases/download/v1.0.0/Najwa-1.0.0.apk) | [Download the signed APK](https://github.com/taroq4-2/Najwa/releases/download/v1.0.0/Najwa-1.0.0.apk) |
+| [تحميل APK الرسمي](https://github.com/taroq4-2/Najwa/releases/latest/download/Najwa.apk) | [Download the signed APK](https://github.com/taroq4-2/Najwa/releases/latest/download/Najwa.apk) |
 
 [![Android verification](https://github.com/taroq4-2/Najwa/actions/workflows/android.yml/badge.svg)](https://github.com/taroq4-2/Najwa/actions/workflows/android.yml)
 
