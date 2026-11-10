@@ -1,1 +1,56 @@
-<LinearLayout android:id="@+id/notification_root" xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:layoutDirection="rtl" android:gravity="center_vertical" android:paddingHorizontal="10dp" android:background="@drawable/widget_background"><ImageView android:id="@+id/notification_icon" android:layout_width="30dp" android:layout_height="30dp" android:src="@drawable/ic_adhan" android:contentDescription=""/><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:orientation="vertical" android:layout_weight="1" android:layout_marginStart="10dp" android:gravity="center_vertical"><TextView android:id="@+id/notification_title" android:layout_width="match_parent" android:layout_height="24dp" android:text="حان وقت صلاة الظهر" android:textSize="13sp" android:textColor="#F5F8FC" android:fontFamily="@font/noto_sans_arabic_regular" android:includeFontPadding="true" android:maxLines="1" android:ellipsize="end" android:textStyle="bold" android:gravity="center_vertical"    android:autoSizeTextType="uniform" android:autoSizeMinTextSize="6sp" android:autoSizeMaxTextSize="13sp" android:autoSizeStepGranularity="1sp"/><TextView android:id="@+id/notification_detail" android:layout_width="match_parent" android:layout_height="18dp" android:text="نجوى · الإقامة 12:22 م" android:textSize="10sp" android:textColor="#60DFBA" android:fontFamily="@font/noto_sans_arabic_regular" android:includeFontPadding="true" android:maxLines="1" android:ellipsize="end"  android:gravity="center_vertical" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="6sp" android:autoSizeMaxTextSize="10sp" android:autoSizeStepGranularity="1sp"/></LinearLayout></LinearLayout>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/notification_root"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:orientation="horizontal"
+    android:layoutDirection="rtl"
+    android:gravity="center_vertical"
+    android:paddingHorizontal="9dp"
+    android:background="@drawable/notification_surface_adhan">
+
+    <ImageView
+        android:id="@+id/notification_icon"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/notification_icon_mask"
+        android:clipToOutline="true"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_adhan" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:layout_marginStart="8dp"
+        android:orientation="vertical"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/notification_title"
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            android:fontFamily="@font/noto_sans_arabic_bold"
+            android:textColor="#F4F8FC"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="9sp"
+            android:autoSizeMaxTextSize="14sp"
+            android:autoSizeStepGranularity="1sp" />
+
+        <TextView
+            android:id="@+id/notification_detail"
+            android:layout_width="match_parent"
+            android:layout_height="17dp"
+            android:fontFamily="@font/noto_sans_arabic_regular"
+            android:textColor="#BCD1D8"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="8sp"
+            android:autoSizeMaxTextSize="11sp"
+            android:autoSizeStepGranularity="1sp" />
+    </LinearLayout>
+</LinearLayout>

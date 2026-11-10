@@ -26,7 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 
 data class Palette(val bg: Color,val surface: Color,val text: Color,val secondary: Color,val border: Color,val green: Color,val mint: Color,val amber: Color,val selected: Color,val track: Color)
 val Dark=Palette(Color(0xFF0B1525),Color(0xFF101D30),Color(0xFFF5F8FC),Color(0xFFA8B7CA),Color(0xFF263A54),Color(0xFF16C784),Color(0xFF35DB9B),Color(0xFFF0B95D),Color(0xFF10333C),Color(0xFF1B3048))
-val Light=Palette(Color(0xFFF4F7F5),Color.White,Color(0xFF14243A),Color(0xFF4A5B70),Color(0xFFD4DFDB),Color(0xFF0B9A63),Color(0xFF0B7A52),Color(0xFFB7791F),Color(0xFFE6F4EE),Color(0xFFDDE7E3))
+val Light=Palette(Color(0xFFF4F7F5),Color.White,Color(0xFF14243A),Color(0xFF4A5B70),Color(0xFFD4DFDB),Color(0xFF0B9A63),Color(0xFF0B7A52),Color(0xFF8A5713),Color(0xFFE6F4EE),Color(0xFFDDE7E3))
 val LocalPalette=staticCompositionLocalOf { Dark }
 @Composable fun Panel(modifier: Modifier=Modifier, radius: Int=24, selected: Boolean=false, content: @Composable ColumnScope.()->Unit) {
     val c=LocalPalette.current; val shape=RoundedCornerShape(radius.dp)
@@ -35,9 +35,9 @@ val LocalPalette=staticCompositionLocalOf { Dark }
 @Composable fun Action(label: String,modifier: Modifier=Modifier,primary: Boolean=false,onClick: ()->Unit) {
     val c=LocalPalette.current
     if(primary) Button(onClick=onClick,modifier=modifier.heightIn(min=50.dp),shape=RoundedCornerShape(16.dp)) {
-        Text(label,fontSize=15.sp,fontWeight=FontWeight.Bold,textAlign=TextAlign.Center)
+        Text(uiText(label),fontSize=15.sp,fontWeight=FontWeight.Bold,textAlign=TextAlign.Center)
     } else OutlinedButton(onClick=onClick,modifier=modifier.heightIn(min=50.dp),shape=RoundedCornerShape(16.dp),border=androidx.compose.foundation.BorderStroke(1.dp,c.border)) {
-        Text(label,color=c.text,fontSize=14.sp,fontWeight=FontWeight.Medium,textAlign=TextAlign.Center)
+        Text(uiText(label),color=c.text,fontSize=14.sp,fontWeight=FontWeight.Medium,textAlign=TextAlign.Center)
     }
 }
 
@@ -50,7 +50,9 @@ val LocalPalette=staticCompositionLocalOf { Dark }
         surface=c.surface,onSurface=c.text,surfaceVariant=c.selected,onSurfaceVariant=c.secondary,
         surfaceContainerHigh=c.surface,surfaceContainer=c.surface,surfaceContainerLow=c.surface,
         outline=c.border,outlineVariant=c.border,error=c.amber)
-    CompositionLocalProvider(LocalPalette provides c,androidx.compose.ui.platform.LocalLayoutDirection provides androidx.compose.ui.unit.LayoutDirection.Rtl) {
+    val locale=androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+    val direction=if(locale.language=="en")androidx.compose.ui.unit.LayoutDirection.Ltr else androidx.compose.ui.unit.LayoutDirection.Rtl
+    CompositionLocalProvider(LocalPalette provides c,androidx.compose.ui.platform.LocalLayoutDirection provides direction) {
         MaterialTheme(colorScheme=scheme,typography=najwaTypography(),content=content)
     }
 }
@@ -58,6 +60,7 @@ val LocalPalette=staticCompositionLocalOf { Dark }
     androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(org.najwa.app.R.drawable.ic_najwa_mark),null,modifier.size(36.dp))
 }
 @Composable fun Glyph(name: String,color: Color=LocalPalette.current.secondary,modifier: Modifier=Modifier) {
+    val rtl=androidx.compose.ui.platform.LocalLayoutDirection.current==androidx.compose.ui.unit.LayoutDirection.Rtl
     Canvas(modifier.size(22.dp)) {
         val unit=size.width/24; val stroke=1.8f*unit
         fun line(x: Float,y: Float,x2: Float,y2: Float) = drawLine(color,Offset(x*unit,y*unit),Offset(x2*unit,y2*unit),stroke,StrokeCap.Round)
@@ -66,8 +69,12 @@ val LocalPalette=staticCompositionLocalOf { Dark }
             "home"->{path(3f to 11f,12f to 3f,21f to 11f); path(6f to 10f,6f to 21f,18f to 21f,18f to 10f)}
             "sound"->{path(3f to 9f,7f to 9f,12f to 5f,12f to 19f,7f to 15f,3f to 15f,3f to 9f); line(17f,9f,21f,15f);line(21f,9f,17f,15f)}
             "check"->path(5f to 12f,10f to 17f,20f to 7f)
-            "back"->path(9f to 6f,15f to 12f,9f to 18f)
-            "chevron"->path(15f to 6f,9f to 12f,15f to 18f)
+            "back","chevron"->{
+                val pointsRight=if(name=="back")rtl else !rtl
+                val outer=if(pointsRight)9f else 15f
+                val tip=24f-outer
+                path(outer to 6f,tip to 12f,outer to 18f)
+            }
             "down"->path(6f to 9f,12f to 15f,18f to 9f)
             "dot"->drawCircle(color,4.5f*unit)
             "widget"->{path(3f to 3f,10f to 3f,10f to 10f,3f to 10f,3f to 3f);path(14f to 3f,21f to 3f,21f to 10f,14f to 10f,14f to 3f);path(3f to 14f,10f to 14f,10f to 21f,3f to 21f,3f to 14f);path(14f to 14f,21f to 14f,21f to 21f,14f to 21f,14f to 14f)}

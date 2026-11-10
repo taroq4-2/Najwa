@@ -30,17 +30,17 @@ import java.time.Instant
 }
 @Composable fun WidgetContent(p: Preferences,now: Instant,onBack: ()->Unit,message: String?=null,onSave: (Preferences)->Unit={},onAdd: ()->Unit) {
     val c=LocalPalette.current
-    TextButton(onClick=onBack) {Text("الرجوع إلى الإعدادات")}
+    TextButton(onClick=onBack) {Text(uiText("الرجوع إلى الإعدادات"))}
     PageHeading("ويدجت نجوى","مواقيتك أمامك على الشاشة الرئيسية")
     var previewSize by rememberSaveable {mutableIntStateOf(1)}
     var background by rememberSaveable {mutableIntStateOf(0)}
     var opacity by remember(p.widgetOpacity) {mutableFloatStateOf(p.widgetOpacity.toFloat())}
     SettingsCard("المظهر والشفافية","طبقة خفيفة فوق خلفيتك، مع بقاء العداد واضحًا") {
         OptionGrid(WidgetTheme.entries.toList(),p.widgetTheme,{it.label}) {onSave(p.copy(widgetTheme=it))}
-        Text("التلقائي يختار لونًا مناسبًا لإضاءة خلفية الهاتف عند توفرها، وإلا يتبع سمة النظام.",color=c.secondary,fontSize=12.sp)
-        Text("شفافية الخلفية: ${100-opacity.toInt()}٪",color=c.text,fontSize=14.sp)
+        Text(uiText("التلقائي يختار لونًا مناسبًا لإضاءة خلفية الهاتف عند توفرها، وإلا يتبع سمة النظام."),color=c.secondary,fontSize=12.sp)
+        Text(uiText("شفافية الخلفية: ${100-opacity.toInt()}٪"),color=c.text,fontSize=14.sp)
         Slider(value=opacity,onValueChange={opacity=it},onValueChangeFinished={onSave(p.copy(widgetOpacity=opacity.toInt()))},valueRange=80f..100f,steps=3,modifier=Modifier.semantics {contentDescription="شفافية خلفية الويدجت";stateDescription="شفافية ${100-opacity.toInt()} بالمئة"})
-        Text("شفافية خفيفة للخلفية فقط، ضمن نطاق يحافظ على تباين النص فوق الخلفيات الفاتحة والداكنة.",color=c.secondary,fontSize=12.sp)
+        Text(uiText("شفافية خفيفة للخلفية فقط، ضمن نطاق يحافظ على تباين النص فوق الخلفيات الفاتحة والداكنة."),color=c.secondary,fontSize=12.sp)
     }
     SectionLabel("معاينة مظهر الويدجت")
     OptionGrid(listOf(0,1,2),background,{listOf("ليلية","فاتحة","ملونة")[it]}) {background=it}
@@ -53,7 +53,9 @@ import java.time.Instant
     BoxWithConstraints(Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(Brush.linearGradient(wallpapers[background])).padding(12.dp),contentAlignment=Alignment.Center) {
         val actualWidth=minOf(width,maxWidth.value.toInt())
         val context=LocalContext.current
-        val preview=p.copy(widgetOpacity=opacity.toInt())
+        val previewTheme=if(p.widgetTheme!=WidgetTheme.AUTO)p.widgetTheme
+            else if(background==1)WidgetTheme.LIGHT else WidgetTheme.DARK
+        val preview=p.copy(widgetOpacity=opacity.toInt(),widgetTheme=previewTheme)
         val remote=remember(preview,now.epochSecond/60,actualWidth,height) {
             PrayerWidget.views(context,preview,now,actualWidth,height)
         }
@@ -62,13 +64,13 @@ import java.time.Instant
             modifier=Modifier.width(actualWidth.dp).height(height.dp),
             update={container->container.removeAllViews();container.addView(remote.apply(context,container))})
     }
-    Text("معاينة الويدجت الفعلي على خلفية تجريبية · يتكيف عند سحب أطرافه",color=c.secondary,fontSize=12.sp,modifier=Modifier.padding(top=12.dp))
+    Text(uiText("معاينة الويدجت الفعلي على خلفية تجريبية · يتكيف عند سحب أطرافه"),color=c.secondary,fontSize=12.sp,modifier=Modifier.padding(top=12.dp))
     Spacer(Modifier.height(18.dp))
     Action("إضافة إلى الشاشة الرئيسية",Modifier.fillMaxWidth(),true,onAdd)
     message?.let {Text(it,color=c.mint,modifier=Modifier.padding(vertical=12.dp))}
     SettingsCard("طريقة الإضافة") {
-        Text("اضغط زر الإضافة ووافق في نافذة الهاتف. إذا لم يدعم مشغّل الشاشة هذه الطريقة، اضغط مطولًا على الشاشة الرئيسية ثم اختر الأدوات وابحث عن نجوى.",color=c.secondary)
-        Text("الويدجت يتبع المدينة وطريقة الحساب في التطبيق. اضغط عليه لفتح نجوى، أو على ↻ للتحديث، واسحب أطرافه لتغيير الحجم.",color=c.secondary)
-        Text("قد يؤخر الهاتف تحديث الصلاة التالية أثناء السكون. فتح الشاشة أو تحديث الويدجت يعيد عرض المواقيت؛ لا يغيّر ذلك جدولة الصمت وتنبيهات الصلاة.",color=c.secondary,fontSize=12.sp)
+        Text(uiText("اضغط زر الإضافة ووافق في نافذة الهاتف. إذا لم يدعم مشغّل الشاشة هذه الطريقة، اضغط مطولًا على الشاشة الرئيسية ثم اختر الأدوات وابحث عن نجوى."),color=c.secondary)
+        Text(uiText("الويدجت يتبع المدينة وطريقة الحساب في التطبيق. اضغط عليه لفتح نجوى، أو على ↻ للتحديث، واسحب أطرافه لتغيير الحجم."),color=c.secondary)
+        Text(uiText("قد يؤخر الهاتف تحديث الصلاة التالية أثناء السكون. فتح الشاشة أو تحديث الويدجت يعيد عرض المواقيت؛ لا يغيّر ذلك جدولة الصمت وتنبيهات الصلاة."),color=c.secondary,fontSize=12.sp)
     }
 }

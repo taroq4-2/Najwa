@@ -10,8 +10,8 @@ android {
         applicationId = "org.najwa.app"
         minSdk = 26
         targetSdk = if (providers.gradleProperty("previewSdk").orNull == "35") 35 else 36
-        versionCode = 101
-        versionName = "1.0.0"
+        versionCode = 107
+        versionName = "1.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { compose = true; buildConfig = true }

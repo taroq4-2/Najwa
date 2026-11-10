@@ -47,6 +47,27 @@ class SessionTest {
     @Test fun failedAlarmNeverMutes() {val f=Fixture();f.scheduleFails=true;assertEquals(SessionState.INTERRUPTED,f.start().state);assertEquals(0,f.writes)}
     @Test fun failedPersistenceNeverMutes() {val f=Fixture();f.diskFails=true;assertThrows(IllegalStateException::class.java) {f.start()};assertEquals(0,f.writes)}
     @Test fun preparedRecoveryNeverGuesses() {val f=Fixture();val s=f.start();f.state=f.state.copy(session=s.copy(state=SessionState.PREPARED));f.now=s.deadline;f.manager.reconcile();assertEquals(SessionState.INTERRUPTED,f.state.session!!.state);assertEquals(1,f.writes)}
+    @Test fun preparedSessionBeforeMuteReleasesFuturePrayersWithoutWritingAudio() {
+        val f=Fixture()
+        val s=f.start()
+        f.state=f.state.copy(session=s.copy(state=SessionState.PREPARED))
+        f.mode=s.original
+        val writes=f.writes
+        assertEquals(SessionState.USER_OVERRIDE,f.manager.reconcile()?.state)
+        assertEquals(writes,f.writes)
+        assertEquals(0,f.scheduled)
+        assertEquals(SessionState.ACTIVE,f.start("next-prayer").state)
+    }
+    @Test fun interruptedSessionKeepsManualOverrideAndResumesFuturePrayers() {
+        val f=Fixture()
+        val s=f.start()
+        f.state=f.state.copy(session=s.copy(state=SessionState.INTERRUPTED,detail="prepared_after_restart"))
+        f.mode=Ringer.VIBRATE
+        assertEquals(SessionState.USER_OVERRIDE,f.manager.reconcile()?.state)
+        assertEquals(Ringer.VIBRATE,f.mode)
+        assertEquals(1,f.writes)
+        assertEquals(SessionState.ACTIVE,f.start("next-prayer").state)
+    }
     @Test fun activeRebootAfterDeadlineRestoresIfStillOwned() {val f=Fixture();val s=f.start();f.now=s.deadline+100;val recreated=SilenceSessionManager(f.store,f.audio,f.alarm,{f.now});recreated.reconcile();assertEquals(Ringer.NORMAL,f.mode)}
     @Test fun revokedPolicyKeepsRecoveryRecord() {val f=Fixture();val s=f.start();f.capable=false;f.now=s.deadline;f.manager.restore(s.id);assertEquals(SessionState.PERMISSION_REVOKED,f.state.session!!.state);assertEquals(1,f.writes)}
     @Test fun manualDisableSafelyRestores() {val f=Fixture();f.start();f.manager.disable();assertEquals(Ringer.NORMAL,f.mode);assertEquals(0,f.scheduled)}
@@ -58,6 +79,27 @@ class SessionTest {
     @Test fun restoredPermissionAfterDeadlineRestoresOriginalVibration() {val f=Fixture();f.mode=Ringer.VIBRATE;val s=f.start();f.capable=false;f.manager.reconcile();f.now=s.deadline+100;f.capable=true;f.manager.reconcile();assertEquals(SessionState.RESTORED,f.state.session!!.state);assertEquals(Ringer.VIBRATE,f.mode);assertEquals(0,f.scheduled)}
     @Test fun revokedPermissionStillHonorsManualModeChange() {val f=Fixture();f.start();f.capable=false;f.manager.reconcile();f.mode=Ringer.VIBRATE;f.manager.reconcile();assertEquals(SessionState.USER_OVERRIDE,f.state.session!!.state);assertEquals(Ringer.VIBRATE,f.mode);assertEquals(1,f.writes);assertEquals(0,f.scheduled)}
     @Test fun restoreFailureRemainsVisibleAndRetryable() {val f=Fixture();val s=f.start();f.audioFails=true;f.manager.restore(s.id,true);assertEquals(SessionState.RESTORE_FAILED,f.state.session!!.state);f.audioFails=false;f.manager.restore(s.id,true);assertEquals(SessionState.RESTORED,f.state.session!!.state)}
+    @Test fun reconciliationRestoresRingerAfterTransientFailure() {
+        val f=Fixture()
+        val s=f.start()
+        f.now=s.deadline
+        f.audioFails=true
+        assertEquals(SessionState.RESTORE_FAILED,f.manager.restore(s.id)!!.state)
+        f.audioFails=false
+        assertEquals(SessionState.RESTORED,f.manager.reconcile()!!.state)
+        assertEquals(Ringer.NORMAL,f.mode)
+        assertEquals("next",f.start("next").eventId)
+    }
+    @Test fun retryHonorsManualRingerChange() {
+        val f=Fixture()
+        val s=f.start()
+        f.audioFails=true
+        f.manager.restore(s.id,true)
+        f.audioFails=false
+        f.mode=Ringer.VIBRATE
+        assertEquals(SessionState.USER_OVERRIDE,f.manager.reconcile()!!.state)
+        assertEquals(Ringer.VIBRATE,f.mode)
+    }
     @Test fun modePreferenceDoesNotOverwriteOriginalDuringExtension() {val f=Fixture();val s=f.start();f.manager.start("b",f.now,20,Ringer.VIBRATE);assertEquals(s.original,f.state.session!!.original);assertEquals(Ringer.SILENT,f.mode)}
     @Test fun failedExtensionCommitRestoresOriginalAlarmDeadline() {val f=Fixture();val s=f.start();f.now+=1000;f.diskFails=true;assertThrows(IllegalStateException::class.java) {f.start("b")};assertEquals(s.deadline,f.scheduled);assertEquals(s,f.state.session)}
     @Test fun lostExactAlarmAccessEndsOwnedLeaseImmediately() {val f=Fixture();f.start();f.scheduleFails=true;f.manager.reconcile();assertEquals(Ringer.NORMAL,f.mode);assertEquals(SessionState.RESTORED,f.state.session!!.state)}

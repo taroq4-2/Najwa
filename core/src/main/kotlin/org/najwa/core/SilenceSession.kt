@@ -77,14 +77,23 @@ class SilenceSessionManager(private val store: JournalStore, private val audio: 
     }
     @Synchronized fun reconcile(): Session? {
         val j=store.read(); val s=j.session ?: return null
-        // A confirmed no-op from the platform must not block every future prayer.
-        // Retire only when the original mode is still observed; ambiguous changes
-        // and sessions that may own a mute remain available for manual recovery.
-        if(s.state == SessionState.INTERRUPTED && s.detail == "mode_not_applied" && audio.current() == s.original) {
-            return restore(s.id,manual=true)
+        if(s.state == SessionState.PREPARED || s.state == SessionState.INTERRUPTED) {
+            // A crash around the ringer write leaves ambiguous ownership only if
+            // the requested mode is still observed. Never write audio here.
+            if(audio.current()!=s.applied) {
+                val r=s.copy(state=SessionState.USER_OVERRIDE,detail="interrupted_mode_released")
+                update(j,r)
+                alarm.cancel()
+                return r
+            }
+            if(s.state==SessionState.PREPARED) {
+                val r=s.copy(state=SessionState.INTERRUPTED,detail="prepared_after_restart")
+                update(j,r)
+                return r
+            }
+            return s
         }
-        if(s.state == SessionState.PREPARED) { val r=s.copy(state=SessionState.INTERRUPTED,detail="prepared_after_restart"); update(j,r); return r }
-        if(s.state == SessionState.PERMISSION_REVOKED) {
+        if(s.state == SessionState.PERMISSION_REVOKED || s.state == SessionState.RESTORE_FAILED) {
             // Once permission returns, end the suspended lease rather than keeping
             // the phone muted indefinitely. restore checks ownership before writing
             // and also retires the lease without a write if the user changed mode.

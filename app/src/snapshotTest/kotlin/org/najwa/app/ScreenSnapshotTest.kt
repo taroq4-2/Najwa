@@ -18,7 +18,7 @@ import org.najwa.core.*
 import java.time.Instant
 
 class ScreenSnapshotTest {
-    @get:Rule val paparazzi=Paparazzi(deviceConfig=DeviceConfig.PIXEL_5.copy(screenWidth=780,screenHeight=1688,density=Density.XHIGH,softButtons=false),theme="android:Theme.Material.Light.NoActionBar")
+    @get:Rule val paparazzi=Paparazzi(deviceConfig=DeviceConfig.PIXEL_5.copy(locale="ar",screenWidth=780,screenHeight=1688,density=Density.XHIGH,softButtons=false),theme="android:Theme.Material.Light.NoActionBar")
     @Test fun screensInBothThemes() {
         val prefs=Preferences(adhanNotifications=true,iqamaNotifications=true)
         val now=Instant.parse("2026-11-06T13:43:28Z")

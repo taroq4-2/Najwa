@@ -7,6 +7,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
 import org.najwa.core.*
 import org.najwa.app.MainActivity
@@ -32,7 +33,15 @@ class AndroidAlarms(private val context: Context): RestoreAlarm {
         manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,deadline,pending("restore",id,deadline))
     }
     override fun cancel() { manager.cancel(pending("restore")) }
-    fun saved(): List<ScheduledPrayer> {
+    fun saved(): List<ScheduledPrayer> = try {
+        readPlan()
+    } catch (_: JSONException) {
+        // The plan is derived from preferences. Rebuild it without touching the ringer journal.
+        emptyList()
+    } catch (_: IllegalArgumentException) {
+        emptyList()
+    }
+    private fun readPlan(): List<ScheduledPrayer> {
         val p=plan.read() ?: return emptyList()
         val a=p.optJSONArray("tasks")
         if(a==null) {
@@ -47,12 +56,21 @@ class AndroidAlarms(private val context: Context): RestoreAlarm {
     fun prayers(tasks: List<ScheduledPrayer>) {
         val old=saved().map {it.at.toEpochMilli()}.toSet()
         val times=tasks.map {it.at.toEpochMilli()}.toSet()
+        val added=mutableListOf<Long>()
+        try {
+            times.sorted().forEach {at->
+                clock(at,pending("prayer","batch:$at",at,true))
+                if(at !in old)added.add(at)
+            }
+            plan.write(JSONObject().put("tasks",JSONArray(tasks.map {t->JSONObject().put("prayer",t.event.prayer.name).put("eventAt",t.event.time.toEpochMilli()).put("action",t.action.name).put("at",t.at.toEpochMilli())})))
+        } catch(e: Exception) {
+            added.forEach {at->runCatching {manager.cancel(pending("prayer",at=at,independent=true))}}
+            throw e
+        }
         // Retire the old single PendingIntent, whose extras/plan could be overwritten
         // while a delivered broadcast was still waiting for the process to start.
         manager.cancel(pending("prayer"))
         (old-times).forEach {manager.cancel(pending("prayer",at=it,independent=true))}
-        plan.write(JSONObject().put("tasks",JSONArray(tasks.map {t->JSONObject().put("prayer",t.event.prayer.name).put("eventAt",t.event.time.toEpochMilli()).put("action",t.action.name).put("at",t.at.toEpochMilli())})))
-        times.sorted().forEach {at->clock(at,pending("prayer","batch:$at",at,true))}
     }
     fun scheduleTrial(at: Long) {
         val old=trialPlan.read()?.optLong("at") ?: 0L

@@ -19,7 +19,7 @@ internal object ArabCityCatalog {
     )
 
     data class Place(val id: String, val name: String, val terms: String, val lat: Double, val lon: Double, val zone: String, val region: String) {
-        fun city() = City(name, lat, lon, zone)
+        fun city(country: ArabCountry) = City(name, lat, lon, catalogZone(country.code,zone),country.code,id)
     }
 
     fun load(context: Context, country: ArabCountry): List<Place> =
@@ -31,6 +31,16 @@ internal object ArabCityCatalog {
                 Place(id, name, citySearchKey("$name|$terms|$region"), lat.toDouble(), lon.toDouble(), fields[5], region)
             }.toList()
         }
+
+    fun forCity(city: City): ArabCountry = countries.firstOrNull {it.code==city.countryCode} ?: forZone(city.zone)
+
+    // IANA zone.tab lists one national civil zone for each of these countries.
+    private fun catalogZone(countryCode: String, sourceZone: String) = when(countryCode) {
+        "DZ" -> "Africa/Algiers"
+        "SD" -> "Africa/Khartoum"
+        "AE" -> "Asia/Dubai"
+        else -> sourceZone
+    }
 
     fun forZone(zone: String): ArabCountry = when (zone) {
         "Asia/Dubai" -> "AE"; "Asia/Bahrain" -> "BH"; "Asia/Kuwait" -> "KW"; "Asia/Muscat" -> "OM"

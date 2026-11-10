@@ -7,9 +7,16 @@ import org.najwa.app.NajwaApplication
 
 class AlarmReceiver: BroadcastReceiver() {
     override fun onReceive(context: Context,intent: Intent) {
+        val runtime=(context.applicationContext as NajwaApplication).runtime
         if(android.os.Build.VERSION.SDK_INT>=37) {
-            context.startForegroundService(Intent(context,PrayerExecutionService::class.java).setAction(intent.action).putExtras(intent))
-        } else (context.applicationContext as NajwaApplication).runtime.receive(intent.action,intent.getStringExtra("id") ?: "",intent.getLongExtra("at",0))
+            try {
+                context.startForegroundService(Intent(context,PrayerExecutionService::class.java).setAction(intent.action).putExtras(intent))
+            } catch(_: IllegalStateException) {
+                runtime.receive(intent.action,intent.getStringExtra("id") ?: "",intent.getLongExtra("at",0),allowRinger=false)
+            } catch(_: SecurityException) {
+                runtime.receive(intent.action,intent.getStringExtra("id") ?: "",intent.getLongExtra("at",0),allowRinger=false)
+            }
+        } else runtime.receive(intent.action,intent.getStringExtra("id") ?: "",intent.getLongExtra("at",0))
     }
 }
 class SystemReceiver: BroadcastReceiver() {

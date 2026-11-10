@@ -17,6 +17,6 @@ class PrayerDispatch(private val sessions: SilenceSessionManager,private val not
 /** Recover an interrupted plan and validate the incoming timestamp independently
  * of which future alarm was last registered. Stale broadcasts cannot run new settings. */
 fun dispatchablePrayers(saved: List<ScheduledPrayer>,current: List<ScheduledPrayer>,now: Instant,p: Preferences,incomingAt: Long?=null): List<ScheduledPrayer> {
-    val candidates=(saved+current.filter {incomingAt!=null && it.at.toEpochMilli()==incomingAt}).distinctBy {it.id}
+    val candidates=if(saved.isEmpty() && incomingAt!=null)current.filter {it.at.toEpochMilli()==incomingAt} else saved
     return duePrayers(candidates,current,now) {p.silenceMinutes.getValue(it)}
 }

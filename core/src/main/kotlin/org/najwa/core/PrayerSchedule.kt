@@ -14,8 +14,8 @@ data class ScheduledPrayer(val event: PrayerEvent, val action: PrayerAction, val
 fun prayerSchedule(events: List<PrayerEvent>, p: Preferences): List<ScheduledPrayer> =
     (events.filter { it.prayer.isPrayer }.flatMap { event -> buildList {
         if(p.autoSilent && event.prayer in p.enabled) add(ScheduledPrayer(event,PrayerAction.SILENCE,event.time.plusSeconds(20)))
-        if(p.adhanNotifications) add(ScheduledPrayer(event,PrayerAction.ADHAN,event.time))
-        if(p.iqamaNotifications) add(ScheduledPrayer(event,PrayerAction.IQAMA,event.time.plusSeconds(p.iqamaMinutes.getValue(event.prayer)*60L)))
+        if(p.adhanNotifications && event.prayer in p.adhanPrayers) add(ScheduledPrayer(event,PrayerAction.ADHAN,event.time))
+        if(p.iqamaNotifications && event.prayer in p.iqamaPrayers) add(ScheduledPrayer(event,PrayerAction.IQAMA,event.time.plusSeconds(p.iqamaMinutes.getValue(event.prayer)*60L)))
     } } + fridayReminders(events,p)).sortedBy { it.at }
 
 private fun fridayReminders(events: List<PrayerEvent>, p: Preferences): List<ScheduledPrayer> {

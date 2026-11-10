@@ -55,6 +55,29 @@ class ScheduledPrayerIntegrationTest {
         shadowOf(Looper.getMainLooper()).idle()
         assertNull(app.runtime.error)
     }
+    @Test fun corruptPlanIsRebuiltAndIncomingAlarmStillDelivers() {
+        val event=PrayerCalculator().calculate(LocalDate.of(2026,11,7),prefs).events.first {it.prayer.isPrayer}
+        now=event.time.minusSeconds(60)
+        coldStart().update(prefs)
+        app.filesDir.resolve("alarm-plan.json").writeText("{broken")
+        coldStart()
+        fire(event.time,"org.najwa.prayer")
+        assertNotNull(shadowOf(notifications).getNotification(300+event.prayer.ordinal*2))
+        assertTrue(app.runtime.alarms.saved().any {it.at==event.time.plusSeconds(20)})
+        assertEquals(AudioManager.RINGER_MODE_NORMAL,audio.ringerMode)
+    }
+    @Test fun receiverFallbackDeliversAlertsWithoutTouchingRinger() {
+        val event=PrayerCalculator().calculate(LocalDate.of(2026,11,7),prefs).events.first {it.prayer.isPrayer}
+        now=event.time.minusSeconds(60)
+        val runtime=coldStart()
+        runtime.update(prefs)
+        now=event.time.plusSeconds(20)
+        runtime.receive("org.najwa.prayer","batch",now.toEpochMilli(),allowRinger=false)
+        assertNotNull(shadowOf(notifications).getNotification(300+event.prayer.ordinal*2))
+        assertEquals(AudioManager.RINGER_MODE_NORMAL,audio.ringerMode)
+        assertNull(runtime.session())
+        assertTrue(runtime.alarms.saved().any {it.at>now})
+    }
     @Test fun realAlarmReceiverPostsAdhanSilencesThenIqamaAndRestoresForFivePrayers() {
         val events=PrayerCalculator().calculate(LocalDate.of(2026,11,7),prefs).events.filter {it.prayer.isPrayer}
         now=events.first().time.minusSeconds(60)

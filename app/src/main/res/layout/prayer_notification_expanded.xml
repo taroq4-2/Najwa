@@ -1,1 +1,158 @@
-<LinearLayout android:id="@+id/notification_root" xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layoutDirection="rtl" android:padding="14dp" android:background="@drawable/widget_background"><LinearLayout android:layout_width="match_parent" android:layout_height="28dp" android:orientation="horizontal" android:gravity="center_vertical"><ImageView android:id="@+id/notification_icon" android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_adhan" android:contentDescription=""/><TextView android:id="@+id/notification_brand" android:layout_width="0dp" android:layout_height="match_parent" android:text="نجوى · حان وقت الصلاة" android:textSize="11sp" android:textColor="#60DFBA" android:fontFamily="@font/noto_sans_arabic_regular" android:includeFontPadding="true" android:maxLines="1" android:ellipsize="end" android:layout_weight="1" android:layout_marginStart="8dp" android:gravity="center_vertical" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="6sp" android:autoSizeMaxTextSize="11sp" android:autoSizeStepGranularity="1sp"/><TextView android:id="@+id/notification_time" android:layout_width="wrap_content" android:layout_height="match_parent" android:text="12:07 م" android:textSize="11sp" android:textColor="#ABC3C4" android:fontFamily="@font/noto_sans_arabic_regular" android:includeFontPadding="true" android:maxLines="1" android:ellipsize="end"  android:gravity="center_vertical" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="6sp" android:autoSizeMaxTextSize="11sp" android:autoSizeStepGranularity="1sp"/></LinearLayout><TextView android:id="@+id/notification_title" android:layout_width="match_parent" android:layout_height="40dp" android:text="حان وقت صلاة الظهر" android:textSize="21sp" android:textColor="#F5F8FC" android:fontFamily="@font/noto_sans_arabic_regular" android:includeFontPadding="true" android:maxLines="1" android:ellipsize="end" android:textStyle="bold" android:gravity="center_vertical"    android:autoSizeTextType="uniform" android:autoSizeMinTextSize="6sp" android:autoSizeMaxTextSize="21sp" android:autoSizeStepGranularity="1sp"/><TextView android:id="@+id/notification_detail" android:layout_width="match_parent" android:layout_height="22dp" android:text="جدة · الإقامة بعد 15 دقيقة" android:textSize="11sp" android:textColor="#ABC3C4" android:fontFamily="@font/noto_sans_arabic_regular" android:includeFontPadding="true" android:maxLines="1" android:ellipsize="end" android:gravity="center_vertical" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="6sp" android:autoSizeMaxTextSize="11sp" android:autoSizeStepGranularity="1sp"/><LinearLayout android:layout_width="match_parent" android:layout_height="46dp" android:orientation="horizontal" android:id="@+id/notification_timer_box" android:gravity="center_vertical" android:paddingHorizontal="12dp" android:layout_marginTop="10dp" android:background="@drawable/widget_counter_gold"><TextView android:id="@+id/notification_timer_label" android:layout_width="0dp" android:layout_height="match_parent" android:text="إلى الإقامة" android:textSize="11sp" android:textColor="#ABC3C4" android:fontFamily="@font/noto_sans_arabic_regular" android:includeFontPadding="true" android:maxLines="1" android:ellipsize="end" android:layout_weight="1" android:gravity="center_vertical" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="6sp" android:autoSizeMaxTextSize="11sp" android:autoSizeStepGranularity="1sp"/><Chronometer android:id="@+id/notification_timer" android:layout_width="110dp" android:layout_height="match_parent" android:gravity="center" android:textSize="24sp" android:textStyle="bold" android:fontFamily="sans-serif-medium" android:textColor="#F0C477" android:countDown="true" android:layoutDirection="ltr" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="12sp" android:autoSizeMaxTextSize="26sp"/></LinearLayout><TextView android:id="@+id/notification_message" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="4dp" android:text="حان وقت الوقوف بين يدي الله" android:textSize="13sp" android:textColor="#F0C477" android:fontFamily="@font/noto_sans_arabic_regular" android:includeFontPadding="true" android:maxLines="4" android:ellipsize="end" android:gravity="center_vertical" android:visibility="gone" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="6sp" android:autoSizeMaxTextSize="13sp" android:autoSizeStepGranularity="1sp"/><TextView android:id="@+id/notification_signature" android:layout_width="match_parent" android:layout_height="26dp" android:text="صلاتك أولاً، وضجيجك لاحقاً" android:textSize="10sp" android:textColor="#94B6B4" android:fontFamily="@font/noto_sans_arabic_regular" android:includeFontPadding="true" android:maxLines="1" android:ellipsize="end" android:gravity="center_vertical" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="6sp" android:autoSizeMaxTextSize="10sp" android:autoSizeStepGranularity="1sp"/></LinearLayout>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/notification_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layoutDirection="rtl"
+    android:paddingHorizontal="12dp"
+    android:paddingVertical="10dp"
+    android:background="@drawable/notification_surface_adhan">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="26dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/notification_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:background="@drawable/notification_icon_mask"
+            android:clipToOutline="true"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_adhan" />
+
+        <TextView
+            android:id="@+id/notification_brand"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="7dp"
+            android:fontFamily="@font/noto_sans_arabic_bold"
+            android:textColor="#71E0BB"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="9sp"
+            android:autoSizeMaxTextSize="12sp"
+            android:autoSizeStepGranularity="1sp" />
+
+        <TextView
+            android:id="@+id/notification_time"
+            android:layout_width="68dp"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/noto_sans_arabic_bold"
+            android:textColor="#BCD1D8"
+            android:gravity="center_vertical|end"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="9sp"
+            android:autoSizeMaxTextSize="12sp"
+            android:autoSizeStepGranularity="1sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/notification_title"
+        android:layout_width="match_parent"
+        android:layout_height="37dp"
+        android:layout_marginTop="2dp"
+        android:fontFamily="@font/noto_sans_arabic_bold"
+        android:textColor="#F4F8FC"
+        android:gravity="center_vertical"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="12sp"
+        android:autoSizeMaxTextSize="20sp"
+        android:autoSizeStepGranularity="1sp" />
+
+    <TextView
+        android:id="@+id/notification_detail"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:fontFamily="@font/noto_sans_arabic_regular"
+        android:textColor="#BCD1D8"
+        android:gravity="center_vertical"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="8sp"
+        android:autoSizeMaxTextSize="12sp"
+        android:autoSizeStepGranularity="1sp" />
+
+    <LinearLayout
+        android:id="@+id/notification_timer_box"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="7dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="10dp"
+        android:background="@drawable/notification_timer_surface"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/notification_timer_label"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="المتبقي للإقامة"
+            android:fontFamily="@font/noto_sans_arabic_regular"
+            android:textColor="#F1D398"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="9sp"
+            android:autoSizeMaxTextSize="12sp"
+            android:autoSizeStepGranularity="1sp" />
+
+        <Chronometer
+            android:id="@+id/notification_timer"
+            android:layout_width="92dp"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical|end"
+            android:textSize="22sp"
+            android:fontFamily="sans-serif-medium"
+            android:fontFeatureSettings="tnum"
+            android:textColor="#F1D398"
+            android:countDown="true"
+            android:layoutDirection="ltr"
+            android:textDirection="ltr"
+            android:maxLines="1"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeMaxTextSize="22sp"
+            android:autoSizeStepGranularity="1sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/notification_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:textSize="12sp"
+        android:fontFamily="@font/noto_sans_arabic_regular"
+        android:textColor="#71E0BB"
+        android:maxLines="3"
+        android:ellipsize="end" />
+
+    <TextView
+        android:id="@+id/notification_signature"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_marginTop="2dp"
+        android:text="صلاتك أولاً، وضجيجك لاحقاً"
+        android:fontFamily="@font/noto_sans_arabic_regular"
+        android:textColor="#BCD1D8"
+        android:gravity="center_vertical"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="8sp"
+        android:autoSizeMaxTextSize="10sp"
+        android:autoSizeStepGranularity="1sp" />
+</LinearLayout>

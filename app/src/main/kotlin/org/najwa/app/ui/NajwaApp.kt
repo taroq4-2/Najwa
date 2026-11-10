@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.*
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.activity.compose.BackHandler
 import androidx.lifecycle.LifecycleEventObserver
@@ -37,13 +38,18 @@ import java.time.Instant
     val setupKey="permissions-setup-v2"
     var onboarding by rememberSaveable {mutableStateOf(!setup.getBoolean(setupKey,false) &&
         (!setup.getBoolean("permissions-complete",false) || !runtime.notifications.granted || !runtime.alarms.exactAccess || !runtime.audio.policyAccess))}
+    var cityConfirmed by rememberSaveable {mutableStateOf(setup.getBoolean("city-confirmed",false) ||
+        setup.getBoolean("permissions-complete",false) || prefs.city!=Preferences().city ||
+        prefs.autoSilent || prefs.adhanNotifications || prefs.iqamaNotifications || prefs.fridayReminder)}
+    var setupSilence by rememberSaveable {mutableStateOf(prefs.autoSilent)}
+    fun confirmCity() {setup.edit().putBoolean("city-confirmed",true).apply();cityConfirmed=true}
     fun finishSetup() {setup.edit().putBoolean(setupKey,true).apply();onboarding=false}
     val screen=if(onboarding)Screen.PERMISSIONS else Screen.fromSaved(trail.last())
     fun navigate(destination: Screen) {trail=navigateScreens(trail,destination)}
     LaunchedEffect(homeRequest) {if(homeRequest>0)trail=navigateScreens(trail,Screen.HOME,true)}
     fun back() {trail=backScreens(trail)}
     var cityDialog by rememberSaveable {mutableStateOf(false)}
-    BackHandler(onboarding || trail.size>1 && !cityDialog) {if(onboarding)finishSetup() else back()}
+    BackHandler(!cityDialog && (onboarding || trail.size>1)) {if(onboarding)finishSetup() else back()}
     val lifecycle=LocalLifecycleOwner.current.lifecycle
     var visible by remember { mutableStateOf(lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) }
     DisposableEffect(lifecycle) { val observer=LifecycleEventObserver { _,_->visible=lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) }; lifecycle.addObserver(observer); onDispose { lifecycle.removeObserver(observer) } }
@@ -61,8 +67,16 @@ import java.time.Instant
     val current=days.first { it.date==now.atZone(prefs.city.zoneId).toLocalDate() }
     val times=timeline(days.flatMap { it.events },now)
     val editingContact=screen==Screen.CONTACT && WindowInsets.ime.getBottom(LocalDensity.current)>0
-    fun save(p: Preferences) { runtime.update(p); prefs=runtime.preferences; session=runtime.session() }
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl,LocalPalette provides colors) {
+    fun save(p: Preferences) {
+        if(!cityConfirmed && (p.autoSilent || p.adhanNotifications || p.iqamaNotifications || p.fridayReminder)) {
+            cityDialog=true
+            return
+        }
+        runtime.update(p)
+        prefs=runtime.preferences
+        session=runtime.session()
+    }
+    CompositionLocalProvider(LocalPalette provides colors) {
         NajwaTheme(dark) {
             Column(Modifier.fillMaxSize().background(colors.bg).safeDrawingPadding(),horizontalAlignment=Alignment.CenterHorizontally) {
                 PageScroll(screen) {
@@ -71,20 +85,22 @@ import java.time.Instant
                     when(screen) {
                         Screen.PERMISSIONS -> PermissionsScreen(runtime,
                             onDone={
-                                if(onboarding) {
+                                if(onboarding && cityConfirmed) {
                                     val alerts=runtime.notifications.granted && runtime.alarms.exactAccess
                                     save(prefs.copy(
                                         adhanNotifications=prefs.adhanNotifications || alerts,
                                         iqamaNotifications=prefs.iqamaNotifications || alerts,
                                         fridayReminder=prefs.fridayReminder || alerts,
-                                        autoSilent=prefs.autoSilent || (runtime.audio.capable() && runtime.alarms.exactAccess)
+                                        autoSilent=prefs.autoSilent || (setupSilence && runtime.audio.capable() && runtime.alarms.exactAccess)
                                     ))
                                     finishSetup()
-                                } else {if(runtime.audio.capable() && runtime.alarms.exactAccess)save(prefs.copy(autoSilent=true));back()}
+                                } else if(!onboarding) {if(runtime.audio.capable() && runtime.alarms.exactAccess)save(prefs.copy(autoSilent=true));back()}
                             },
                             onSkip={if(onboarding)finishSetup() else back()},
-                            onBack={if(onboarding)finishSetup() else back()},firstRun=onboarding)
-                        Screen.NOTIFICATIONS -> NotificationScreen(runtime,prefs,::save,::back)
+                            onBack={if(onboarding)finishSetup() else back()},firstRun=onboarding,
+                            city=prefs.city,cityConfirmed=cityConfirmed,onChooseCity={cityDialog=true},onConfirmCity=::confirmCity,
+                            wantsSilence=setupSilence,onWantsSilence={setupSilence=it})
+                        Screen.NOTIFICATIONS -> NotificationScreen(runtime,prefs,::save,::back,resumed)
                         Screen.HOME -> HomeScreen(prefs,now,current,times,runtime.error==null && days.all {it.complete} && prefs.enabled.isNotEmpty() && runtime.audio.capable() && runtime.alarms.exactAccess,onCity={cityDialog=true},onSilence={navigate(Screen.SILENCE)},activeUntil=session?.takeIf {it.state==SessionState.ACTIVE}?.let {Instant.ofEpochMilli(it.deadline)})
                         Screen.SILENCE -> SilenceScreen(runtime,prefs,session,now,onSave=::save,onAccess={navigate(Screen.PERMISSIONS)},onRestore={runtime.restore();session=runtime.session()})
                         Screen.SETTINGS -> SettingsScreen(prefs,onSave=::save,onCity={cityDialog=true},onNotifications={navigate(Screen.NOTIFICATIONS)},onWidget={navigate(Screen.WIDGET)},onInformation={navigate(Screen.INFORMATION)},onCalculation={navigate(Screen.CALCULATION)},onAppearance={navigate(Screen.APPEARANCE)},onSilence={navigate(Screen.SILENCE)})
@@ -97,7 +113,11 @@ import java.time.Instant
                 }
                 if(!onboarding && !editingContact)BottomNavigation(screen.tab) {trail=navigateScreens(trail,Screen.forTab(it),true)}
             }
-            if(cityDialog) CityDialog(prefs.city,onDismiss={cityDialog=false},onSelect={save(prefs.copy(city=it));cityDialog=false})
+            if(cityDialog) CityDialog(prefs.city,onDismiss={cityDialog=false},onSelect={
+                save(prefs.copy(city=it))
+                if(prefs.city==it)confirmCity()
+                cityDialog=false
+            })
         }
     }
 }
@@ -117,7 +137,7 @@ import java.time.Instant
 @Composable fun BottomNavigation(tab: Int,onTab: (Int)->Unit) {
     val c=LocalPalette.current
     NavigationBar(containerColor=c.surface,tonalElevation=0.dp,windowInsets=WindowInsets(0,0,0,0)) {
-        listOf("الرئيسية" to "home","الصمت" to "sound","الإعدادات" to "settings").forEachIndexed { i,item ->
+        listOf(stringResource(R.string.en_tab_home) to "home",stringResource(R.string.en_tab_silence) to "sound",stringResource(R.string.en_tab_settings) to "settings").forEachIndexed { i,item ->
             NavigationBarItem(selected=i==tab,onClick={onTab(i)},icon={Glyph(item.second,if(i==tab)c.mint else c.secondary)},
                 label={Text(item.first,fontSize=12.sp,fontWeight=if(i==tab)FontWeight.Bold else FontWeight.Normal)},
                 colors=NavigationBarItemDefaults.colors(indicatorColor=c.selected,selectedTextColor=c.mint,unselectedTextColor=c.secondary))

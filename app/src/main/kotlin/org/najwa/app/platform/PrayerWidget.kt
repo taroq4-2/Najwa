@@ -7,6 +7,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
@@ -56,9 +57,19 @@ class PrayerWidget: AppWidgetProvider() {
                 setTextViewText(R.id.widget_hijri,date)
                 setTextColor(R.id.widget_hijri,colors.secondary)
                 val iqama=data?.phase==CountdownPhase.IQAMA
+                val mini=layout==R.layout.prayer_widget_mini
+                val wide=layout==R.layout.prayer_widget_wide
+                val slim=layout==R.layout.prayer_widget_slim
+                if(mini || wide)setViewVisibility(R.id.widget_hijri,View.GONE)
+                if(mini)setViewVisibility(R.id.widget_brand,View.GONE)
+                if(slim && data!=null)setViewVisibility(R.id.widget_phase,View.GONE)
                 setTextViewText(R.id.widget_phase,data?.heading ?: "الصلاة القادمة")
                 setTextViewText(R.id.widget_countdown_label,if(iqama)"إلى الإقامة" else "إلى الأذان")
-                setTextColor(R.id.widget_countdown,if(iqama)colors.iqama else colors.adhan)
+                val phaseColor=if(iqama)colors.iqama else colors.adhan
+                setTextColor(R.id.widget_countdown,phaseColor)
+                if(Build.VERSION.SDK_INT>=31) {
+                    setColorStateList(R.id.widget_progress,"setProgressTintList",ColorStateList.valueOf(phaseColor))
+                }
                 setInt(R.id.widget_counter_box,"setBackgroundResource",when {
                     colors.light && iqama->R.drawable.widget_counter_gold_light
                     colors.light->R.drawable.widget_counter_mint_light
@@ -77,7 +88,7 @@ class PrayerWidget: AppWidgetProvider() {
                     setChronometer(R.id.widget_countdown,SystemClock.elapsedRealtime()+data.time.toEpochMilli()-now.toEpochMilli(),null,true)
                 }
                 val footer=when {
-                    layout==R.layout.prayer_widget_slim -> p.city.name
+                    slim -> p.city.name
                     iqama -> "إقامة ${data?.prayer?.label} · حسب إعدادك"
                     else -> "صلاتك أولاً، وضجيجك لاحقاً"
                 }

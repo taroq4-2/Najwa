@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="interface_labels">
+        <item>Audible alerts for selected prayers</item>
+        <item>Customize alerts by prayer</item>
+        <item>Choose adhan and iqama for each prayer</item>
+        <item>Selections apply when the main alert switches above are on.</item>
+        <item>Next scheduled alert</item>
+        <item>No alert is ready right now</item>
+        <item>Lock screen details</item>
+        <item>Show the city and prayer details when the phone allows it</item>
+        <item>Alert status and support</item>
+        <item>Copy an on-device status summary</item>
+        <item>Notification permission</item>
+        <item>Exact alarms</item>
+        <item>Available</item>
+        <item>Blocked</item>
+        <item>No recent delivery history</item>
+        <item>Copy status report</item>
+        <item>Report copied</item>
+        <item>Choose an option</item>
+        <item>Ringer access</item>
+        <item>Settings</item>
+        <item>Everything you need for your prayer routine</item>
+        <item>Prayer and quiet mode</item>
+        <item>Prayer times and city</item>
+        <item>Prayer alerts</item>
+        <item>Adhan, iqama and Friday · Sound and timing</item>
+        <item>Silent mode during prayer</item>
+        <item>On · Set the duration for each prayer</item>
+        <item>Activation, duration and ringer recovery</item>
+        <item>Your Najwa experience</item>
+        <item>Appearance and display</item>
+        <item>Home screen widget</item>
+        <item>Flexible sizes · Prayer times at a glance</item>
+        <item>Help and information</item>
+        <item>App information</item>
+        <item>About · Contact · Privacy</item>
+        <item>Back to settings</item>
+        <item>Set your location and calculation method</item>
+        <item>City</item>
+        <item>Prayer times use the selected city and time zone</item>
+        <item>Change city</item>
+        <item>Prayer times</item>
+        <item>Calculation method</item>
+        <item>Isha is 90 minutes after sunset, or 120 minutes during Ramadan according to the selected Hijri calendar.</item>
+        <item>Fajr angle</item>
+        <item>Isha angle</item>
+        <item>Enter two angles between 1 and 30 degrees.</item>
+        <item>Save angles</item>
+        <item>Asr calculation</item>
+        <item>Hanafi · Double shadow length</item>
+        <item>Standard · Single shadow length</item>
+        <item>Hide advanced settings</item>
+        <item>Advanced calculation settings</item>
+        <item>Twilight estimation at high latitudes</item>
+        <item>If sunrise or sunset is unavailable, Najwa explains the calculation issue and pauses silent-mode scheduling.</item>
+        <item>Adjust the display for easier reading</item>
+        <item>App theme</item>
+        <item>Choose a theme or follow your phone settings</item>
+        <item>Time format</item>
+        <item>24-hour</item>
+        <item>12-hour</item>
+        <item>Countdown</item>
+        <item>Iqama countdown</item>
+        <item>Show the time until iqama on the home screen and widget after adhan</item>
+        <item>Green until adhan and gold until iqama.</item>
+        <item>Custom location</item>
+        <item>Choose your city</item>
+        <item>Country</item>
+        <item>Search in Arabic or English</item>
+        <item>Could not load cities. You can enter a custom location.</item>
+        <item>Loading cities…</item>
+        <item>No city found. Try a different name or enter a custom location.</item>
+        <item>My city is missing · Enter manually</item>
+        <item>Location name</item>
+        <item>Latitude · −90 to 90</item>
+        <item>Longitude · −180 to 180</item>
+        <item>Time zone</item>
+        <item>Example: Asia/Riyadh</item>
+        <item>Check the name, coordinates and time zone.</item>
+        <item>Back to the city list</item>
+        <item>Save location</item>
+        <item>Close</item>
+        <item>Prayer alerts</item>
+        <item>Adhan, iqama and Friday reminders</item>
+        <item>Notification display</item>
+        <item>Iqama, Friday and the lock screen</item>
+        <item>Iqama notification settings</item>
+        <item>Friday notification settings</item>
+        <item>Banners and lock-screen alerts follow your phone settings. Iqama alerts are silent by default.</item>
+        <item>Enable alerts in phone settings</item>
+        <item>Najwa notifications are disabled in your phone settings.</item>
+        <item>Open Najwa notification settings</item>
+        <item>Allow exact alarms so prayer reminders arrive on time.</item>
+        <item>Open exact alarm settings</item>
+        <item>Alerts</item>
+        <item>Adhan alert</item>
+        <item>Audible alert for the five daily prayers</item>
+        <item>Iqama reminder</item>
+        <item>Visual alert without sound or vibration</item>
+        <item>Alerts are independent of automatic silent mode. Sunrise is excluded.</item>
+        <item>Your phone may show an alarm icon and the time of the next prayer alert.</item>
+        <item>Friday prayer</item>
+        <item>Weekly reminder before your city\'s calculated Dhuhr time</item>
+        <item>Friday reminder</item>
+        <item>How long before Dhuhr</item>
+        <item>Dhuhr is calculated. Khutbah and prayer times may vary by mosque.</item>
+        <item>Iqama after adhan</item>
+        <item>Set a delay for each prayer based on your mosque. These are personal reminders.</item>
+        <item>Could not open settings. Open Najwa from your phone settings.</item>
+        <item>Back to app information</item>
+        <item>Learn about Najwa, contact us and review your privacy</item>
+        <item>About us</item>
+        <item>About Najwa and its identity</item>
+        <item>Contact us</item>
+        <item>Privacy policy</item>
+        <item>Your data stays on your device</item>
+        <item>User guide</item>
+        <item>Getting started and setting up alerts</item>
+        <item>Choose your city and calculation method and check the times against your local calendar. Set iqama delays in Prayer alerts and configure your ringer in Silent mode.</item>
+        <item>Noto Sans Arabic is licensed under SIL OFL. GeoNames city data is licensed under CC BY 4.0.</item>
+        <item>Najwa · Prayer times and quiet in one place</item>
+        <item>About Najwa</item>
+        <item>Najwa · Prayer first. Noise can wait.</item>
+        <item>Najwa helps you follow prayer times, receive adhan and iqama reminders, and silence your phone before restoring its previous ringer mode.</item>
+        <item>Najwa calculates prayer times on your device using the city and method you choose.</item>
+        <item>Designed and developed by os73.com</item>
+        <item>Make it yours</item>
+        <item>Check the times against your local calendar and set iqama delays to match your mosque. These are personal reminders.</item>
+        <item>Noto Sans Arabic is licensed under SIL OFL. AndroidX and Kotlin components use Apache 2.0.</item>
+        <item>We welcome your feedback and ideas</item>
+        <item>Technical issue</item>
+        <item>Suggestion</item>
+        <item>Question</item>
+        <item>Message the Najwa team</item>
+        <item>Request type</item>
+        <item>Phone model and system version</item>
+        <item>Message details</item>
+        <item>Enter your message.</item>
+        <item>Open in email</item>
+        <item>Review and send the prepared message from your email app.</item>
+        <item>Copy email address</item>
+        <item>Your data stays on your device</item>
+        <item>What we store locally</item>
+        <item>We store your city or coordinates, calculation method, appearance, and silence and alert preferences. We also keep a limited local history for ringer recovery, alert deduplication and schedule diagnostics.</item>
+        <item>The app does not request GPS location or read contacts, messages or other apps\' notifications.</item>
+        <item>When you select adhan audio, Najwa keeps a private copy and shares it with Android\'s notification player. Najwa does not request broad file access.</item>
+        <item>Connectivity and sharing</item>
+        <item>Najwa uses no Internet permission, accounts, ads or tracking. Prayer data and preferences stay on your device.</item>
+        <item>Contact opens your chosen email app. You choose what to send. Your email provider handles the message.</item>
+        <item>Why we request permissions</item>
+        <item>Ringer access lets Najwa set and restore silent mode. Exact alarms schedule reminders. Notification access displays them. Startup access restores the schedule after reboot.</item>
+        <item>The widget shows your city and prayer times on your home screen and requires no additional data access.</item>
+        <item>Control and deletion</item>
+        <item>You can disable silent mode or alerts and revoke permissions. Clearing app data or uninstalling Najwa removes local data. System backup is disabled.</item>
+        <item>Najwa widget</item>
+        <item>Prayer times on your home screen</item>
+        <item>Appearance and transparency</item>
+        <item>A subtle background with a readable countdown</item>
+        <item>Auto adapts to the wallpaper when available and otherwise follows the system theme.</item>
+        <item>Only the background is translucent so text remains readable on light and dark wallpapers.</item>
+        <item>Widget preview</item>
+        <item>Night</item>
+        <item>Light</item>
+        <item>Color</item>
+        <item>Mini</item>
+        <item>Small</item>
+        <item>Wide</item>
+        <item>Tall</item>
+        <item>Large</item>
+        <item>Slim</item>
+        <item>Widget preview on a sample wallpaper. Resize it by dragging its edges.</item>
+        <item>Add to home screen</item>
+        <item>How to add the widget</item>
+        <item>Tap Add and confirm. If your launcher does not support this, press and hold the home screen, open Widgets and find Najwa.</item>
+        <item>The widget uses your city and calculation method. Tap it to open Najwa, tap ↻ to refresh or drag its edges to resize.</item>
+        <item>Your phone may delay widget updates while asleep. Wake the screen or refresh the widget to see current times. Prayer alarms run separately.</item>
+        <item>Adhan sound</item>
+        <item>Select a recording from your phone</item>
+        <item>Checking and saving the file…</item>
+        <item>Choose an adhan audio file</item>
+        <item>Restore the default alarm sound</item>
+        <item>Open adhan sound settings</item>
+        <item>MP3, M4A, WAV and other formats supported by your phone, up to 32 MB. Najwa keeps a copy if the original file is moved.</item>
+        <item>The alert uses alarm volume. Playback duration and Do Not Disturb follow Android settings.</item>
+        <item>Choosing a sound leaves the alert switch unchanged. Enable Adhan alert above.</item>
+        <item>Silent according to phone settings</item>
+        <item>Sound changed in phone settings</item>
+        <item>Restore default durations</item>
+        <item>Minutes after adhan</item>
+        <item>Save</item>
+        <item>Cancel</item>
+        <item>Upcoming prayer times</item>
+        <item>Previous</item>
+        <item>Today</item>
+        <item>Next</item>
+        <item>Automatic silent mode</item>
+        <item>Quiet during prayer, then restore your previous ringer mode</item>
+        <item>Activation</item>
+        <item>Automatic silent mode is on</item>
+        <item>Enable automatic silent mode</item>
+        <item>This device does not support changing the ringer</item>
+        <item>Grant permissions to get started</item>
+        <item>Select at least one prayer</item>
+        <item>Starts 20 seconds after adhan. The duration is measured from adhan.</item>
+        <item>Your phone may show an alarm icon and the next scheduled prayer.</item>
+        <item>Silent mode is active</item>
+        <item>Check ringer recovery</item>
+        <item>Check your phone sound. Restore the previous mode if you did not change it yourself.</item>
+        <item>Restore now</item>
+        <item>Prayers and silent durations</item>
+        <item>Choose each prayer and set the duration from adhan.</item>
+        <item>Phone mode during prayer</item>
+        <item>Alarm and media volumes stay the same.</item>
+        <item>Silent</item>
+        <item>Vibrate</item>
+        <item>Normal</item>
+        <item>System</item>
+        <item>Dark</item>
+        <item>Light</item>
+        <item>Auto</item>
+        <item>Middle of the night</item>
+        <item>One seventh of the night</item>
+        <item>Twilight angle fraction</item>
+    </string-array>
+</resources>

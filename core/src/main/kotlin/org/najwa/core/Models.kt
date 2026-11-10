@@ -11,7 +11,9 @@ enum class ThemeChoice(val label: String) { SYSTEM("النظام"), DARK("داك
 enum class WidgetTheme(val label: String) { AUTO("تلقائي"), DARK("داكن"), LIGHT("فاتح") }
 fun defaultIqamaMinutes() = mapOf(Prayer.FAJR to 20,Prayer.DHUHR to 15,Prayer.ASR to 15,Prayer.MAGHRIB to 5,Prayer.ISHA to 15)
 fun defaultSilenceMinutes() = mapOf(Prayer.FAJR to 35,Prayer.DHUHR to 30,Prayer.ASR to 30,Prayer.MAGHRIB to 20,Prayer.ISHA to 30)
-data class City(val name: String, val latitude: Double, val longitude: Double, val zone: String) {
+val dailyPrayers: Set<Prayer> = Prayer.entries.filter {it.isPrayer}.toSet()
+data class City(val name: String, val latitude: Double, val longitude: Double, val zone: String,
+                val countryCode: String? = null, val catalogId: String? = null) {
     init { require(latitude.isFinite() && latitude in -90.0..90.0); require(longitude.isFinite() && longitude in -180.0..180.0); ZoneId.of(zone) }
     val zoneId get() = ZoneId.of(zone)
 }
@@ -29,7 +31,10 @@ data class Preferences(
     val widgetTheme: WidgetTheme = WidgetTheme.AUTO,
     val widgetOpacity: Int = 85,
     val fridayReminder: Boolean = false,
-    val fridayLeadMinutes: Int = DEFAULT_FRIDAY_LEAD_MINUTES
+    val fridayLeadMinutes: Int = DEFAULT_FRIDAY_LEAD_MINUTES,
+    val showLockScreenDetails: Boolean = false,
+    val adhanPrayers: Set<Prayer> = dailyPrayers,
+    val iqamaPrayers: Set<Prayer> = dailyPrayers
 ) { init {
     require(durationMinutes in 5..120); require(customFajr in 1.0..30.0 && customIsha in 1.0..30.0)
     require(mode != Ringer.NORMAL); require(enabled.none { !it.isPrayer })
@@ -38,6 +43,7 @@ data class Preferences(
     require(silenceMinutes.keys == iqamaMinutes.keys && silenceMinutes.values.all {it in 5..120})
     require(widgetOpacity in 80..100)
     require(fridayLeadMinutes in 5..60)
+    require(adhanPrayers.all {it.isPrayer} && iqamaPrayers.all {it.isPrayer})
 } }
 data class PrayerEvent(val prayer: Prayer, val time: Instant) { val id get() = "${prayer.name}:${time.toEpochMilli()}" }
 data class PrayerDay(val date: LocalDate, val events: List<PrayerEvent>, val warning: String? = null) { val complete get() = events.size == 6 }

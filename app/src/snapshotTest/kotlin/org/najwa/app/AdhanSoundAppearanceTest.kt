@@ -14,7 +14,7 @@ import org.najwa.app.ui.*
 import org.najwa.core.Screen
 
 class AdhanSoundAppearanceTest {
-    @get:Rule val paparazzi=Paparazzi(deviceConfig=DeviceConfig.PIXEL_5,theme="android:Theme.Material.Light.NoActionBar",supportsRtl=true)
+    @get:Rule val paparazzi=Paparazzi(deviceConfig=DeviceConfig.PIXEL_5.copy(locale="ar"),theme="android:Theme.Material.Light.NoActionBar",supportsRtl=true)
     @Test fun soundPickerStatesStayReadable() {
         for(dark in listOf(true,false))for(large in listOf(false,true)) {
             paparazzi.snapshot("sound_${if(dark)"dark" else "light"}${if(large)"_large" else ""}") {

@@ -28,7 +28,8 @@ class PreferencesStore(context: Context) {
         val j=file.read() ?: return Preferences()
         val storedIqama=Prayer.entries.filter {it.isPrayer}.associateWith {j.optJSONObject("iqamaMinutes")?.optInt(it.name,15) ?: 15}
         val iqama=if(j.optInt("schema",0)<5 && storedIqama.values.all {it==15})defaultIqamaMinutes() else storedIqama
-        return Preferences(City(j.getString("city"),j.getDouble("lat"),j.getDouble("lon"),j.getString("zone")),Method.valueOf(j.getString("method")),j.getBoolean("hanafi"),HighLatitude.valueOf(j.getString("high")),j.getDouble("fajr"),j.getDouble("isha"),ThemeChoice.valueOf(j.getString("theme")),j.getBoolean("hour24"),j.getBoolean("auto"),j.getJSONArray("enabled").let { a -> (0 until a.length()).map { Prayer.valueOf(a.getString(it)) }.toSet() },j.getInt("duration"),Ringer.valueOf(j.getString("mode")),
+        return Preferences(City(j.getString("city"),j.getDouble("lat"),j.getDouble("lon"),j.getString("zone"),
+            j.optString("cityCountry").takeIf {it.isNotBlank()},j.optString("cityCatalogId").takeIf {it.isNotBlank()}),Method.valueOf(j.getString("method")),j.getBoolean("hanafi"),HighLatitude.valueOf(j.getString("high")),j.getDouble("fajr"),j.getDouble("isha"),ThemeChoice.valueOf(j.getString("theme")),j.getBoolean("hour24"),j.getBoolean("auto"),j.getJSONArray("enabled").let { a -> (0 until a.length()).map { Prayer.valueOf(a.getString(it)) }.toSet() },j.getInt("duration"),Ringer.valueOf(j.getString("mode")),
             adhanNotifications=j.optBoolean("adhanNotifications",false),iqamaNotifications=j.optBoolean("iqamaNotifications",false),
             iqamaMinutes=iqama,
             silenceMinutes=Prayer.entries.filter {it.isPrayer}.associateWith {j.optJSONObject("silenceMinutes")?.optInt(it.name,defaultSilenceMinutes().getValue(it)) ?: defaultSilenceMinutes().getValue(it)},
@@ -36,11 +37,23 @@ class PreferencesStore(context: Context) {
             widgetTheme=runCatching {WidgetTheme.valueOf(j.optString("widgetTheme","AUTO"))}.getOrDefault(WidgetTheme.AUTO),
             widgetOpacity=j.optInt("widgetOpacity",85).coerceIn(80,100),
             fridayReminder=j.optBoolean("fridayReminder",false),
-            fridayLeadMinutes=j.optInt("fridayLeadMinutes",DEFAULT_FRIDAY_LEAD_MINUTES).coerceIn(5,60))
+            fridayLeadMinutes=j.optInt("fridayLeadMinutes",DEFAULT_FRIDAY_LEAD_MINUTES).coerceIn(5,60),
+            showLockScreenDetails=j.optBoolean("showLockScreenDetails",false),
+            adhanPrayers=readPrayerSelection(j,"adhanPrayers"),
+            iqamaPrayers=readPrayerSelection(j,"iqamaPrayers"))
+    }
+    private fun readPrayerSelection(j: JSONObject,key: String): Set<Prayer> {
+        val values=j.optJSONArray(key) ?: return dailyPrayers
+        val names=(0 until values.length()).map {values.optString(it)}.toSet()
+        return dailyPrayers.filterTo(mutableSetOf()) {it.name in names}
     }
     fun write(p: Preferences) { file.write(JSONObject().put("city",p.city.name).put("lat",p.city.latitude).put("lon",p.city.longitude).put("zone",p.city.zone).put("method",p.method.name).put("hanafi",p.hanafi).put("high",p.highLatitude.name).put("fajr",p.customFajr).put("isha",p.customIsha).put("theme",p.theme.name).put("hour24",p.hour24).put("auto",p.autoSilent).put("enabled",JSONArray(p.enabled.map { it.name })).put("duration",p.durationMinutes).put("mode",p.mode.name)
         .put("adhanNotifications",p.adhanNotifications).put("iqamaNotifications",p.iqamaNotifications)
+        .put("cityCountry",p.city.countryCode).put("cityCatalogId",p.city.catalogId)
         .put("fridayReminder",p.fridayReminder).put("fridayLeadMinutes",p.fridayLeadMinutes)
+        .put("showLockScreenDetails",p.showLockScreenDetails)
+        .put("adhanPrayers",JSONArray(p.adhanPrayers.map {it.name}))
+        .put("iqamaPrayers",JSONArray(p.iqamaPrayers.map {it.name}))
         .put("iqamaMinutes",JSONObject().apply {p.iqamaMinutes.forEach {(prayer,minutes)->put(prayer.name,minutes)}})
         .put("schema",6).put("showIqamaCountdown",p.showIqamaCountdown)
         .put("widgetTheme",p.widgetTheme.name).put("widgetOpacity",p.widgetOpacity)

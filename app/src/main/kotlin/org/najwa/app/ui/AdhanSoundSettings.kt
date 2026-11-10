@@ -60,15 +60,15 @@ import org.najwa.app.NajwaRuntime
     val c=LocalPalette.current
     SettingsCard("صوت الأذان","اختر تسجيلًا من ملفات هاتفك") {
         Text(name,color=c.mint,fontSize=15.sp)
-        if(busy) {LinearProgressIndicator(Modifier.fillMaxWidth());Text("جارٍ فحص الملف وحفظه…",color=c.secondary)}
+        if(busy) {LinearProgressIndicator(Modifier.fillMaxWidth());Text(uiText("جارٍ فحص الملف وحفظه…"),color=c.secondary)}
         else {
             Action("اختيار ملف أذان من الهاتف",Modifier.fillMaxWidth(),true,onChoose)
-            if(custom)TextButton(onClick=onReset) {Text("العودة إلى نغمة المنبّه الافتراضية")}
-            TextButton(onClick=onSystem) {Text("إعدادات صوت الأذان في الهاتف")}
+            if(custom)TextButton(onClick=onReset) {Text(uiText("العودة إلى نغمة المنبّه الافتراضية"))}
+            TextButton(onClick=onSystem) {Text(uiText("إعدادات صوت الأذان في الهاتف"))}
         }
-        Text("MP3 أو M4A أو WAV وغيرها من الصيغ التي يدعمها هاتفك، بحد أقصى 32 ميغابايت. تُحفظ نسخة داخل نجوى لتبقى متاحة بعد نقل الملف الأصلي.",color=c.secondary,fontSize=12.sp)
-        Text("يستخدم التنبيه مستوى صوت المنبّه. مدة تشغيل الصوت وعدم الإزعاج تخضع لإعدادات Android.",color=c.secondary,fontSize=12.sp)
-        Text("اختيار الصوت لا يفعّل التنبيهات تلقائيًا؛ تأكد من تشغيل «تنبيه الأذان» أعلى الصفحة.",color=c.secondary,fontSize=12.sp)
+        Text(uiText("MP3 أو M4A أو WAV وغيرها من الصيغ التي يدعمها هاتفك، بحد أقصى 32 ميغابايت. تُحفظ نسخة داخل نجوى لتبقى متاحة بعد نقل الملف الأصلي."),color=c.secondary,fontSize=12.sp)
+        Text(uiText("يستخدم التنبيه مستوى صوت المنبّه. مدة تشغيل الصوت وعدم الإزعاج تخضع لإعدادات Android."),color=c.secondary,fontSize=12.sp)
+        Text(uiText("اختيار الصوت لا يفعّل التنبيهات تلقائيًا؛ تأكد من تشغيل «تنبيه الأذان» أعلى الصفحة."),color=c.secondary,fontSize=12.sp)
         message?.let {Text(it,color=c.amber,fontSize=13.sp)}
     }
 }

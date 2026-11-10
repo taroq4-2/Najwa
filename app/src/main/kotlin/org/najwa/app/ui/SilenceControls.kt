@@ -8,6 +8,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
+import androidx.compose.ui.res.stringResource
+import org.najwa.app.R
 import org.najwa.app.NajwaRuntime
 import org.najwa.core.*
 import java.time.Instant
@@ -18,32 +20,40 @@ import java.time.Instant
 
 @Composable fun SilenceContent(p: Preferences,s: Session?,now: Instant,ready: Boolean,fixed: Boolean,onSave: (Preferences)->Unit,onAccess: ()->Unit,onRestore: ()->Unit) {
     val c=LocalPalette.current
-    PageHeading("الصمت التلقائي","هدوء وقت الصلاة، ثم عودة إلى وضع الرنين السابق")
-    SettingsCard("التفعيل") {
+    val activationLabel=stringResource(R.string.en_silent_enable)
+    PageHeading(stringResource(R.string.en_silent_title),stringResource(R.string.en_silent_intro))
+    SettingsCard(stringResource(R.string.en_silent_activation)) {
         Row(verticalAlignment=Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text(if(p.autoSilent)"الصمت التلقائي مفعّل" else "تفعيل الصمت التلقائي",color=c.text,fontSize=16.sp)
-                Text(when {fixed->"هذا الجهاز لا يدعم تغيير الرنين";!ready->"أكمل الأذونات لبدء الاستخدام";p.enabled.isEmpty()->"اختر صلاة واحدة على الأقل";else->"يبدأ بعد الأذان بـ20 ثانية؛ نهاية المدة محسوبة من الأذان"},color=c.secondary,fontSize=12.sp)
+                Text(if(p.autoSilent)stringResource(R.string.en_silent_on) else stringResource(R.string.en_silent_enable),color=c.text,fontSize=16.sp)
+                Text(when {fixed->stringResource(R.string.en_silent_fixed);!ready->stringResource(R.string.en_silent_permissions);p.enabled.isEmpty()->stringResource(R.string.en_silent_choose_prayer);else->stringResource(R.string.en_silent_timing)},color=c.secondary,fontSize=12.sp)
             }
-            Switch(p.autoSilent,{if(it&&!ready)onAccess() else onSave(p.copy(autoSilent=it))},modifier=Modifier.semantics {contentDescription="تفعيل الصمت التلقائي"},enabled=!fixed,colors=silenceSwitchColors())
+            Switch(p.autoSilent,{if(it&&!ready)onAccess() else onSave(p.copy(autoSilent=it))},modifier=Modifier.semantics {contentDescription=activationLabel},enabled=!fixed,colors=silenceSwitchColors())
         }
-        Text("عند التفعيل قد يظهر رمز المنبّه في الهاتف وموعد الصلاة المجدولة التالية.",color=c.secondary,fontSize=12.sp)
+        Text(stringResource(R.string.en_silent_alarm_icon),color=c.secondary,fontSize=12.sp)
     }
     if(s!=null && s.state !in listOf(SessionState.RESTORED,SessionState.USER_OVERRIDE,SessionState.IDLE)) {
         val active=s.state==SessionState.ACTIVE
-        SettingsCard(if(active)"جلسة صمت نشطة" else "راجع استعادة الرنين") {
-            if(active)Text(countdown(((s.deadline-now.toEpochMilli())/1000).coerceAtLeast(0)),color=c.mint,fontSize=36.sp,fontWeight=FontWeight.Bold)
-            Text("الاستعادة: ${displayTime(Instant.ofEpochMilli(s.deadline),p)} · الوضع السابق: ${modeName(s.original)}",color=c.secondary,fontSize=13.sp)
-            if(!active)Text("تحقق من صوت الهاتف. يمكنك طلب استعادة الوضع السابق إذا لم تغيّره بنفسك.",color=c.amber,fontSize=13.sp)
-            Action("استعادة الآن",Modifier.fillMaxWidth(),true,onRestore)
+        SettingsCard(if(active)stringResource(R.string.en_silent_active_session) else stringResource(R.string.en_silent_check_restore)) {
+            if(active)CountdownDisplay(((s.deadline-now.toEpochMilli())/1000).coerceAtLeast(0),c.mint)
+            Text(stringResource(R.string.en_silent_restore_info,localizedUiTime(Instant.ofEpochMilli(s.deadline),p),modeName(s.original)),color=c.secondary,fontSize=13.sp)
+            if(!active)Text(stringResource(R.string.en_silent_check_phone),color=c.amber,fontSize=13.sp)
+            Action(stringResource(R.string.en_silent_restore_now),Modifier.fillMaxWidth(),true,onRestore)
         }
     }
-    PrayerDurations("الصلوات ومدد الصمت","فعّل كل صلاة وحدد مدة الصمت من الأذان حتى نهايتها.",p.silenceMinutes,defaultSilenceMinutes(),5,
+    PrayerDurations(stringResource(R.string.en_silent_prayers_title),stringResource(R.string.en_silent_prayers_help),p.silenceMinutes,defaultSilenceMinutes(),5,
         enabledPrayers=p.enabled,onEnabled={prayer,enabled->onSave(p.copy(enabled=if(enabled)p.enabled+prayer else p.enabled-prayer))}) {onSave(p.copy(silenceMinutes=it))}
-    SettingsCard("وضع الهاتف أثناء الصلاة") {
-        OptionGrid(listOf(Ringer.SILENT,Ringer.VIBRATE),p.mode,::modeName,2) {onSave(p.copy(mode=it))}
-        Text("يبقى صوت المنبّه والوسائط دون تعديل.",color=c.secondary,fontSize=12.sp)
+    SettingsCard(stringResource(R.string.en_silent_phone_mode)) {
+        val modes=listOf(Ringer.SILENT,Ringer.VIBRATE)
+        val modeLabels=mapOf(Ringer.SILENT to modeName(Ringer.SILENT),Ringer.VIBRATE to modeName(Ringer.VIBRATE))
+        OptionGrid(modes,p.mode,{modeLabels.getValue(it)},2) {onSave(p.copy(mode=it))}
+        Text(stringResource(R.string.en_silent_no_audio_change),color=c.secondary,fontSize=12.sp)
     }
 }
-private fun modeName(mode: Ringer)=when(mode) {Ringer.SILENT->"صامت";Ringer.VIBRATE->"اهتزاز";Ringer.NORMAL->"عادي"}
+@Composable
+private fun modeName(mode: Ringer)=stringResource(when(mode) {
+    Ringer.SILENT->R.string.en_silent_mode_silent
+    Ringer.VIBRATE->R.string.en_silent_mode_vibrate
+    Ringer.NORMAL->R.string.en_silent_mode_normal
+})
 @Composable private fun silenceSwitchColors() = LocalPalette.current.let { c -> SwitchDefaults.colors(checkedThumbColor=c.bg,checkedTrackColor=c.green,uncheckedThumbColor=c.secondary,uncheckedTrackColor=c.track,uncheckedBorderColor=c.border) }

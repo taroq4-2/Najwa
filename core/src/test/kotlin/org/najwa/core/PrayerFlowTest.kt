@@ -103,4 +103,18 @@ class PrayerFlowTest {
         assertThrows(IllegalArgumentException::class.java) {p.copy(silenceMinutes=p.silenceMinutes+(Prayer.MAGHRIB to 0))}
         assertThrows(IllegalArgumentException::class.java) {p.copy(silenceMinutes=emptyMap())}
     }
+    @Test fun prayerAlertSelectionsAreIndependentAndStaleAlarmsCannotStartNewTasks() {
+        val at=Instant.parse("2026-11-07T09:00:00Z")
+        val dhuhr=PrayerEvent(Prayer.DHUHR,at)
+        val fajr=PrayerEvent(Prayer.FAJR,at.minusSeconds(1200))
+        val prefs=Preferences(adhanNotifications=true,iqamaNotifications=true,autoSilent=true,
+            adhanPrayers=setOf(Prayer.DHUHR),iqamaPrayers=setOf(Prayer.FAJR))
+        val plan=prayerSchedule(listOf(fajr,dhuhr),prefs)
+        assertEquals(listOf(Prayer.DHUHR),plan.filter {it.action==PrayerAction.ADHAN}.map {it.event.prayer})
+        assertEquals(listOf(Prayer.FAJR),plan.filter {it.action==PrayerAction.IQAMA}.map {it.event.prayer})
+        assertEquals(2,plan.count {it.action==PrayerAction.SILENCE})
+        val old=plan.filter {it.action==PrayerAction.ADHAN}
+        val new=plan.filter {it.action==PrayerAction.IQAMA}
+        assertTrue(dispatchablePrayers(old,new,at,prefs,at.toEpochMilli()).isEmpty())
+    }
 }
