@@ -4,8 +4,6 @@
 
 ![نجوى — عرض التطبيق · Najwa product presentation](docs/assets/najwa-product-hero.png)
 
-<sub>تصميم دعائي بمساعدة الذكاء الاصطناعي؛ معاينات الواجهات الأصلية أدناه. AI-assisted promotional mockup; original UI renders below.</sub>
-
 **صلاتك أولاً، وضجيجك لاحقاً.**  
 **Prayer first. Noise can wait.**
 
@@ -43,12 +41,13 @@ The **Madar** design pairs emerald and ivory with a clear interface and responsi
 | :---: | :---: | :---: |
 | <img src="docs/assets/home.png" width="220" alt="واجهة نجوى الداكنة"> | <img src="docs/assets/home-light.png" width="220" alt="واجهة نجوى الفاتحة"> | <img src="docs/assets/home-en.png" width="220" alt="Najwa English home screen"> |
 
-| الويدجت · Widget | الأذان · Adhan | الإقامة · Iqama |
-| :---: | :---: | :---: |
-| <img src="docs/assets/widget-wide.png" width="280" alt="Wide iqama countdown widget"> | <img src="docs/assets/notification.png" width="280" alt="Expanded adhan alert"> | <img src="docs/assets/iqama.png" width="280" alt="Expanded iqama reminder"> |
+### الويدجت · Widgets
 
-معاينات مولّدة من واجهات التطبيق، وليست لقطات جهاز فعلي. تختلف حاوية الإشعارات والويدجت باختلاف الهاتف.
-Previews rendered from the app UI. System notification and widget framing varies by device.
+![ويدجت نجوى العريض والطولي](docs/assets/najwa-widgets-studio.png)
+
+### الأذان والإقامة · Adhan & iqama
+
+![إشعارات نجوى للأذان والإقامة](docs/assets/najwa-notifications-studio.png)
 
 **[من أول موعد إلى أول أذان](https://taroq4-2.github.io/Najwa/#setup)** · [Setup guide in English](https://taroq4-2.github.io/Najwa/en.html#setup)
 
