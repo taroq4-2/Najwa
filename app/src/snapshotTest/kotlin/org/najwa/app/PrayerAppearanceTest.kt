@@ -47,8 +47,8 @@ class PrayerAppearanceTest {
         }
     }
     @Test fun bothNotificationDesignsInflateAtNarrowWidth() {
-        for(scale in listOf(1f,1.4f))for(w in listOf(260,320,420))for(expanded in listOf(false,true))for(adhan in listOf(false,true)) {
-            val h=if(expanded)224 else 48
+        for(scale in listOf(1f,1.4f,2f))for(w in listOf(260,320,420))for(expanded in listOf(false,true))for(adhan in listOf(false,true)) {
+            val h=if(expanded)252 else 48
             paparazzi.unsafeUpdateConfig(deviceConfig=DeviceConfig.PIXEL_5.copy(locale="ar",screenWidth=w*2,screenHeight=h*2,density=Density.XHIGH,fontScale=scale,orientation=ScreenOrientation.LANDSCAPE))
             val task=ScheduledPrayer(event,if(adhan)PrayerAction.ADHAN else PrayerAction.IQAMA,event.time)
             val title=when {
@@ -59,7 +59,7 @@ class PrayerAppearanceTest {
             }
             val view=notificationViews(paparazzi.context,task,prefs,title,"جدة · الإقامة بعد 15 دقيقة · حسب إعدادك",expanded).apply(paparazzi.context,FrameLayout(paparazzi.context))
             view.layoutParams=ViewGroup.LayoutParams(w*2,h*2)
-            if(expanded && adhan)view.findViewById<Chronometer>(R.id.notification_timer).apply {stop();text="15:00"}
+            if(adhan)view.findViewById<Chronometer>(R.id.notification_timer).apply {stop();text="15:00"}
             assertEquals(title,view.findViewById<TextView>(R.id.notification_title).text.toString())
             if(expanded)assertTrue(view.findViewById<TextView>(R.id.notification_message).text.isNotBlank())
             paparazzi.snapshot(view,"notification_${w}_${scale}_${if(adhan)"adhan" else "iqama"}_${if(expanded)"expanded" else "compact"}")
@@ -99,11 +99,11 @@ class PrayerAppearanceTest {
     }
     @Test fun fridayNotificationUsesItsOwnIconAndNoCountdown() {
         val task=ScheduledPrayer(event,PrayerAction.FRIDAY,event.time.minusSeconds(1800))
-        paparazzi.unsafeUpdateConfig(deviceConfig=DeviceConfig.PIXEL_5.copy(locale="ar",screenWidth=640,screenHeight=448,
+        paparazzi.unsafeUpdateConfig(deviceConfig=DeviceConfig.PIXEL_5.copy(locale="ar",screenWidth=640,screenHeight=504,
             density=Density.XHIGH,orientation=ScreenOrientation.LANDSCAPE))
         val view=notificationViews(paparazzi.context,task,prefs,"تذكير بصلاة الجمعة","جدة · الظهر 12:07 م تقريبًا",true)
             .apply(paparazzi.context,FrameLayout(paparazzi.context))
-        view.layoutParams=ViewGroup.LayoutParams(640,448)
+        view.layoutParams=ViewGroup.LayoutParams(640,504)
         assertEquals(View.GONE,view.findViewById<View>(R.id.notification_timer_box).visibility)
         assertTrue(view.findViewById<TextView>(R.id.notification_message).text.isNotBlank())
         paparazzi.snapshot(view,"notification_friday_expanded")

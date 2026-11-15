@@ -119,7 +119,11 @@ class PrayerNotifications(
                     adhan -> "#3EB28C"
                     friday -> "#9F7535"
                     else -> "#126D53"
-                })).setSubText(strings.getString(R.string.system_signature))
+                })).setSubText(strings.getString(when {
+                    friday -> R.string.system_friday
+                    adhan -> R.string.system_adhan
+                    else -> R.string.system_iqama
+                }))
                 .setContentIntent(open).setAutoCancel(true).setCategory(if(adhan)NotificationCompat.CATEGORY_ALARM else NotificationCompat.CATEGORY_REMINDER)
                 .setVisibility(if(p.showLockScreenDetails)NotificationCompat.VISIBILITY_PUBLIC else NotificationCompat.VISIBILITY_PRIVATE)
                 .setPublicVersion(publicVersion)
@@ -188,11 +192,18 @@ fun notificationViews(context: Context,task: ScheduledPrayer,p: Preferences,titl
             adhan -> {
                 val iqamaTime=strings.prayerTime(Instant.ofEpochMilli(iqamaDeadline(task,p)),p)
                 val schedule="${strings.getString(R.string.system_iqama)} $iqamaTime"
-                if(expanded)"${p.city.name} · $schedule" else schedule
+                if(expanded)"$schedule · ${p.city.name}" else schedule
             }
             !expanded -> strings.prayerTime(task.at,p)
             else -> "${p.city.name} · ${strings.getString(R.string.system_iqama_detail)}"
         })
+        // Keep the live countdown visible even when Android collapses the card.
+        // SystemUI owns expansion; a compact RemoteViews must stay within 48dp.
+        val remaining=iqamaDeadline(task,p)-now.toEpochMilli()
+        val showTimer=adhan && remaining>0
+        setViewVisibility(R.id.notification_timer_box,if(showTimer)View.VISIBLE else View.GONE)
+        setChronometerCountDown(R.id.notification_timer,true)
+        setChronometer(R.id.notification_timer,SystemClock.elapsedRealtime()+remaining.coerceAtLeast(0L),null,showTimer)
         if(expanded) {
             setTextViewText(R.id.notification_brand,"$brand · $phase")
             setTextColor(R.id.notification_brand,accent)
@@ -213,13 +224,7 @@ fun notificationViews(context: Context,task: ScheduledPrayer,p: Preferences,titl
             })
             setTextViewText(R.id.notification_time,strings.prayerTime(task.at,p))
             setViewVisibility(R.id.notification_message,View.VISIBLE)
-            val remaining=iqamaDeadline(task,p)-now.toEpochMilli()
-            val showTimer=adhan && remaining>0
-            setViewVisibility(R.id.notification_timer_box,if(showTimer)View.VISIBLE else View.GONE)
-            if(showTimer) {
-                setChronometerCountDown(R.id.notification_timer,true)
-                setChronometer(R.id.notification_timer,SystemClock.elapsedRealtime()+remaining,null,true)
-            }
+
         }
     }
 }
