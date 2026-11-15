@@ -31,7 +31,7 @@ jobs:
       - run: sh gradlew :app:dependencies --configuration releaseRuntimeClasspath > dependency-tree.txt
       - run: sh gradlew :app:releaseDependencyInventory
       - run: python3 scripts/release_sbom.py app/build/reports/runtime-dependencies.tsv app/build/reports/najwa.cdx.json --scan
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: verification-evidence
@@ -80,7 +80,7 @@ jobs:
             adb shell wm size 780x1900
             adb shell wm density 320
             sh gradlew --no-daemon :app:connectedDebugAndroidTest
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: android-instrumented-${{ matrix.api }}
@@ -103,7 +103,7 @@ jobs:
           SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           "$SDKMANAGER" 'platforms;android-35' 'build-tools;35.0.0'
       - run: sh gradlew --no-daemon -PpreviewSdk=35 :app:testDebugUnitTest
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: android-preview-evidence
