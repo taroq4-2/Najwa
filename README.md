@@ -2,7 +2,9 @@
 
 # نجوى · Najwa
 
-![مدار السكينة — Najwa Madar visual identity](docs/assets/madar-atmosphere.png)
+![نجوى — عرض التطبيق · Najwa product presentation](docs/assets/najwa-product-hero.png)
+
+<sub>تصميم دعائي بمساعدة الذكاء الاصطناعي؛ معاينات الواجهات الأصلية أدناه. AI-assisted promotional mockup; original UI renders below.</sub>
 
 **صلاتك أولاً، وضجيجك لاحقاً.**  
 **Prayer first. Noise can wait.**
