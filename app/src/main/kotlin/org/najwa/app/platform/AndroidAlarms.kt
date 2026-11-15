@@ -17,10 +17,12 @@ class AndroidAlarms(private val context: Context): RestoreAlarm {
     private val manager=context.getSystemService(AlarmManager::class.java)
     private val plan=JsonFile(context,"alarm-plan.json")
     private val trialPlan=JsonFile(context,"trial-plan.json")
+    private val registered=mutableSetOf<Long>()
     val exactAccess get() = Build.VERSION.SDK_INT < 31 || runCatching {manager?.canScheduleExactAlarms()==true}.getOrDefault(false)
-    private fun pending(kind: String,id: String="",at: Long=0,independent: Boolean=false): PendingIntent {
+    private fun pending(kind: String,id: String="",at: Long=0,independent: Boolean=false,backup: Boolean=false): PendingIntent {
         val intent=Intent(context,AlarmReceiver::class.java).setAction("org.najwa.$kind").putExtra("id",id).putExtra("at",at)
         if(independent)intent.data=Uri.parse("najwa://scheduled/$kind/$at")
+        if(backup)intent.data=Uri.parse("najwa://scheduled/restore/backup")
         return PendingIntent.getBroadcast(context,when(kind){"restore"->102;"trial"->103;else->101},intent,PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     }
     private fun clock(at: Long,intent: PendingIntent) {
@@ -29,10 +31,23 @@ class AndroidAlarms(private val context: Context): RestoreAlarm {
         manager.setAlarmClock(AlarmManager.AlarmClockInfo(at,show),intent)
     }
     override fun schedule(id: String,deadline: Long) {
-        check(exactAccess)
-        manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,deadline,pending("restore",id,deadline))
+        scheduleRestore(id,deadline,deadline)
     }
-    override fun cancel() { manager.cancel(pending("restore")) }
+    fun deferRestore(id: String,deadline: Long,retryAt: Long) {
+        require(retryAt>=deadline)
+        scheduleRestore(id,deadline,retryAt)
+    }
+    private fun scheduleRestore(id: String,deadline: Long,triggerAt: Long) {
+        check(exactAccess)
+        // Keep the original session deadline in the intent when delaying execution.
+        // A second foreground-service denial must still match the active session.
+        manager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,triggerAt+120_000L,pending("restore",id,deadline,backup=true))
+        manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,triggerAt,pending("restore",id,deadline))
+    }
+    override fun cancel() {
+        manager.cancel(pending("restore"))
+        manager.cancel(pending("restore",backup=true))
+    }
     fun saved(): List<ScheduledPrayer> = try {
         readPlan()
     } catch (_: JSONException) {
@@ -53,16 +68,17 @@ class AndroidAlarms(private val context: Context): RestoreAlarm {
             ScheduledPrayer(PrayerEvent(Prayer.valueOf(it.getString("prayer")),Instant.ofEpochMilli(it.getLong("eventAt"))),PrayerAction.valueOf(it.getString("action")),Instant.ofEpochMilli(it.getLong("at")))
         }}
     }
-    fun prayers(tasks: List<ScheduledPrayer>) {
-        val old=saved().map {it.at.toEpochMilli()}.toSet()
+    fun prayers(tasks: List<ScheduledPrayer>, refresh: Boolean=false) {
+        val previous=saved()
+        val old=previous.map {it.at.toEpochMilli()}.toSet()
         val times=tasks.map {it.at.toEpochMilli()}.toSet()
         val added=mutableListOf<Long>()
         try {
-            times.sorted().forEach {at->
+            times.filter {refresh || it !in registered}.sorted().forEach {at->
                 clock(at,pending("prayer","batch:$at",at,true))
                 if(at !in old)added.add(at)
             }
-            plan.write(JSONObject().put("tasks",JSONArray(tasks.map {t->JSONObject().put("prayer",t.event.prayer.name).put("eventAt",t.event.time.toEpochMilli()).put("action",t.action.name).put("at",t.at.toEpochMilli())})))
+            if(previous!=tasks)plan.write(JSONObject().put("tasks",JSONArray(tasks.map {t->JSONObject().put("prayer",t.event.prayer.name).put("eventAt",t.event.time.toEpochMilli()).put("action",t.action.name).put("at",t.at.toEpochMilli())})))
         } catch(e: Exception) {
             added.forEach {at->runCatching {manager.cancel(pending("prayer",at=at,independent=true))}}
             throw e
@@ -71,6 +87,8 @@ class AndroidAlarms(private val context: Context): RestoreAlarm {
         // while a delivered broadcast was still waiting for the process to start.
         manager.cancel(pending("prayer"))
         (old-times).forEach {manager.cancel(pending("prayer",at=it,independent=true))}
+        registered.retainAll(times)
+        registered.addAll(times)
     }
     fun scheduleTrial(at: Long) {
         val old=trialPlan.read()?.optLong("at") ?: 0L

@@ -14,9 +14,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import org.najwa.app.platform.PrayerWidget
+import org.najwa.app.R
 import org.najwa.core.*
 import java.time.Instant
 
@@ -24,8 +26,7 @@ import java.time.Instant
     val context=LocalContext.current
     var message by remember {mutableStateOf<String?>(null)}
     WidgetContent(p,now,onBack,message,onSave=onSave) {
-        message=if(PrayerWidget.requestPin(context))"أكمل إضافة الويدجت من نافذة الشاشة الرئيسية."
-        else "اضغط مطولًا على مكان فارغ في الشاشة الرئيسية ← الأدوات / الويدجت ← نجوى، ثم اسحب الويدجت إلى الشاشة."
+        message=context.getString(if(PrayerWidget.requestPin(context))R.string.widget_pin_complete else R.string.widget_pin_manual)
     }
 }
 @Composable fun WidgetContent(p: Preferences,now: Instant,onBack: ()->Unit,message: String?=null,onSave: (Preferences)->Unit={},onAdd: ()->Unit) {
@@ -38,8 +39,10 @@ import java.time.Instant
     SettingsCard("المظهر والشفافية","طبقة خفيفة فوق خلفيتك، مع بقاء العداد واضحًا") {
         OptionGrid(WidgetTheme.entries.toList(),p.widgetTheme,{it.label}) {onSave(p.copy(widgetTheme=it))}
         Text(uiText("التلقائي يختار لونًا مناسبًا لإضاءة خلفية الهاتف عند توفرها، وإلا يتبع سمة النظام."),color=c.secondary,fontSize=12.sp)
-        Text(uiText("شفافية الخلفية: ${100-opacity.toInt()}٪"),color=c.text,fontSize=14.sp)
-        Slider(value=opacity,onValueChange={opacity=it},onValueChangeFinished={onSave(p.copy(widgetOpacity=opacity.toInt()))},valueRange=80f..100f,steps=3,modifier=Modifier.semantics {contentDescription="شفافية خلفية الويدجت";stateDescription="شفافية ${100-opacity.toInt()} بالمئة"})
+        val transparencyLabel=stringResource(R.string.widget_transparency_label)
+        val transparencyState=stringResource(R.string.widget_transparency_value,100-opacity.toInt())
+        Text(stringResource(R.string.widget_transparency_display,100-opacity.toInt()),color=c.text,fontSize=14.sp)
+        Slider(value=opacity,onValueChange={opacity=it},onValueChangeFinished={onSave(p.copy(widgetOpacity=opacity.toInt()))},valueRange=80f..100f,steps=3,modifier=Modifier.semantics {contentDescription=transparencyLabel;stateDescription=transparencyState})
         Text(uiText("شفافية خفيفة للخلفية فقط، ضمن نطاق يحافظ على تباين النص فوق الخلفيات الفاتحة والداكنة."),color=c.secondary,fontSize=12.sp)
     }
     SectionLabel("معاينة مظهر الويدجت")
@@ -62,7 +65,15 @@ import java.time.Instant
         androidx.compose.ui.viewinterop.AndroidView(
             factory={android.widget.FrameLayout(it)},
             modifier=Modifier.width(actualWidth.dp).height(height.dp),
-            update={container->container.removeAllViews();container.addView(remote.apply(context,container))})
+            update={container->
+                // The page clock recomposes each second; only inflate a changed preview.
+                if(container.tag!==remote) {
+                    val rendered=remote.apply(context,container)
+                    container.removeAllViews()
+                    container.addView(rendered)
+                    container.tag=remote
+                }
+            })
     }
     Text(uiText("معاينة الويدجت الفعلي على خلفية تجريبية · يتكيف عند سحب أطرافه"),color=c.secondary,fontSize=12.sp,modifier=Modifier.padding(top=12.dp))
     Spacer(Modifier.height(18.dp))

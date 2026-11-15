@@ -22,13 +22,30 @@ class MainActivity: ComponentActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState); enableEdgeToEdge(); setContent { InterfaceLanguage {NajwaApp((application as NajwaApplication).runtime,resumed.intValue,homeRequest.intValue)} } }
     override fun onNewIntent(intent: Intent) {super.onNewIntent(intent);setIntent(intent);if(intent.getBooleanExtra("open_home",false))homeRequest.intValue++}
-    override fun onResume() { super.onResume(); (application as NajwaApplication).runtime.reconcile(); org.najwa.app.platform.PrayerWidget.updateAll(this); resumed.intValue++ }
+    override fun onResume() {
+        super.onResume()
+        val app=application as NajwaApplication
+        prayerExecutor.execute {
+            app.runtime.reconcile()
+            org.najwa.app.platform.PrayerWidget.updateAll(app)
+            runOnUiThread { if(!isDestroyed)resumed.intValue++ }
+        }
+    }
 }
 
+internal val supportedLanguages = linkedMapOf(
+    "ar" to "العربية", "en" to "English", "id" to "Bahasa Indonesia",
+    "ur" to "اردو", "bn" to "বাংলা", "hi" to "हिन्दी", "tr" to "Türkçe"
+)
+
 internal fun appLanguage(context: Context): String =
-    context.getSharedPreferences("interface-language",Context.MODE_PRIVATE).getString("language","ar") ?: "ar"
+    context.getSharedPreferences("interface-language",Context.MODE_PRIVATE).getString("language","ar")
+        ?.takeIf {it in supportedLanguages} ?: "ar"
 
 internal fun changeAppLanguage(activity: MainActivity,language: String) {
+    require(language in supportedLanguages)
     activity.getSharedPreferences("interface-language",Context.MODE_PRIVATE).edit().putString("language",language).apply()
+    val app=activity.application as NajwaApplication
+    prayerExecutor.execute { app.runtime.notifications.updateChannels() }
     activity.recreate()
 }

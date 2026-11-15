@@ -6,13 +6,18 @@ import org.json.JSONObject
 import org.najwa.app.platform.*
 import org.najwa.core.*
 import java.time.Instant
+import java.util.concurrent.Executors
+import kotlinx.coroutines.asCoroutineDispatcher
+
+internal val prayerExecutor = Executors.newSingleThreadExecutor()
+internal val prayerDispatcher = prayerExecutor.asCoroutineDispatcher()
 
 class NajwaApplication: Application() {
     lateinit var runtime: NajwaRuntime; private set
     override fun onCreate() { super.onCreate(); runtime=NajwaRuntime(this) }
     override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
         super.onConfigurationChanged(newConfig)
-        PrayerWidget.updateAll(this)
+        prayerExecutor.execute { PrayerWidget.updateAll(this) }
     }
 }
 class NajwaRuntime(private val context: Context,private val clock: ()->Instant = Instant::now) {
@@ -24,15 +29,16 @@ class NajwaRuntime(private val context: Context,private val clock: ()->Instant =
     val notifications=PrayerNotifications(context,clock)
     val calculator=PrayerCalculator()
     val sessions=SilenceSessionManager(journal,audio,alarms,{clock().toEpochMilli()})
-    var error: String?=null; private set
+    @Volatile var error: String?=null; private set
     private var preferencesAvailable=true
-    var preferences=runCatching { preferencesStore.read() }.getOrElse { preferencesAvailable=false;error="تعذّر قراءة الإعدادات المحفوظة. ${it.javaClass.simpleName}";Preferences() }; private set
-    var nextScheduled: ScheduledPrayer?=null;private set
-    var nextNotification: ScheduledPrayer?=null;private set
-    var notice: String?=null;private set
-    fun lastDispatch(): String? = runCatching {diagnostic.read()?.optString("text")?.takeIf {it.isNotBlank()}}.getOrNull()
+    @Volatile var preferences=runCatching { preferencesStore.read() }.getOrElse { preferencesAvailable=false;error="تعذّر قراءة الإعدادات المحفوظة. ${it.javaClass.simpleName}";Preferences() }; private set
+    @Volatile var nextScheduled: ScheduledPrayer?=null;private set
+    @Volatile var nextNotification: ScheduledPrayer?=null;private set
+    @Volatile var notice: String?=null;private set
+    @Volatile private var dispatchText=runCatching {diagnostic.read()?.optString("text")?.takeIf {it.isNotBlank()}}.getOrNull()
+    fun lastDispatch(): String? = dispatchText
     fun session(): Session? = try {journal.read().session} catch(e: Exception) {error="تعذّر قراءة حالة الرنين؛ لن نغيّر الصوت. ${e.javaClass.simpleName}";null}
-    fun displayedSession(): Session? = runCatching {journal.snapshot().session}.getOrNull()
+    fun displayedSession(): Session? = journal.cachedSnapshot()?.session
     private fun attempt(label: String,block: ()->Unit): Boolean = try {block();true} catch(e: Exception) {
         error=listOfNotNull(error,"$label: ${e.javaClass.simpleName}").joinToString("\n");false
     }
@@ -52,10 +58,10 @@ class NajwaRuntime(private val context: Context,private val clock: ()->Instant =
         if(disabled)attempt("تعذّرت استعادة الرنين") {sessions.disable()}
         attempt("تعذّرت جدولة المواقيت") {reschedule()}
     }
-    @Synchronized fun reconcile() {
+    @Synchronized fun reconcile(refreshAlarms: Boolean=false) {
         val available=begin()
         attempt("تعذّرت مراجعة الرنين") {sessions.reconcile()}
-        if(available)attempt("تعذّرت جدولة المواقيت") {reschedule()}
+        if(available)attempt("تعذّرت جدولة المواقيت") {reschedule(refreshAlarms=refreshAlarms)}
     }
     @Synchronized fun restore() {
         begin()
@@ -73,10 +79,25 @@ class NajwaRuntime(private val context: Context,private val clock: ()->Instant =
     }
     @Synchronized fun scheduledTrial() {
         if(!begin())return
+        val strings=context.prayerLanguage()
+        val now=clock()
         attempt("تعذّرت جدولة التجربة") {
-            check(audio.capable() && alarms.exactAccess)
-            alarms.scheduleTrial(clock().toEpochMilli()+30_000L)
-            notice="اختبار كامل: أذان بعد 30 ثانية وصمت بعده بـ20 ثانية، إقامة بعد دقيقة، وعودة الرنين بعد 5 دقائق من الأذان. أغلق الشاشة الآن."
+            if(!audio.capable() || !alarms.exactAccess ||
+                !notifications.enabled(PrayerNotifications.ADHAN) || !notifications.enabled(PrayerNotifications.IQAMA)) {
+                error=strings.getString(org.najwa.app.R.string.trial_permissions_required)
+                return@attempt
+            }
+            val active=session()
+            if(error!=null)return@attempt
+            val ongoingSession=active!=null && active.state !in setOf(SessionState.IDLE,SessionState.RESTORED,SessionState.USER_OVERRIDE)
+            val ongoingTrial=alarms.trialEvent()?.time?.plusSeconds(300)?.isAfter(now)==true
+            val prayerDueSoon=nextScheduled?.at?.let {it<=now.plusSeconds(330)}==true
+            if(ongoingSession || ongoingTrial || prayerDueSoon) {
+                error=strings.getString(org.najwa.app.R.string.trial_existing_schedule)
+                return@attempt
+            }
+            alarms.scheduleTrial(now.plusSeconds(30).toEpochMilli())
+            notice=strings.getString(org.najwa.app.R.string.trial_scheduled)
         }
     }
     @Synchronized fun testNotification(adhan: Boolean) {
@@ -103,12 +124,14 @@ class NajwaRuntime(private val context: Context,private val clock: ()->Instant =
                 SessionState.RESTORED->"استُعيد الرنين"
                 SessionState.USER_OVERRIDE->"احتُفظ بوضع الرنين الحالي"
                 SessionState.PERMISSION_REVOKED->"إذن تغيير الرنين غير متاح"
-                SessionState.RESTORE_FAILED,SessionState.INTERRUPTED,SessionState.PREPARED->"تحتاج استعادة الرنين إلى مراجعة"
+                SessionState.RESTORE_FAILED,SessionState.INTERRUPTED,SessionState.PREPARED,SessionState.APPLYING->"تحتاج استعادة الرنين إلى مراجعة"
                 else->"لم تبدأ جلسة جديدة؛ تحقق من التفعيل ووضع الهاتف"
             }
             "$label · $result"
         }
-        diagnostic.write(JSONObject().put("text","$text · الموعد ${displayTime(tasks.first().at,preferences)} · الاستلام ${displayTime(now,preferences)}"))
+        val line="$text · الموعد ${displayTime(tasks.first().at,preferences)} · الاستلام ${displayTime(now,preferences)}"
+        dispatchText=line
+        diagnostic.write(JSONObject().put("text",line))
     }
     private fun dispatch(tasks: List<ScheduledPrayer>,p: Preferences,test: Boolean=false) {
         val delivery=mutableMapOf<String,String>()
@@ -126,7 +149,7 @@ class NajwaRuntime(private val context: Context,private val clock: ()->Instant =
         record(tasks,clock(),delivery)
         if(tasks.isNotEmpty())PrayerWidget.updateAll(context)
     }
-    private fun reschedule(incomingAt: Long?=null,allowRinger: Boolean=true) {
+    private fun reschedule(incomingAt: Long?=null,allowRinger: Boolean=true,refreshAlarms: Boolean=false) {
         nextScheduled=null
         nextNotification=null
         if(!alarms.exactAccess) {alarms.prayers(emptyList());return}
@@ -140,7 +163,9 @@ class NajwaRuntime(private val context: Context,private val clock: ()->Instant =
         // make recovery idempotent if the process stops between these two operations.
         attempt("تعذّر تنفيذ موعد الصلاة") {dispatch(due,preferences)}
         val future=tasks.filter {it.at>now}
-        if(attempt("تعذّر إعداد مواعيد الصلاة") {alarms.prayers(future)}) {
+        val window=future.filter {it.at<=now.plusSeconds(86_400)}
+        val planned=window.ifEmpty { nextPrayers(future,now) }
+        if(attempt("تعذّر إعداد مواعيد الصلاة") {alarms.prayers(planned,refreshAlarms)}) {
             nextScheduled=future.firstOrNull()
             val available=mutableMapOf<PrayerAction,Boolean>()
             nextNotification=future.firstOrNull {task->
@@ -163,10 +188,17 @@ class NajwaRuntime(private val context: Context,private val clock: ()->Instant =
             else attempt("تعذّرت مراجعة الرنين") {sessions.reconcile()}
         } else if(action=="org.najwa.restore") {
             attempt("تعذّر تأجيل استعادة الرنين") {
-                val active=session()?.takeIf {it.id==id && it.state==SessionState.ACTIVE}
-                if(active!=null && at==active.deadline && alarms.exactAccess)
-                    alarms.schedule(id,clock().plusSeconds(30).toEpochMilli())
+                val active=session()?.takeIf {it.id==id && it.state in listOf(SessionState.ACTIVE,SessionState.APPLYING)}
+                if(active!=null && at==active.deadline && alarms.exactAccess) {
+                    val now=clock()
+                    // One quick retry, then space attempts to avoid frequent wakeups.
+                    val delay=if(now.toEpochMilli()<=active.deadline)30L else 300L
+                    alarms.deferRestore(id,active.deadline,now.plusSeconds(delay).toEpochMilli())
+                }
             }
+        }
+        if(!allowRinger && action=="org.najwa.prayer") {
+            notice=context.prayerLanguage().getString(org.najwa.app.R.string.system_background_unavailable)
         }
         if(action=="org.najwa.trial" && available && allowRinger)attempt("تعذّر الاختبار المؤجل") {
             val event=alarms.trialEvent()

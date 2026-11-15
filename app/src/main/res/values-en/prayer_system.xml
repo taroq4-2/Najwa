@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="city_unconfirmed">Confirm your city to see prayer times for your location.</string>
+    <string name="system_adhan">Adhan</string>
+    <string name="system_iqama">Iqama</string>
+    <string name="system_friday">Friday prayer</string>
+    <string name="system_friday_title">Friday prayer reminder</string>
+    <string name="system_adhan_title">Time for %1$s adhan</string>
+    <string name="system_iqama_title">Time for %1$s iqama</string>
+    <string name="system_adhan_test">Adhan test</string>
+    <string name="system_iqama_test">Iqama test</string>
+    <string name="system_next">Next prayer</string>
+    <string name="system_iqama_remaining">Time until iqama</string>
+    <string name="system_to_iqama">Until iqama</string>
+    <string name="system_to_adhan">Until adhan</string>
+    <string name="system_unavailable">Unavailable</string>
+    <string name="system_check_calculation">Check calculation settings</string>
+    <string name="system_brand">Najwa</string>
+    <string name="system_signature">Prayer first. Noise can wait.</string>
+    <string name="system_private_alert">You have a prayer reminder</string>
+    <string name="system_friday_detail">Get ready for Friday prayer. Check your mosque for the sermon and prayer times.</string>
+    <string name="system_iqama_detail">Based on your iqama settings</string>
+    <string name="system_refresh">Refresh</string>
+    <string name="system_execution">Prayer mode</string>
+    <string name="system_execution_detail">Applying your quiet period or restoring the ringer</string>
+    <string name="system_minutes_after">Iqama in %1$d minutes</string>
+    <string name="system_hijri_format">%1$s AH</string>
+    <string name="system_clock_required">Prayer alerts and automatic silence are paused until you allow exact alarms.</string>
+    <string name="system_background_unavailable">Android blocked the ringer service at the last scheduled time. Check the ringer status in Najwa.</string>
+    <string name="trial_title">Adhan and silence test</string>
+    <string name="trial_description">Adhan in 30 seconds, silence or vibration 20 seconds later, iqama after a minute, and ringer restoration five minutes after adhan.</string>
+    <string name="trial_start">Schedule a test</string>
+    <string name="trial_scheduled">Test scheduled. You can lock your screen now. The adhan starts in 30 seconds.</string>
+    <string name="trial_existing_schedule">A quiet session or test is running, or a prayer is due soon. Wait for it to finish and try again.</string>
+    <string name="trial_permissions_required">Allow exact alarms and ringer control, and enable the adhan and iqama notification channels before testing.</string>
+    <string name="app_language_label">App language</string>
+    <string name="city_choose_country">Choose a country or territory</string>
+    <string name="city_search_country">Search countries and territories</string>
+    <string name="city_search_place">Search for your city</string>
+    <string name="city_unavailable_zone">Your phone does not have this city’s time zone. Enter a custom location or choose another city.</string>
+    <string name="city_search_limit">Showing the first 100 results. Enter a more specific name to see other options.</string>
+</resources>

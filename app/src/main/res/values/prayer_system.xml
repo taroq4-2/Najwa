@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="city_unconfirmed">لم تؤكّد مدينتك بعد. قد لا تطابق المواقيت المعروضة موقعك.</string>
+    <string name="system_adhan">الأذان</string>
+    <string name="system_iqama">الإقامة</string>
+    <string name="system_friday">الجمعة</string>
+    <string name="system_friday_title">تذكير بصلاة الجمعة</string>
+    <string name="system_adhan_title">حان وقت أذان %1$s</string>
+    <string name="system_iqama_title">حان وقت إقامة %1$s</string>
+    <string name="system_adhan_test">تجربة تنبيه الأذان</string>
+    <string name="system_iqama_test">تجربة تذكير الإقامة</string>
+    <string name="system_next">الصلاة القادمة</string>
+    <string name="system_iqama_remaining">المتبقي على الإقامة</string>
+    <string name="system_to_iqama">إلى الإقامة</string>
+    <string name="system_to_adhan">إلى الأذان</string>
+    <string name="system_unavailable">غير متاح</string>
+    <string name="system_check_calculation">راجع إعدادات الحساب</string>
+    <string name="system_brand">نجوى</string>
+    <string name="system_signature">صلاتك أولاً، وضجيجك لاحقاً</string>
+    <string name="system_private_alert">لديك تنبيه للصلاة</string>
+    <string name="system_friday_detail">استعد لصلاة الجمعة. يُحدّد كل مسجد موعد الخطبة والصلاة.</string>
+    <string name="system_iqama_detail">حسب موعد الإقامة المحدد</string>
+    <string name="system_refresh">تحديث</string>
+    <string name="system_execution">تنفيذ وضع الصلاة</string>
+    <string name="system_execution_detail">تنفيذ موعد الصمت أو استعادة الرنين الذي اخترته</string>
+    <string name="system_minutes_after">الإقامة بعد %1$d دقيقة</string>
+    <string name="system_hijri_format">%1$s هـ</string>
+    <string name="system_clock_required">التنبيهات والصمت التلقائي معلّقان حتى تسمح للمنبّهات الدقيقة.</string>
+    <string name="system_background_unavailable">لم يسمح أندرويد بتشغيل خدمة تغيير الرنين في الموعد الأخير. راجع حالة الرنين في التطبيق.</string>
+    <string name="trial_title">اختبار الأذان والصمت</string>
+    <string name="trial_description">أذان بعد 30 ثانية، صمت أو اهتزاز بعده بـ20 ثانية، إقامة بعد دقيقة، ثم عودة الرنين بعد 5 دقائق من الأذان.</string>
+    <string name="trial_start">جدولة اختبار الآن</string>
+    <string name="trial_scheduled">جُدول الاختبار. يمكنك قفل الشاشة الآن. يبدأ الأذان بعد 30 ثانية.</string>
+    <string name="trial_existing_schedule">هناك جلسة صمت أو اختبار قائم، أو موعد صلاة خلال الدقائق القادمة. انتظر انتهاءه قبل إعادة المحاولة.</string>
+    <string name="trial_permissions_required">للاختبار، اسمح بالمنبّهات الدقيقة والتحكم بالرنين، وتأكد من تفعيل قناتي الأذان والإقامة.</string>
+    <string name="app_language_label">لغة التطبيق</string>
+    <string name="city_choose_country">اختر دولة أو إقليمًا</string>
+    <string name="city_search_country">ابحث عن دولة أو إقليم</string>
+    <string name="city_search_place">ابحث عن مدينتك</string>
+    <string name="city_unavailable_zone">المنطقة الزمنية لهذه المدينة غير متاحة على هاتفك. أدخل موقعًا مخصصًا أو اختر مدينة أخرى.</string>
+    <string name="city_search_limit">أول 100 نتيجة. اكتب اسمًا أدق لعرض خيارات أخرى.</string>
+</resources>

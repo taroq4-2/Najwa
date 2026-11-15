@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="contact_no_email_app">کوئی ای میل ایپ نہیں ملی۔ پتہ کاپی کرکے اپنی پسند کی ای میل سروس استعمال کریں۔</string>
+    <string name="contact_email_copied">ای میل پتہ کاپی ہوگیا۔</string>
+    <string name="contact_copy_failed">کاپی نہیں ہوسکا۔ ای میل: %1$s</string>
+    <string name="brand_version">نجویٰ · %1$s</string>
+    <string name="app_version_label">ورژن %1$s</string>
+    <string name="contact_character_count">%2$d میں سے %1$d حروف</string>
+    <string name="contact_privacy_email">رازداری سے متعلق سوالات: %1$s</string>
+    <string name="widget_pin_complete">ہوم اسکرین کے مکالمے میں ویجٹ شامل کرنے کا عمل مکمل کریں۔</string>
+    <string name="widget_pin_manual">ہوم اسکرین کی خالی جگہ کو دبائے رکھیں، ویجٹس منتخب کریں، نجویٰ تلاش کریں اور ویجٹ کو اسکرین پر کھینچیں۔</string>
+    <string name="widget_transparency_label">ویجٹ کے پس منظر کی شفافیت</string>
+    <string name="widget_transparency_value">%1$d فیصد شفافیت</string>
+    <string name="widget_transparency_display">پس منظر کی شفافیت: %1$d٪</string>
+    <string name="sound_saved">%1$s محفوظ ہوگیا</string>
+    <string name="sound_import_failed">آواز محفوظ نہیں ہوسکی۔ 32 میگابائٹ تک کی درست آڈیو فائل منتخب کریں اور فون کی ترتیبات میں اذان کی اطلاع کا چینل فعال کریں۔</string>
+    <string name="sound_picker_failed">فائل منتخب کرنے کی سہولت نہیں کھل سکی۔ یقینی بنائیں کہ فون پر فائل مینیجر موجود ہے۔</string>
+    <string name="sound_reset_done">الارم کی طے شدہ آواز بحال ہوگئی۔</string>
+    <string name="sound_reset_failed">آواز تبدیل نہیں ہوسکی۔ اذان کی اطلاعات کی ترتیبات دیکھیں اور دوبارہ کوشش کریں۔</string>
+    <string name="sound_unavailable_title">محفوظ آواز دوبارہ منتخب کریں</string>
+    <string name="sound_unavailable_detail">محفوظ آواز کا انتخاب پڑھا نہیں جاسکا۔ فائل دوبارہ منتخب کریں یا الارم کی طے شدہ آواز بحال کریں۔ انتخاب تک اذان کی آواز بند رہے گی۔</string>
+    <string name="sound_phone_silent">فون کی ترتیبات کے مطابق خاموش</string>
+    <string name="sound_phone_changed">فون کی ترتیبات میں آواز تبدیل کی گئی</string>
+    <string name="sound_phone_default">فون پر منتخب کردہ اذان کی آواز</string>
+    <string name="sound_alarm_default">الارم کی طے شدہ آواز</string>
+</resources>

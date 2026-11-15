@@ -10,11 +10,14 @@ android {
         applicationId = "org.najwa.app"
         minSdk = 26
         targetSdk = if (providers.gradleProperty("previewSdk").orNull == "35") 35 else 36
-        versionCode = 107
-        versionName = "1.1.0"
+        versionCode = 111
+        versionName = "1.2.1"
+        buildConfigField("boolean","TRIAL_BUILD","false")
+        manifestPlaceholders["najwaLabel"] = "@string/system_brand"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { compose = true; buildConfig = true }
+    bundle.language.enableSplit = false
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     kotlinOptions { jvmTarget = "17" }
     signingConfigs {
@@ -29,8 +32,18 @@ android {
         }
     }
     buildTypes {
+        debug {
+            if(providers.gradleProperty("trialApk").orNull=="true") {
+                applicationIdSuffix=".trial"
+                versionNameSuffix="-trial"
+                manifestPlaceholders["najwaLabel"]="نجوى (تجربة)"
+                buildConfigField("boolean","TRIAL_BUILD","true")
+            }
+        }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
             isDebuggable = false
             if(!System.getenv("NAJWA_KEYSTORE").isNullOrBlank())signingConfig=signingConfigs.getByName("official")
         }
@@ -44,7 +57,7 @@ android {
 
 tasks.register("releaseDependencyInventory") {
     doLast {
-        val target=rootProject.file("docs/release-review/runtime-dependencies.tsv")
+        val target=layout.buildDirectory.file("reports/runtime-dependencies.tsv").get().asFile
         target.parentFile.mkdirs()
         val artifacts=configurations.getByName("releaseRuntimeClasspath").resolvedConfiguration.resolvedArtifacts
         target.writeText("coordinate\tartifact\n"+artifacts.sortedBy {it.moduleVersion.id.toString()}.joinToString("\n") {"${it.moduleVersion.id}\t${it.file.name}"}+"\n")

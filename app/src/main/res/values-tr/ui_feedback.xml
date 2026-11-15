@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="contact_no_email_app">E-posta uygulaması bulunamadı. Adresi kopyalayıp tercih ettiğiniz e-posta hizmetini kullanın.</string>
+    <string name="contact_email_copied">E-posta adresi kopyalandı.</string>
+    <string name="contact_copy_failed">Kopyalanamadı. E-posta: %1$s</string>
+    <string name="brand_version">Najwa · %1$s</string>
+    <string name="app_version_label">Sürüm %1$s</string>
+    <string name="contact_character_count">%2$d karakterden %1$d</string>
+    <string name="contact_privacy_email">Gizlilik soruları: %1$s</string>
+    <string name="widget_pin_complete">Ana ekran iletişim kutusunda widget eklemeyi tamamlayın.</string>
+    <string name="widget_pin_manual">Ana ekranın boş bir alanına basılı tutun, Widget seçeneğini açın, Najwa uygulamasını bulun ve widgetı ekrana sürükleyin.</string>
+    <string name="widget_transparency_label">Widget arka plan saydamlığı</string>
+    <string name="widget_transparency_value">Yüzde %1$d saydamlık</string>
+    <string name="widget_transparency_display">Arka plan saydamlığı: %1$d%%</string>
+    <string name="sound_saved">%1$s kaydedildi</string>
+    <string name="sound_import_failed">Ses kaydedilemedi. En fazla 32 MB boyutunda geçerli bir ses dosyası seçin ve telefon ayarlarında ezan bildirim kanalının açık olduğundan emin olun.</string>
+    <string name="sound_picker_failed">Dosya seçici açılamadı. Telefonda bir dosya yöneticisi bulunduğundan emin olun.</string>
+    <string name="sound_reset_done">Varsayılan alarm sesi geri yüklendi.</string>
+    <string name="sound_reset_failed">Ses değiştirilemedi. Ezan bildirimi ayarlarını kontrol edip tekrar deneyin.</string>
+    <string name="sound_unavailable_title">Kayıtlı sesi yeniden seçin</string>
+    <string name="sound_unavailable_detail">Kayıtlı ses seçimi okunamadı. Dosyayı yeniden seçin veya varsayılan alarm sesini geri yükleyin. Siz seçim yapana kadar ezan sesi kapalı kalır.</string>
+    <string name="sound_phone_silent">Telefon ayarlarına göre sessiz</string>
+    <string name="sound_phone_changed">Ses telefon ayarlarından değiştirildi</string>
+    <string name="sound_phone_default">Telefonda seçilen ezan sesi</string>
+    <string name="sound_alarm_default">Varsayılan alarm sesi</string>
+</resources>

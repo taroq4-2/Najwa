@@ -70,7 +70,7 @@ class AdhanSounds(private val context: Context,private val validate: (File)->Uni
         // Android freezes a channel's sound after creation. A user's explicit new
         // selection gets a new channel while keeping the current visibility settings.
         val id="adhan_selected_${UUID.randomUUID()}"
-        val channel=NotificationChannel(id,"تنبيه الأذان",old?.importance ?: NotificationManager.IMPORTANCE_HIGH).apply {
+        val channel=NotificationChannel(id,context.prayerLanguage().getString(org.najwa.app.R.string.system_adhan),old?.importance ?: NotificationManager.IMPORTANCE_HIGH).apply {
             description="صوت الأذان: $name"
             setSound(uri,AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build())
             enableVibration(old?.shouldVibrate() ?: false)

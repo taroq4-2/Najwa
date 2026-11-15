@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="city_unconfirmed">Konfirmasi kota Anda untuk melihat waktu salat setempat.</string>
+    <string name="system_adhan">Azan</string>
+    <string name="system_iqama">Iqamah</string>
+    <string name="system_friday">Salat Jumat</string>
+    <string name="system_friday_title">Pengingat salat Jumat</string>
+    <string name="system_adhan_title">Waktunya azan %1$s</string>
+    <string name="system_iqama_title">Waktunya iqamah %1$s</string>
+    <string name="system_adhan_test">Uji azan</string>
+    <string name="system_iqama_test">Uji iqamah</string>
+    <string name="system_next">Salat berikutnya</string>
+    <string name="system_iqama_remaining">Waktu menuju iqamah</string>
+    <string name="system_to_iqama">Hingga iqamah</string>
+    <string name="system_to_adhan">Hingga azan</string>
+    <string name="system_unavailable">Tidak tersedia</string>
+    <string name="system_check_calculation">Periksa pengaturan perhitungan</string>
+    <string name="system_brand">Najwa</string>
+    <string name="system_signature">Utamakan salat. Suara bisa menunggu.</string>
+    <string name="system_private_alert">Anda memiliki pengingat salat</string>
+    <string name="system_friday_detail">Bersiaplah untuk salat Jumat. Periksa jadwal khotbah dan salat di masjid Anda.</string>
+    <string name="system_iqama_detail">Sesuai pengaturan iqamah Anda</string>
+    <string name="system_refresh">Perbarui</string>
+    <string name="system_execution">Mode salat</string>
+    <string name="system_execution_detail">Mengaktifkan mode senyap atau mengembalikan mode dering</string>
+    <string name="system_minutes_after">Iqamah dalam %1$d menit</string>
+    <string name="system_hijri_format">%1$s H</string>
+    <string name="system_clock_required">Izinkan alarm presisi agar pengingat salat dan mode senyap otomatis berfungsi.</string>
+    <string name="system_background_unavailable">Android memblokir layanan pengaturan dering pada jadwal terakhir. Periksa status dering di Najwa.</string>
+    <string name="trial_title">Uji azan dan mode senyap</string>
+    <string name="trial_description">Azan dalam 30 detik. Mode senyap atau getar aktif 20 detik setelah azan, iqamah setelah 1 menit, dan mode dering kembali setelah 5 menit.</string>
+    <string name="trial_start">Jadwalkan uji coba</string>
+    <string name="trial_scheduled">Uji coba dijadwalkan. Kunci layar jika diinginkan. Azan dimulai dalam 30 detik.</string>
+    <string name="trial_existing_schedule">Saat sesi yang tenang atau ujian berjalan, atau doa akan segera dimulai.</string>
+    <string name="trial_permissions_required">Memungkinkan alarm yang tepat dan kontrol lonceng, dan mengaktifkan saluran pemberitahuan azan dan iqamah sebelum pengujian.</string>
+    <string name="app_language_label">Bahasa aplikasi</string>
+    <string name="city_choose_country">Pilih negara atau wilayah</string>
+    <string name="city_search_country">Cari negara atau wilayah</string>
+    <string name="city_search_place">Cari kota Anda</string>
+    <string name="city_unavailable_zone">Zona waktu kota ini tidak tersedia di ponsel. Pilih kota lain atau masukkan lokasi sendiri.</string>
+    <string name="city_search_limit">100 hasil pertama ditampilkan. Ketik nama yang lebih spesifik untuk melihat hasil lain.</string>
+</resources>

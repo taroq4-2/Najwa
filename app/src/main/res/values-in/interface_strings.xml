@@ -1,0 +1,227 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string-array name="interface_labels">
+        <item>Peringatan suara untuk doa yang dipilih</item>
+        <item>Personalize peringatan dengan doa</item>
+        <item>Pilih azan dan iqamah untuk setiap shalat.</item>
+        <item>Pilihan berlaku ketika tombol peringatan utama di atas diaktifkan.</item>
+        <item>Peringatan terjadwal berikutnya</item>
+        <item>Tidak ada alarm siap sekarang</item>
+        <item>Detail layar kunci</item>
+        <item>Tunjukkan kota dan rincian doa ketika telepon memungkinkan</item>
+        <item>Status peringatan dan dukungan</item>
+        <item>Salin ringkasan status pada perangkat</item>
+        <item>Izin pemberitahuan</item>
+        <item>Alarm yang tepat</item>
+        <item>Tersedia</item>
+        <item>Diblokir</item>
+        <item>Tidak ada riwayat pengiriman terbaru</item>
+        <item>Laporan status salinan</item>
+        <item>Laporan disalin</item>
+        <item>Pilih opsi</item>
+        <item>Akses cincin</item>
+        <item>Pengaturan</item>
+        <item>Semua yang Anda butuhkan untuk rutinitas doa Anda</item>
+        <item>Doa dan mode diam</item>
+        <item>Waktu salat dan kota</item>
+        <item>Notifikasi salat</item>
+        <item>Azan, iqamah dan Jumat · Suara dan waktu</item>
+        <item>Mode senyap saat salat</item>
+        <item>Pada · Tentukan durasi setiap doa</item>
+        <item>Aktivasi, durasi dan pemulihan ring</item>
+        <item>Pengalaman Anda Najwa</item>
+        <item>Tampilan</item>
+        <item>Widget layar utama</item>
+        <item>Ukuran yang fleksibel · Waktu doa dalam sekelip mata</item>
+        <item>Bantuan dan informasi</item>
+        <item>Informasi aplikasi</item>
+        <item>Tentang · Kontak · Privasi</item>
+        <item>Kembali ke pengaturan</item>
+        <item>Tentukan lokasi dan metode perhitungan</item>
+        <item>Kota</item>
+        <item>Waktu doa menggunakan kota dan zona waktu yang dipilih</item>
+        <item>Ganti kota</item>
+        <item>Waktu salat</item>
+        <item>Metode perhitungan</item>
+        <item>Isha adalah 90 menit setelah matahari terbenam, atau 120 menit selama Ramazan menurut kalender Hijri yang dipilih.</item>
+        <item>Sudut Fajr</item>
+        <item>Sudut Isha</item>
+        <item>Masukkan dua sudut antara 1 dan 30 derajat.</item>
+        <item>Menghemat sudut</item>
+        <item>Perhitungan Asr</item>
+        <item>Hanafi · Panjang bayangan ganda</item>
+        <item>Standar · Panjang bayangan tunggal</item>
+        <item>Sembunyikan pengaturan lanjutan</item>
+        <item>Pengaturan perhitungan lanjutan</item>
+        <item>Perkiraan kegelapan di garis lintang tinggi</item>
+        <item>Jika matahari terbit atau terbenam tidak tersedia, Najwa menjelaskan masalah perhitungan dan menghentikan penjadwalan mode diam.</item>
+        <item>Perbaiki tampilan agar lebih mudah dibaca</item>
+        <item>Tema aplikasi</item>
+        <item>Pilih tema atau ikuti pengaturan telepon Anda</item>
+        <item>Format waktu</item>
+        <item>24 jam</item>
+        <item>12 jam</item>
+        <item>Penghitungan mundur</item>
+        <item>Idul Fitri</item>
+        <item>Tampilkan waktu sampai iqamah di layar utama dan widget setelah azan</item>
+        <item>Hijau sampai azan dan emas sampai iqamah.</item>
+        <item>Lokasi khusus</item>
+        <item>Pilih kota Anda</item>
+        <item>Negara atau wilayah</item>
+        <item>Pencarian dalam bahasa Arab atau Inggris</item>
+        <item>Tidak bisa memuat kota. Anda dapat memasukkan lokasi khusus.</item>
+        <item>Memuat kota…</item>
+        <item>Coba nama yang berbeda atau masukkan lokasi khusus.</item>
+        <item>Kota saya hilang · Masukkan secara manual</item>
+        <item>Nama lokasi</item>
+        <item>Latitude · -90 sampai 90</item>
+        <item>· -180 sampai 180</item>
+        <item>Zona waktu</item>
+        <item>Contoh: Asia/Riyadh</item>
+        <item>Periksa nama, koordinat dan zona waktu.</item>
+        <item>Kembali ke daftar kota</item>
+        <item>Simpan lokasi</item>
+        <item>Dekat</item>
+        <item>Peringatan Doa</item>
+        <item>Azan, iqamah dan peringatan hari Jumat</item>
+        <item>Tampilan pemberitahuan</item>
+        <item>Iqamah, Jumat dan layar kunci</item>
+        <item>Pengaturan pemberitahuan Iqamah</item>
+        <item>Pengaturan pemberitahuan hari Jumat</item>
+        <item>Banner dan peringatan layar kunci mengikuti pengaturan telepon Anda.</item>
+        <item>Mengaktifkan peringatan dalam pengaturan telepon</item>
+        <item>Pemberitahuan Najwa tidak aktif di pengaturan telepon Anda.</item>
+        <item>Buka pengaturan pemberitahuan Najwa</item>
+        <item>Biarkan alarm yang tepat agar pengingat doa tiba tepat waktu.</item>
+        <item>Buka pengaturan alarm yang tepat</item>
+        <item>Pemberitahuan</item>
+        <item>Peringatan Azan</item>
+        <item>Peringatan suara untuk lima doa harian</item>
+        <item>Pengingat Iqamah</item>
+        <item>Peringatan visual tanpa suara atau getaran</item>
+        <item>Alarm bebas dari mode silent otomatis. Sunrise tidak termasuk.</item>
+        <item>Ponsel Anda mungkin menampilkan ikon alarm dan waktu peringatan doa berikutnya.</item>
+        <item>Doa Jumat</item>
+        <item>Peringatan mingguan sebelum waktu Dhuhr kota Anda dihitung</item>
+        <item>Peringatan hari Jumat</item>
+        <item>Berapa lama sebelum Dhuhr</item>
+        <item>Khutbah dan waktu shalat dapat bervariasi dari masjid ke masjid.</item>
+        <item>Iqamah setelah azan</item>
+        <item>(Tentukanlah waktu untuk setiap shalat yang ada di masjidmu) yakni salat hari Jum\'at atau salat malam.</item>
+        <item>Tidak bisa membuka pengaturan, buka Najwa dari pengaturan teleponmu.</item>
+        <item>Kembali ke informasi aplikasi</item>
+        <item>Pelajari tentang Najwa, hubungi kami dan meninjau privasi Anda</item>
+        <item>Tentang kita</item>
+        <item>Tentang Najwa dan identitasnya</item>
+        <item>Hubungi kami</item>
+        <item>Kebijakan Privasi</item>
+        <item>Data Anda tetap di perangkat Anda</item>
+        <item>Panduan Pengguna</item>
+        <item>Memulai dan mengatur peringatan</item>
+        <item>Pilih kota dan metode perhitungan Anda dan memeriksa waktu dengan kalender lokal Anda.</item>
+        <item>Noto Sans Arab dilisensikan di bawah SIL OFL. Data kota GeoNames dilisensikan di bawah CC BY 4.0.</item>
+        <item>Najwa · Waktu doa dan kedamaian di satu tempat</item>
+        <item>Tentang Najwa</item>
+        <item>Doa dulu, bising bisa menunggu.</item>
+        <item>Najwa membantu Anda mengikuti waktu shalat, menerima peringatan azan dan iqamah, dan membungkam ponsel sebelum mengembalikan mode pencakar suara sebelumnya.</item>
+        <item>Najwa menghitung waktu doa di perangkat Anda menggunakan kota dan metode yang Anda pilih.</item>
+        <item>Dirancang dan dikembangkan oleh os73.com</item>
+        <item>Buatlah milikmu.</item>
+        <item>Periksa waktu dengan kalender lokal Anda dan tetapkan keterlambatan iqamah sesuai masjid Anda.</item>
+        <item>Noto Sans Arabic dilisensikan di bawah SIL OFL. Komponen AndroidX dan Kotlin menggunakan Apache 2.0.</item>
+        <item>Kami menyambut umpan balik dan ide Anda</item>
+        <item>Masalah teknis</item>
+        <item>Saran</item>
+        <item>Pertanyaan</item>
+        <item>Berpesan pada tim Najwa</item>
+        <item>Jenis permintaan</item>
+        <item>Model telepon dan versi sistem</item>
+        <item>Detail pesan</item>
+        <item>Masukkan pesanmu.</item>
+        <item>Buka di email</item>
+        <item>Periksa dan kirimkan pesan yang sudah disiapkan dari aplikasi email Anda.</item>
+        <item>Salin alamat email</item>
+        <item>Data Anda tetap di perangkat Anda</item>
+        <item>Apa yang kami simpan secara lokal</item>
+        <item>Kami menyimpan kota atau koordinat Anda, metode perhitungan, penampilan, dan kegemaran diam dan peringatan. kami juga menyimpan sejarah lokal terbatas untuk pemulihan ringer, deduplikasi peringatan dan diagnostik jadwal.</item>
+        <item>Aplikasi ini tidak meminta lokasi GPS atau membaca kontak, pesan atau pemberitahuan aplikasi lainnya.</item>
+        <item>Saat Anda memilih azan audio, Najwa menyimpan salinan pribadi dan membagikannya dengan pemutar pemberitahuan Android.</item>
+        <item>Konektivitas dan berbagi</item>
+        <item>Najwa tidak menggunakan izin internet, akun, iklan atau pelacakan. Data doa dan preferensi tetap di perangkat Anda.</item>
+        <item>Kontak membuka aplikasi email yang Anda pilih. Anda memilih apa yang akan dikirim. Penyedia email Anda menangani pesan.</item>
+        <item>Mengapa kita meminta izin</item>
+        <item>Ringer access memungkinkan Najwa mengatur dan mengembalikan mode silent. Alarm yang tepat peringatan jadwal. Akses pemberitahuan menampilkan mereka. Akses Startup memulihkan jadwal setelah reboot.</item>
+        <item>Widget menunjukkan kota dan waktu doa Anda di layar utama Anda dan tidak memerlukan akses data tambahan.</item>
+        <item>Kontrol dan penghapusan</item>
+        <item>Anda dapat menonaktifkan mode diam atau peringatan dan membatalkan izin. Hapus data aplikasi atau menghapus Najwa menghapus data lokal.</item>
+        <item>Widget Najwa</item>
+        <item>Waktu doa di layar rumah Anda</item>
+        <item>Penampilan dan transparansi</item>
+        <item>Latar belakang halus dengan hitungan mundur yang dapat dibaca</item>
+        <item>Otomatis menyesuaikan dengan wallpaper ketika tersedia dan sebaliknya mengikuti tema sistem.</item>
+        <item>Hanya latar belakang yang transparan sehingga teks tetap dapat dibaca pada kertas dinding terang dan gelap.</item>
+        <item>Pratinjau Widget</item>
+        <item>Malam</item>
+        <item>Cahaya</item>
+        <item>Warna</item>
+        <item>Mini</item>
+        <item>Kecil</item>
+        <item>lebar</item>
+        <item>Tinggi</item>
+        <item>Besar</item>
+        <item>Ringan</item>
+        <item>Pratinjau widget pada sampel wallpaper. Ukur ulang dengan menyeret tepi.</item>
+        <item>Tambahkan ke layar utama</item>
+        <item>Cara menambahkan widget</item>
+        <item>Ketuk Tambahkan dan konfirmasi. Jika peluncur Anda tidak mendukung ini, tekan dan tahan layar utama, buka Widget dan temukan Najwa.</item>
+        <item>Widget menggunakan metode kota dan perhitungan Anda. Ketuknya untuk membuka Najwa, ketuk  ⁇  untuk menyegarkan atau seret pinggirannya untuk mengubah ukuran.</item>
+        <item>Ponsel Anda mungkin menunda pembaruan widget saat tidur. Bangun layar atau refresh widget untuk melihat waktu saat ini.</item>
+        <item>Suara Azan</item>
+        <item>Pilih rekaman dari ponsel Anda</item>
+        <item>Memverifikasi dan menyimpan file...</item>
+        <item>Pilih file audio azan</item>
+        <item>Memulihkan suara alarm default</item>
+        <item>Buka pengaturan suara azan</item>
+        <item>MP3, M4A, WAV dan format lain yang didukung oleh ponsel Anda, hingga 32 MB. Najwa menyimpan salinan jika file asli dipindahkan.</item>
+        <item>Alarm menggunakan volume alarm. Durasi pemutaran dan Jangan Ganggu mengikuti pengaturan Android.</item>
+        <item>Memilih suara meninggalkan tombol peringatan tidak berubah.</item>
+        <item>Diam menurut pengaturan telepon</item>
+        <item>Suara berubah dalam pengaturan telepon</item>
+        <item>Memulihkan durasi default</item>
+        <item>Menit setelah azan</item>
+        <item>Simpan</item>
+        <item>Batalkan</item>
+        <item>Waktu doa yang akan datang</item>
+        <item>Sebelumnya</item>
+        <item>Hari ini</item>
+        <item>Selanjutnya</item>
+        <item>Modus diam otomatis</item>
+        <item>Diam selama shalat, kemudian mengembalikan mode ringtone sebelumnya</item>
+        <item>Aktivasi</item>
+        <item>Modus diam otomatis diaktifkan</item>
+        <item>Aktifkan mode diam otomatis</item>
+        <item>Perangkat ini tidak mendukung perubahan ring</item>
+        <item>Berikan izin untuk memulai</item>
+        <item>Pilih setidaknya satu doa</item>
+        <item>Dimulai 20 detik setelah azan. Durasi diukur dari azan</item>
+        <item>Ponsel Anda mungkin menampilkan ikon alarm dan doa yang dijadwalkan berikutnya.</item>
+        <item>Mode diam aktif</item>
+        <item>Periksa pemulihan ringtone</item>
+        <item>Periksa suara telepon Anda. Kembali ke mode sebelumnya jika Anda tidak mengubahnya sendiri.</item>
+        <item>Kembalikan sekarang</item>
+        <item>Doa dan durasi diam</item>
+        <item>Pilihlah setiap doa dan tentukan durasi dari azan.</item>
+        <item>Modus telepon selama doa</item>
+        <item>Alarm dan volume media tetap sama.</item>
+        <item>Diam</item>
+        <item>Bergetar</item>
+        <item>Normal</item>
+        <item>Sistem</item>
+        <item>Kegelapan</item>
+        <item>Cahaya</item>
+        <item>Otomatis</item>
+        <item>Di tengah malam</item>
+        <item>Satu ketujuh malam</item>
+        <item>Braksi sudut kegelapan</item>
+    </string-array>
+</resources>

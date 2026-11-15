@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="city_unconfirmed">स्थानीय नमाज़ के समय देखने के लिए अपना शहर पक्का करें।</string>
+    <string name="system_adhan">अज़ान</string>
+    <string name="system_iqama">इक़ामत</string>
+    <string name="system_friday">जुमे की नमाज़</string>
+    <string name="system_friday_title">जुमे की नमाज़ की याद</string>
+    <string name="system_adhan_title">%1$s की अज़ान का समय</string>
+    <string name="system_iqama_title">%1$s की इक़ामत का समय</string>
+    <string name="system_adhan_test">अज़ान की जाँच</string>
+    <string name="system_iqama_test">इक़ामत की जाँच</string>
+    <string name="system_next">अगली नमाज़</string>
+    <string name="system_iqama_remaining">इक़ामत तक बाकी समय</string>
+    <string name="system_to_iqama">इक़ामत तक</string>
+    <string name="system_to_adhan">अज़ान तक</string>
+    <string name="system_unavailable">उपलब्ध नहीं</string>
+    <string name="system_check_calculation">गणना की सेटिंग देखें</string>
+    <string name="system_brand">नजवा</string>
+    <string name="system_signature">नमाज़ पहले, शोर बाद में।</string>
+    <string name="system_private_alert">आपके लिए नमाज़ की याद है</string>
+    <string name="system_friday_detail">जुमे की नमाज़ की तैयारी करें। ख़ुत्बे और नमाज़ का समय अपनी मस्जिद से पता करें।</string>
+    <string name="system_iqama_detail">आपकी इक़ामत की सेटिंग के अनुसार</string>
+    <string name="system_refresh">रीफ़्रेश करें</string>
+    <string name="system_execution">नमाज़ मोड</string>
+    <string name="system_execution_detail">साइलेंट मोड लगाया जा रहा है या रिंगर बहाल हो रहा है</string>
+    <string name="system_minutes_after">इक़ामत %1$d मिनट बाद</string>
+    <string name="system_hijri_format">%1$s हिजरी</string>
+    <string name="system_clock_required">नमाज़ की याद और स्वचालित साइलेंट मोड के लिए सटीक अलार्म की अनुमति दें।</string>
+    <string name="system_background_unavailable">Android ने पिछले तय समय पर रिंगर सेवा रोक दी। नजवा में रिंगर की स्थिति देखें।</string>
+    <string name="trial_title">अज़ान और साइलेंट मोड की जाँच</string>
+    <string name="trial_description">30 सेकंड बाद अज़ान होगी। अज़ान के 20 सेकंड बाद साइलेंट या वाइब्रेशन, एक मिनट बाद इक़ामत और पाँच मिनट बाद रिंगर बहाल होगा।</string>
+    <string name="trial_start">जाँच तय करें</string>
+    <string name="trial_scheduled">जाँच तय हो गई। चाहें तो स्क्रीन लॉक करें। अज़ान 30 सेकंड में शुरू होगी।</string>
+    <string name="trial_existing_schedule">एक शांत सत्र चल रहा है या परीक्षा हो रही है, या प्रार्थना होने वाली है। प्रतीक्षा करें कि यह समाप्त हो जाए और फिर से प्रयास करें।</string>
+    <string name="trial_permissions_required">सटीक अलार्म और रिंग कंट्रोल की अनुमति दें, और परीक्षण से पहले अदन और इक़ामत अधिसूचना चैनलों को सक्षम करें।</string>
+    <string name="app_language_label">ऐप की भाषा</string>
+    <string name="city_choose_country">देश या क्षेत्र चुनें</string>
+    <string name="city_search_country">देश या क्षेत्र खोजें</string>
+    <string name="city_search_place">अपना शहर खोजें</string>
+    <string name="city_unavailable_zone">इस शहर का समय क्षेत्र आपके फ़ोन में उपलब्ध नहीं है। दूसरा शहर चुनें या स्थान खुद दर्ज करें।</string>
+    <string name="city_search_limit">पहले 100 नतीजे दिख रहे हैं। दूसरे नतीजों के लिए ज़्यादा सटीक नाम लिखें।</string>
+</resources>

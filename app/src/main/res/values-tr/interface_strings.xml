@@ -1,0 +1,227 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string-array name="interface_labels">
+        <item>Seçili dualar için sesli uyarılar</item>
+        <item>Duayla uyarıları özelleştir</item>
+        <item>Her namaz için ezan ve kamet seçin.</item>
+        <item>Yukarıdaki ana uyarı anahtarları açık olduğunda seçme geçerlidir.</item>
+        <item>Sonraki planlı uyarı</item>
+        <item>Şu anda alarm yok.</item>
+        <item>Kilit ekranı detayları</item>
+        <item>Telefon izin verdiğinde şehri ve dua detaylarını göster</item>
+        <item>Alarm durumu ve destek</item>
+        <item>Cihaz durumunun özetini kopyalayın</item>
+        <item>İletişim izni</item>
+        <item>Tam alarmlar</item>
+        <item>Kullanılabilir</item>
+        <item>Engellenmiş</item>
+        <item>Son teslim tarihi yok</item>
+        <item>Kopya durumu raporu</item>
+        <item>Rapor kopyalandı</item>
+        <item>Bir seçenek seçin</item>
+        <item>Çekici erişim</item>
+        <item>Ayarlar</item>
+        <item>Dua rutininiz için ihtiyacınız olan her şey</item>
+        <item>Dua ve sessizlik</item>
+        <item>Namaz vakitleri ve şehir</item>
+        <item>Namaz bildirimleri</item>
+        <item>Ezan, kamet ve Cuma · Ses ve zamanlama</item>
+        <item>Namaz sırasında sessiz mod</item>
+        <item>• Her duanın süresini belirleyin</item>
+        <item>Aktifleştirme, süresi ve çanlı kurtarma</item>
+        <item>Najwa deneyimi .</item>
+        <item>Görünüm ve ekran</item>
+        <item>Ana ekran araç takımı</item>
+        <item>Dönüştürülebilir boyutlar · Bir bakışta dua zamanları</item>
+        <item>Yardım ve bilgi</item>
+        <item>Uygulama bilgileri</item>
+        <item>Hakkında · İletişim · Gizlilik</item>
+        <item>Ayarlara dön</item>
+        <item>Konumunuzu ve hesaplama yönteminizi ayarlayın</item>
+        <item>Şehir</item>
+        <item>Dua zamanları seçilen şehir ve saat bölgesini kullanın</item>
+        <item>Şehri değiştir</item>
+        <item>Namaz vakitleri</item>
+        <item>Hesaplama yöntemi</item>
+        <item>İsha, seçilen Hijri takvime göre güneş battıktan 90 dakika sonra veya Ramazan\'da 120 dakikadır.</item>
+        <item>Fajr açısı</item>
+        <item>İsha açısı</item>
+        <item>1 ila 30 derece arasındaki iki açıyı girin.</item>
+        <item>Kaydet açıları</item>
+        <item>Asr hesaplaması</item>
+        <item>Hanafi · Çift gölge uzunluğu</item>
+        <item>Standart · Tek gölge uzunluğu</item>
+        <item>Gelişmiş ayarları gizle</item>
+        <item>Gelişmiş hesaplama ayarları</item>
+        <item>Yüksek boyutlarda karanlık tahminleri</item>
+        <item>Güneş doğu veya batışı bulunmazsa, Najwa hesaplama sorunu açıklar ve sessiz modunda programlamayı durdurur.</item>
+        <item>Ekranı daha kolay okuyabilmek için ayarlayın</item>
+        <item>Uygulama teması</item>
+        <item>Bir tema seçin veya telefon ayarlarınızı takip edin</item>
+        <item>Zaman biçimi</item>
+        <item>24 saat</item>
+        <item>12 saat</item>
+        <item>Geri sayım</item>
+        <item>Kamet geri sayımı</item>
+        <item>Ev ekrandaki kamet zamanını ve ezan sonrası widget\'i göster</item>
+        <item>Yeşilden ezan\'a kadar ve altından kamet kadar.</item>
+        <item>Özel konum</item>
+        <item>Şehrinizi seçin</item>
+        <item>Ülke veya bölge</item>
+        <item>Arapça veya İngilizce arama</item>
+        <item>Şehirleri yükleyemiyorum, özel bir yere girebilirsin.</item>
+        <item>Şehirler yükleniyor…</item>
+        <item>Şehir bulunamadı. Başka bir isim deneyin ya da özel bir yere girin.</item>
+        <item>Şehrimi kaybettim.</item>
+        <item>Yer adı</item>
+        <item>Latitüde · -90 ila 90</item>
+        <item>Uzunluk · -180 ila 180</item>
+        <item>Zaman bölgesi</item>
+        <item>Örnek: Asya/Riyad</item>
+        <item>Adı, koordinatları ve zaman bölgesi kontrol edin.</item>
+        <item>Şehir listesine geri dönelim .</item>
+        <item>Yerini kaydet</item>
+        <item>Yakınlık</item>
+        <item>Dua uyarıları</item>
+        <item>Ezan, kamet ve Cuma hatırlatmaları</item>
+        <item>Uyarı görüntüleme</item>
+        <item>Kamet, Cuma ve kilit ekranı</item>
+        <item>Kamet bildirim ayarları</item>
+        <item>Cuma bildirim ayarları</item>
+        <item>Bannerler ve kilit ekran uyarıları telefon ayarlarını takip eder. Kamet uyarıları öntanımlı olarak sessizdir.</item>
+        <item>Telefon ayarlarında uyarıları etkinleştir</item>
+        <item>Telefon ayarlarınızda Najwa bildirimleri devre dışı bırakıldı.</item>
+        <item>Najwa bildirim ayarlarını aç</item>
+        <item>Tam alarmlara izin ver ki dua hatırlatmaları zamanında gelsin.</item>
+        <item>Tam alarm ayarlarını aç</item>
+        <item>Alarmlar</item>
+        <item>Ezan uyarısı</item>
+        <item>Beş günlük dua için sesli uyarı</item>
+        <item>Kamet hatırlatması</item>
+        <item>Ses veya titreşimsiz görsel uyarı</item>
+        <item>Alarmlar otomatik sessiz moddan bağımsızdır.</item>
+        <item>Telefonunuzda bir alarm simgesi ve sonraki dua uyarısı saatini gösterebilir.</item>
+        <item>Cuma namazı</item>
+        <item>Şehrinizin hesaplanmış Dhuhr zamanından önce haftalık hatırlatma.</item>
+        <item>Cuma günü hatırlatma.</item>
+        <item>Dhuhr \' a ne kadar zaman geçecek ?</item>
+        <item>Zuhr hesaplanır. Khutbah ve namaz zamanları camiye göre değişebilir.</item>
+        <item>İqama ezan\'dan sonra</item>
+        <item>Meçittiğiniz her namaz için bir süre belirleyin.</item>
+        <item>Telefon ayarlarından Najwa\'yı açamadın.</item>
+        <item>Uygulama bilgileri</item>
+        <item>Najwa hakkında bilgi edinin, bizimle iletişime geçin ve gizliliğinizi inceleyin.</item>
+        <item>Bizim hakkımızda</item>
+        <item>Najwa ve kimliği hakkında</item>
+        <item>Bizimle iletişime geç</item>
+        <item>Gizlilik politikası</item>
+        <item>Verileriniz cihazınızda kalır</item>
+        <item>Kullanıcı kılavuzu</item>
+        <item>Başlatma ve uyarı ayarlama</item>
+        <item>Şehrinizi ve hesaplama yönteminizi seçin ve yerel takviminize göre saatleri kontrol edin.</item>
+        <item>Noto Sans Arabic, SIL OFL altında lisanslıdır. GeoNames şehir verileri CC BY 4.0 altında lisanslıdır.</item>
+        <item>Najwa · Dua zamanları ve sessizlik tek bir yerde</item>
+        <item>Najwa hakkında</item>
+        <item>Najwa · Önce dua.</item>
+        <item>Najwa, dua saatlerini takip etmenize, ezan ve kamet hatırlatmalarını almanıza ve telefonunuzu önceki çalan moduna geri getirmeden önce sessizleştirmenize yardımcı olur.</item>
+        <item>Najwa, seçtiğiniz şehri ve yöntemi kullanarak cihazınızda dua saatlerini hesaplar.</item>
+        <item>Os73.com tarafından tasarlanmış ve geliştirilmiştir.</item>
+        <item>Senin olsun.</item>
+        <item>Yerel takviminize göre saatleri kontrol edin ve mezhebinizle eşleşen kamet gecikmelerini ayarlayın.</item>
+        <item>Noto Sans Arapça, SIL OFL altında lisanslanmıştır. AndroidX ve Kotlin bileşenleri Apache 2.0 kullanır.</item>
+        <item>Yorumlarınızı ve fikirlerinizi memnuniyetle karşılıyoruz .</item>
+        <item>Teknik sorun</item>
+        <item>Önergi</item>
+        <item>Soru</item>
+        <item>Najwa ekibine mesaj gönder.</item>
+        <item>Talep türü</item>
+        <item>Telefon modeli ve sistem versiyonu</item>
+        <item>Mesaj detayları</item>
+        <item>Mesajınızı girin.</item>
+        <item>E-posta aç</item>
+        <item>E-posta uygulamanızdan hazırlanmış mesajı gözden geçirin ve gönderin.</item>
+        <item>E-posta adresinin kopyası</item>
+        <item>Verileriniz cihazınızda kalır</item>
+        <item>Yerel olarak sakladığımız şeyler</item>
+        <item>Şehrinizi veya koordinatlarınızı, hesaplama yöntemizi, görünümünüzü ve sessizlik ve uyarı tercihlerinizi saklıyoruz.</item>
+        <item>Uygulama GPS konumunu istemez veya iletişim, mesaj ya da diğer uygulamaların bildirimlerini okumayır.</item>
+        <item>Ezan sesini seçtiğinizde, Najwa özel bir kopyayı tutar ve Android\'in bildirim oynatıcısı ile paylaşır.</item>
+        <item>Bağlantı ve paylaşım</item>
+        <item>Najwa internet izinleri, hesapları, reklamları veya izlemeyi kullanmaz.</item>
+        <item>İletişim seçtiğiniz e-posta uygulamasını açar. Neyi göndereceğinizi seçersiniz. E-posta sağlayıcınız mesajı ele alır.</item>
+        <item>Neden izin istiyoruz?</item>
+        <item>Ringer erişim Najwa\'nın sessiz modunu ayarlamasını ve geri getirmesini sağlar. Alarmların tam zamanlama hatırlatmaları. İletiştirme erişimi onları görüntüler. Başlangıç erişimi yeniden başlatıldıktan sonra zamanlamayı geri alır.</item>
+        <item>Bu widget, ev ekranınızda şehrinizi ve dua saatlerinizi gösterir ve ek veri erişimi gerektirmez.</item>
+        <item>Kontrol ve silme</item>
+        <item>Sessiz modu veya uyarıları devre dışı bırakabilir ve izinleri iptal edebilirsiniz. Uygulama verilerini temizlemek ya da Najwa\'yı kaldırmak yerel verileri çıkarır. Sistem yedekleme etkinleştirilmez.</item>
+        <item>Najwa widget</item>
+        <item>Ev ekranında dua saatleri</item>
+        <item>Görünüm ve şeffaflık</item>
+        <item>Okunabilir bir geri sayımla ince bir arka plan</item>
+        <item>Otomatik olarak var olduğunda duvar kağıdına uyar ve sistem temasını takip eder.</item>
+        <item>Sadece arka plan şeffaflık gösterir, böylece açık ve karanlık duvar kağıtlarında metin okunur.</item>
+        <item>Widget ön görünümü</item>
+        <item>Gece .</item>
+        <item>Işık</item>
+        <item>Renk</item>
+        <item>Mini</item>
+        <item>Küçük</item>
+        <item>Geniş</item>
+        <item>Uzun boylu</item>
+        <item>Büyük</item>
+        <item>Sıcak</item>
+        <item>Örnek duvar kağıdındaki widget ön görünümü. Kenarlarını sürükleyerek boyutunu değiştirin.</item>
+        <item>Ana ekrana ekle</item>
+        <item>Widget nasıl eklenir</item>
+        <item>Ekleyin ve onaylayın. Eğer başlatıcınız bunu desteklemiyorsa, ana ekrani basıp tutun, Widgets açın ve Najwa\'yı bulun.</item>
+        <item>Widget şehrin ve hesaplama yöntemini kullanır. Najwa\'yı açmak için ona dokun,  ⁇ \'ye dokunun veya boyutlarını değiştirmek için kenarlarını sürükleyin.</item>
+        <item>Telefonunuz uyurken widget güncellemelerini geciktirir. Ekranı uyanabilir veya güncel saatleri görmek için widget\'i yenilgiye uğratabilirsiniz.</item>
+        <item>Ezan sesi</item>
+        <item>Telefonunuzdan bir kayıt seçin</item>
+        <item>Dosyayı kontrol etmek ve kaydetmek...</item>
+        <item>Ezan ses dosyası seçin</item>
+        <item>Öntanımlı alarm sesini geri yükle</item>
+        <item>Açık ezan ses ayarları</item>
+        <item>MP3, M4A, WAV ve telefonunuz tarafından desteklenen diğer biçimler 32 MB\'ye kadar. Najwa orijinal dosya taşınırsa bir kopya tutar.</item>
+        <item>Alarm, alarm sesini kullanır. Oyunun süresi ve rahatsız etme Android ayarlarını takip eder.</item>
+        <item>Ses seçmek uyarı anahtarını değiştirmez.</item>
+        <item>Telefon ayarlarına göre sessiz</item>
+        <item>Telefon ayarlarında ses değişikliği</item>
+        <item>Öntanımlı süreleri geri yükle</item>
+        <item>Ezan\'dan sonraki dakikalar</item>
+        <item>Kaydet .</item>
+        <item>İptal</item>
+        <item>Gelecek dua zamanları</item>
+        <item>Önceki</item>
+        <item>Bugün</item>
+        <item>Sonraki .</item>
+        <item>Otomatik sessiz mod</item>
+        <item>Dua sırasında sessiz kalın, sonra önceki çaldırma modunuzu geri getirin.</item>
+        <item>Aktifleştirme</item>
+        <item>Otomatik sessiz mod açık .</item>
+        <item>Otomatik sessiz mod etkinleştir</item>
+        <item>Bu aygıt çalanı değiştirmeyi desteklemiyor.</item>
+        <item>Başlamak için izin ver</item>
+        <item>En az bir dua seç</item>
+        <item>Ezan\'dan 20 saniye sonra başlar.</item>
+        <item>Telefonunuzda bir alarm simgesi ve sonraki düzenli dua görüntülenebilir.</item>
+        <item>Sessiz mod aktif .</item>
+        <item>Alarm geri kazanımını kontrol et</item>
+        <item>Telefonunun sesini kontrol et. Kendin değiştirmediysen önceki modunu geri yükle.</item>
+        <item>Şimdi geri getir .</item>
+        <item>Dualar ve sessiz süreler</item>
+        <item>Her duayı seçin ve ezan\'dan itibaren süreyi belirleyin.</item>
+        <item>Dua sırasında telefon modunda</item>
+        <item>Alarm ve medya hacmi aynı kalıyor.</item>
+        <item>Sessiz</item>
+        <item>Vibrasyon</item>
+        <item>Normal.</item>
+        <item>Sistem</item>
+        <item>Karanlık</item>
+        <item>Işık</item>
+        <item>Otomatik</item>
+        <item>Gecenin ortasında</item>
+        <item>Gecenin yedinci saatinde</item>
+        <item>Karanlık açısı bölümü</item>
+    </string-array>
+</resources>

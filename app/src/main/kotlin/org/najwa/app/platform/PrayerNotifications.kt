@@ -48,19 +48,22 @@ class PrayerNotifications(
         val current=manager.getNotificationChannel(if(channel==ADHAN)adhanChannel else channel) ?: return false
         return current.importance!=NotificationManager.IMPORTANCE_NONE
     }
-    init {
-        manager.createNotificationChannel(NotificationChannel(ADHAN,"تنبيه الأذان",NotificationManager.IMPORTANCE_HIGH).apply {
-            description="تنبيه صوتي عند دخول وقت الصلاة؛ يمكن اختيار الصوت من إعدادات الهاتف"
+    init { updateChannels(updateSelection=false) }
+    fun updateChannels(updateSelection: Boolean=true) {
+        val strings=context.prayerLanguage()
+        manager.createNotificationChannel(NotificationChannel(ADHAN,strings.getString(R.string.system_adhan),NotificationManager.IMPORTANCE_HIGH).apply {
             setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
             enableVibration(false)
         })
-        manager.createNotificationChannel(NotificationChannel(IQAMA,"تذكير الإقامة",NotificationManager.IMPORTANCE_HIGH).apply {
-            description="تذكير مرئي حسب المدة التي تحددها لكل صلاة"
+        manager.createNotificationChannel(NotificationChannel(IQAMA,strings.getString(R.string.system_iqama),NotificationManager.IMPORTANCE_HIGH).apply {
             setSound(null,null);enableVibration(false)
         })
-        manager.createNotificationChannel(NotificationChannel(FRIDAY,"تذكير صلاة الجمعة",NotificationManager.IMPORTANCE_DEFAULT).apply {
-            description="تذكير أسبوعي قبل وقت الظهر المحسوب في مدينتك"
-        })
+        manager.createNotificationChannel(NotificationChannel(FRIDAY,strings.getString(R.string.system_friday_title),NotificationManager.IMPORTANCE_DEFAULT))
+        val selected=if(updateSelection)adhanChannel else ADHAN
+        if(selected!=ADHAN) manager.getNotificationChannel(selected)?.let {channel->
+            channel.name=strings.getString(R.string.system_adhan)
+            manager.createNotificationChannel(channel)
+        }
     }
     fun show(task: ScheduledPrayer,p: Preferences,test: Boolean=false): NotificationDelivery {
         val adhan=task.action==PrayerAction.ADHAN
@@ -78,21 +81,24 @@ class PrayerNotifications(
         }
         if(task.id in ids)return NotificationDelivery.ALREADY_POSTED
         val now=clock()
+        val strings=context.prayerLanguage()
+        val prayer=strings.prayerName(task.event.prayer)
+        val time=strings.prayerTime(task.event.time,p)
         val title=when {
-            friday -> "تذكير بصلاة الجمعة"
-            test -> if(adhan)"تجربة تنبيه الأذان" else "تجربة تذكير الإقامة"
-            adhan -> "حان وقت أذان ${task.event.prayer.label}"
-            else -> "حان وقت إقامة ${task.event.prayer.label}"
+            friday -> strings.getString(R.string.system_friday_title)
+            test -> strings.getString(if(adhan)R.string.system_adhan_test else R.string.system_iqama_test)
+            adhan -> strings.getString(R.string.system_adhan_title,prayer)
+            else -> strings.getString(R.string.system_iqama_title,prayer)
         }
         val text=when {
-            friday -> "${p.city.name} · الظهر ${displayTime(task.event.time,p)} تقريبًا"
-            adhan -> "${p.city.name} · ${displayTime(task.event.time,p)} · الإقامة بعد ${p.iqamaMinutes.getValue(task.event.prayer)} دقيقة"
-            else -> "${p.city.name} · بعد الأذان بـ${p.iqamaMinutes.getValue(task.event.prayer)} دقيقة · حسب إعدادك"
+            friday -> "${p.city.name} · ${strings.prayerName(Prayer.DHUHR)} ≈ $time"
+            adhan -> "${p.city.name} · $time · ${strings.getString(R.string.system_minutes_after,p.iqamaMinutes.getValue(task.event.prayer))}"
+            else -> "${p.city.name} · ${strings.getString(R.string.system_iqama_detail)}"
         }
         val compactTitle=when {
             friday || test -> title
-            adhan -> "أذان ${task.event.prayer.label}"
-            else -> "إقامة ${task.event.prayer.label}"
+            adhan -> "${strings.getString(R.string.system_adhan)} · $prayer"
+            else -> "${strings.getString(R.string.system_iqama)} · $prayer"
         }
         val compact=notificationViews(context,task,p,compactTitle,text,false,now)
         val expanded=notificationViews(context,task,p,title,text,true,now)
@@ -104,16 +110,16 @@ class PrayerNotifications(
         }
         val icon=if(adhan)R.drawable.ic_status_adhan else R.drawable.ic_status_iqama
         val publicVersion=NotificationCompat.Builder(context,channel)
-            .setSmallIcon(icon).setContentTitle("نجوى").setContentText("لديك تنبيه للصلاة")
+            .setSmallIcon(icon).setContentTitle(strings.getString(R.string.system_brand)).setContentText(strings.getString(R.string.system_private_alert))
             .setShowWhen(false).build()
         val notification=NotificationCompat.Builder(context,channel).setSmallIcon(icon)
                 .setContentTitle(title).setContentText(text).setStyle(NotificationCompat.DecoratedCustomViewStyle())
                 .setCustomContentView(compact).setCustomBigContentView(expanded).setCustomHeadsUpContentView(compact)
                 .setColor(Color.parseColor(when {
-                    adhan -> "#16C784"
-                    friday -> "#9D7526"
-                    else -> "#087A53"
-                })).setSubText("صلاتك أولاً")
+                    adhan -> "#3EB28C"
+                    friday -> "#9F7535"
+                    else -> "#126D53"
+                })).setSubText(strings.getString(R.string.system_signature))
                 .setContentIntent(open).setAutoCancel(true).setCategory(if(adhan)NotificationCompat.CATEGORY_ALARM else NotificationCompat.CATEGORY_REMINDER)
                 .setVisibility(if(p.showLockScreenDetails)NotificationCompat.VISIBILITY_PUBLIC else NotificationCompat.VISIBILITY_PRIVATE)
                 .setPublicVersion(publicVersion)
@@ -144,17 +150,25 @@ private fun iqamaDeadline(task: ScheduledPrayer,p: Preferences) =
 fun notificationViews(context: Context,task: ScheduledPrayer,p: Preferences,title: String,detail: String,expanded: Boolean,now: Instant=task.at): RemoteViews {
     val adhan=task.action==PrayerAction.ADHAN
     val friday=task.action==PrayerAction.FRIDAY
+    val strings=context.prayerLanguage()
+    val brand=strings.getString(R.string.system_brand)
+    val phase=strings.getString(when {
+        friday->R.string.system_friday
+        adhan->R.string.system_adhan
+        else->R.string.system_iqama
+    })
     return RemoteViews(context.packageName,if(expanded)R.layout.prayer_notification_expanded else R.layout.prayer_notification_compact).apply {
-        val primary=Color.parseColor(if(adhan)"#F4F8FC" else "#172C2D")
+        setInt(R.id.notification_root,"setLayoutDirection",strings.prayerLayoutDirection)
+        val primary=Color.parseColor(if(adhan)"#F6F4EC" else "#19352E")
         val secondary=Color.parseColor(when {
-            adhan -> "#BCD1D8"
-            friday -> "#624F2D"
-            else -> "#365852"
+            adhan -> "#B8CBC0"
+            friday -> "#66523A"
+            else -> "#58756A"
         })
         val accent=Color.parseColor(when {
-            adhan -> "#71E0BB"
-            friday -> "#755419"
-            else -> "#086548"
+            adhan -> "#A5E8C4"
+            friday -> "#865F2A"
+            else -> "#126D53"
         })
         setInt(R.id.notification_root,"setBackgroundResource",when {
             adhan -> R.drawable.notification_surface_adhan
@@ -169,26 +183,35 @@ fun notificationViews(context: Context,task: ScheduledPrayer,p: Preferences,titl
         setTextColor(R.id.notification_title,primary)
         setTextColor(R.id.notification_detail,secondary)
         setTextViewText(R.id.notification_title,title)
-        val iqamaTime=displayTime(task.event.time.plusSeconds(p.iqamaMinutes.getValue(task.event.prayer)*60L),p)
         setTextViewText(R.id.notification_detail,when {
             friday -> detail
-            !expanded && adhan -> "الإقامة $iqamaTime"
-            !expanded -> displayTime(task.at,p)
-            adhan -> "${p.city.name} · الإقامة $iqamaTime"
-            else -> "${p.city.name} · حسب موعد الإقامة المحدد"
+            adhan -> {
+                val iqamaTime=strings.prayerTime(Instant.ofEpochMilli(iqamaDeadline(task,p)),p)
+                val schedule="${strings.getString(R.string.system_iqama)} $iqamaTime"
+                if(expanded)"${p.city.name} · $schedule" else schedule
+            }
+            !expanded -> strings.prayerTime(task.at,p)
+            else -> "${p.city.name} · ${strings.getString(R.string.system_iqama_detail)}"
         })
         if(expanded) {
-            setTextViewText(R.id.notification_brand,when {
-                friday -> "نجوى · الجمعة"
-                adhan -> "نجوى · الأذان"
-                else -> "نجوى · الإقامة"
-            })
+            setTextViewText(R.id.notification_brand,"$brand · $phase")
             setTextColor(R.id.notification_brand,accent)
             setTextColor(R.id.notification_time,secondary)
             setTextColor(R.id.notification_signature,secondary)
             setTextColor(R.id.notification_message,accent)
-            setTextViewText(R.id.notification_message,if(friday)"استعد لصلاة الجمعة. يُحدّد كل مسجد موعد الخطبة والصلاة." else prayerMessage(task.event.prayer,adhan))
-            setTextViewText(R.id.notification_time,displayTime(task.at,p))
+            setTextViewText(R.id.notification_signature,strings.getString(R.string.system_signature))
+            setTextViewText(R.id.notification_timer_label,strings.getString(R.string.system_to_iqama))
+            val rtl=strings.prayerLayoutDirection==View.LAYOUT_DIRECTION_RTL
+            if(android.os.Build.VERSION.SDK_INT>=31) {
+                setInt(R.id.notification_timer,"setGravity",android.view.Gravity.CENTER_VERTICAL or
+                    if(rtl)android.view.Gravity.LEFT else android.view.Gravity.RIGHT)
+            }
+            setTextViewText(R.id.notification_message,when {
+                friday -> strings.getString(R.string.system_friday_detail)
+                !strings.usesArabic -> strings.getString(if(adhan)R.string.system_adhan_title else R.string.system_iqama_title,strings.prayerName(task.event.prayer))
+                else -> prayerMessage(task.event.prayer,adhan)
+            })
+            setTextViewText(R.id.notification_time,strings.prayerTime(task.at,p))
             setViewVisibility(R.id.notification_message,View.VISIBLE)
             val remaining=iqamaDeadline(task,p)-now.toEpochMilli()
             val showTimer=adhan && remaining>0

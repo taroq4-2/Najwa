@@ -16,9 +16,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.najwa.app.NajwaRuntime
+import org.najwa.app.R
 
 @Composable fun AdhanSoundSettings(runtime: NajwaRuntime,open: (Intent)->Unit) {
-    val context=LocalContext.current.applicationContext
+    val context=LocalContext.current
     val scope=rememberCoroutineScope()
     var busy by remember {mutableStateOf(false)}
     var message by remember {mutableStateOf<String?>(null)}
@@ -26,9 +27,10 @@ import org.najwa.app.NajwaRuntime
     val choice=remember(refresh) {runtime.notifications.sounds.selected()}
     val channel=context.getSystemService(NotificationManager::class.java).getNotificationChannel(choice.channelId)
     val name=when {
-        choice.error!=null->choice.name
-        channel?.sound==null->"بدون صوت حسب إعدادات الهاتف"
-        choice.uri!=null && channel.sound.toString()!=choice.uri->"صوت معدّل من إعدادات الهاتف"
+        choice.error!=null->context.getString(R.string.sound_unavailable_title)
+        channel!=null && channel.sound==null->context.getString(R.string.sound_phone_silent)
+        choice.uri!=null && channel?.sound!=null && channel.sound.toString()!=choice.uri->context.getString(R.string.sound_phone_changed)
+        choice.fileName==null->context.getString(if(choice.uri==null)R.string.sound_phone_default else R.string.sound_alarm_default)
         else->choice.name
     }
     val picker=rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {uri->
@@ -37,19 +39,19 @@ import org.najwa.app.NajwaRuntime
             scope.launch {
                 try {
                     val imported=withContext(Dispatchers.IO) {runtime.notifications.sounds.importAudio(uri)}
-                    refresh++;message="تم حفظ ${imported.name}"
-                } catch(e: Exception) {message=e.message ?: "تعذّر حفظ الصوت. اختر ملفًا آخر."}
+                    refresh++;message=context.getString(R.string.sound_saved,imported.name)
+                } catch(e: Exception) {message=context.getString(R.string.sound_import_failed)}
                 finally {busy=false}
             }
         }
     }
-    AdhanSoundContent(name,choice.fileName!=null || choice.error!=null,busy,message ?: choice.error,
-        onChoose={try {picker.launch(arrayOf("audio/*","application/ogg"))} catch(_: Exception) {message="تعذّر فتح تطبيق الملفات. تأكد من توفر مدير ملفات على هاتفك."}},
+    AdhanSoundContent(name,choice.fileName!=null || choice.error!=null,busy,message ?: choice.error?.let {context.getString(R.string.sound_unavailable_detail)},
+        onChoose={try {picker.launch(arrayOf("audio/*","application/ogg"))} catch(_: Exception) {message=context.getString(R.string.sound_picker_failed)}},
         onReset={
             busy=true
             scope.launch {
-                try {withContext(Dispatchers.IO) {runtime.notifications.sounds.reset()};refresh++;message="أُعيد صوت المنبّه الافتراضي."}
-                catch(e: Exception) {message=e.message ?: "تعذّر تغيير الصوت."}
+                try {withContext(Dispatchers.IO) {runtime.notifications.sounds.reset()};refresh++;message=context.getString(R.string.sound_reset_done)}
+                catch(e: Exception) {message=context.getString(R.string.sound_reset_failed)}
                 finally {busy=false}
             }
         },

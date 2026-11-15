@@ -6,11 +6,14 @@ import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.*
 import org.najwa.app.BuildConfig
+import org.najwa.app.R
 import org.najwa.app.platform.*
 import org.najwa.core.Screen
 
@@ -18,9 +21,9 @@ import org.najwa.core.Screen
     val context=LocalContext.current
     var message by remember {mutableStateOf<String?>(null)}
     InformationContent(screen,onNavigate,onBack,message,onEmail={category,device,details->
-        if(!launchExternal(context,contactEmailIntent(category,device,details)))message="لم نجد تطبيق بريد. انسخ العنوان واستخدمه في خدمة البريد التي تفضلها."
+        if(!launchExternal(context,contactEmailIntent(category,device,details)))message=context.getString(R.string.contact_no_email_app)
     },onCopy={
-        message=if(runCatching {(context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(ClipData.newPlainText("Najwa contact",CONTACT_EMAIL))}.isSuccess)"تم نسخ البريد الإلكتروني." else "تعذّر النسخ. البريد: $CONTACT_EMAIL"
+        message=if(runCatching {(context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(ClipData.newPlainText("Najwa contact",CONTACT_EMAIL))}.isSuccess)context.getString(R.string.contact_email_copied) else context.getString(R.string.contact_copy_failed,CONTACT_EMAIL)
     })
 }
 
@@ -42,7 +45,7 @@ import org.najwa.core.Screen
                 Text(uiText("اختر المدينة وطريقة الحساب من إعدادات المواقيت، وراجع الأوقات مع تقويم مدينتك. خصّص الإقامة من صفحة تنبيهات الصلاة، والصمت من تبويب الصمت."),color=c.secondary)
                 Text(uiText("الخط: Noto Sans Arabic بترخيص SIL OFL. دليل المدن: GeoNames بترخيص CC BY 4.0."),color=c.secondary,fontSize=12.sp)
             }
-            Text(uiText("نجوى · ${BuildConfig.VERSION_NAME}"),color=c.secondary,fontSize=12.sp)
+            Text(stringResource(R.string.brand_version,BuildConfig.VERSION_NAME),color=c.secondary,fontSize=12.sp)
         }
         Screen.ABOUT -> {
             PageHeading("من نحن","نجوى · مواقيتك وهدوؤك في مكان واحد")
@@ -54,7 +57,7 @@ import org.najwa.core.Screen
             }
             SettingsCard("استخدام يناسبك") {
                 Text(uiText("راجع المواقيت مع تقويم مدينتك، وحدّد مدة الإقامة حسب مسجدك. التذكيرات التي تختارها للإقامة ليست مواقيت معتمدة للمساجد."),color=c.secondary)
-                Text(uiText("الإصدار ${BuildConfig.VERSION_NAME}"),color=c.mint)
+                Text(stringResource(R.string.app_version_label,BuildConfig.VERSION_NAME),color=c.mint)
                 Text(uiText("الخط: Noto Sans Arabic بترخيص SIL OFL. مكونات AndroidX وKotlin بترخيص Apache-2.0."),color=c.secondary,fontSize=12.sp)
             }
         }
@@ -62,18 +65,18 @@ import org.najwa.core.Screen
             val focus=LocalFocusManager.current
             PageHeading("تواصل معنا","نسعد بملاحظاتك واقتراحاتك لتحسين نجوى")
             val categories=listOf("مشكلة تقنية","اقتراح تحسين","استفسار")
-            var category by remember {mutableStateOf(categories.first())}
-            var device by remember {
+            var category by rememberSaveable {mutableStateOf(categories.first())}
+            var device by rememberSaveable {
                 mutableStateOf("${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL} · Android ${android.os.Build.VERSION.RELEASE} · نجوى ${BuildConfig.VERSION_NAME}")
             }
-            var details by remember {mutableStateOf("")}
-            var invalid by remember {mutableStateOf(false)}
+            var details by rememberSaveable {mutableStateOf("")}
+            var invalid by rememberSaveable {mutableStateOf(false)}
             SettingsCard("رسالة إلى فريق نجوى",CONTACT_EMAIL) {
                 SectionLabel("نوع الطلب")
                 Choice(category,categories,{it}) {category=it}
                 OutlinedTextField(device,{device=it.take(200)},label={Text(uiText("نوع الهاتف وإصدار النظام"))},modifier=Modifier.fillMaxWidth())
                 OutlinedTextField(details,{details=it.take(2000);invalid=false},label={Text(uiText("تفاصيل الرسالة"))},minLines=3,maxLines=6,
-                    isError=invalid,supportingText={Text(if(invalid)"أدخل تفاصيل رسالتك." else "${details.length} من 2000 حرف")},modifier=Modifier.fillMaxWidth())
+                    isError=invalid,supportingText={Text(if(invalid)uiText("أدخل تفاصيل رسالتك.") else stringResource(R.string.contact_character_count,details.length,2000))},modifier=Modifier.fillMaxWidth())
                 Action("إرسال بالبريد",Modifier.fillMaxWidth(),true) {
                     if(details.isBlank())invalid=true else {
                         focus.clearFocus()
@@ -102,7 +105,7 @@ import org.najwa.core.Screen
             }
             SettingsCard("التحكم والحذف") {
                 Text(uiText("يمكنك تعطيل الصمت والتنبيهات أو سحب الأذونات من إعدادات الهاتف. تُحذف البيانات المحلية عند مسح بيانات التطبيق أو إزالته. النسخ الاحتياطي للنظام معطّل."),color=c.text)
-                Text(uiText("استفسارات الخصوصية: $CONTACT_EMAIL"),color=c.mint)
+                Text(stringResource(R.string.contact_privacy_email,CONTACT_EMAIL),color=c.mint)
             }
         }
         else -> Unit

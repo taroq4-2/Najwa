@@ -20,7 +20,13 @@ import org.najwa.app.BuildConfig
 import org.najwa.app.MainActivity
 import org.najwa.app.appLanguage
 import org.najwa.app.changeAppLanguage
-import org.najwa.app.platform.ArabCityCatalog
+import org.najwa.app.platform.CityCatalog
+import org.najwa.app.platform.CatalogCountry
+import org.najwa.app.supportedLanguages
+import org.najwa.app.R
+import androidx.compose.ui.res.stringResource
+import java.text.Collator
+import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -47,13 +53,13 @@ import kotlinx.coroutines.withContext
     Panel(Modifier.fillMaxWidth()) {SettingsDestination("معلومات التطبيق","من نحن · تواصل معنا · الخصوصية","shield",onInformation)}
     if(activity!=null) {
         Spacer(Modifier.height(16.dp))
-        SettingsCard("لغة التطبيق · App language") {
-            OptionGrid(listOf("ar","en"),appLanguage(activity),{if(it=="ar")"العربية" else "English"},2) {
+        SettingsCard(stringResource(R.string.app_language_label)) {
+            OptionGrid(supportedLanguages.keys.toList(),appLanguage(activity),supportedLanguages::getValue,2) {
                 if(it!=appLanguage(activity))changeAppLanguage(activity,it)
             }
         }
     }
-    Text(uiText("نجوى · ${BuildConfig.VERSION_NAME}"),color=c.secondary,fontSize=12.sp,modifier=Modifier.fillMaxWidth().padding(vertical=24.dp),textAlign=androidx.compose.ui.text.style.TextAlign.Center)
+    Text("${stringResource(R.string.system_brand)} · ${BuildConfig.VERSION_NAME}",color=c.secondary,fontSize=12.sp,modifier=Modifier.fillMaxWidth().padding(vertical=24.dp),textAlign=androidx.compose.ui.text.style.TextAlign.Center)
 }
 
 @Composable fun CalculationScreen(p: Preferences,onSave: (Preferences)->Unit,onCity: ()->Unit,onBack: ()->Unit) {
@@ -114,22 +120,22 @@ import kotlinx.coroutines.withContext
     val context=LocalContext.current
     var manual by rememberSaveable {mutableStateOf(false)}
     var query by rememberSaveable {mutableStateOf("")}
-    var countryCode by rememberSaveable {mutableStateOf(ArabCityCatalog.forCity(current).code)}
-    var countryMenu by remember {mutableStateOf(false)}
-    val country=ArabCityCatalog.countries.first {it.code==countryCode}
-    val catalog by key(countryCode) {
-        produceState<Result<List<ArabCityCatalog.Place>>?>(null,context) {
-            value=withContext(Dispatchers.IO) {runCatching {ArabCityCatalog.load(context,country)}}
-        }
-    }
+    val countries=remember(context) {CityCatalog.countries(context)}
+    var countryCode by rememberSaveable {mutableStateOf(CityCatalog.forCity(context,current,countries).code)}
+    var countryMenu by rememberSaveable {mutableStateOf(false)}
+    var countryQuery by rememberSaveable {mutableStateOf("")}
+    val country=countries.first {it.code==countryCode}
     val term=citySearchKey(query)
     val cities by key(countryCode) {
-        produceState<Pair<String,List<ArabCityCatalog.Place>>?>(null,catalog,term) {
-            val places=catalog?.getOrNull() ?: return@produceState
-            if(term.isEmpty())value=term to places else {
-                delay(160)
-                value=term to withContext(Dispatchers.Default) {places.filter {term in it.terms}}
+        produceState<Pair<String,Result<List<CityCatalog.Place>>>?>(null,context,term,manual,countryMenu) {
+            if(manual || countryMenu)return@produceState
+            if(term.isNotEmpty())delay(250)
+            val result=withContext(Dispatchers.IO) {
+                try { Result.success(CityCatalog.search(context,country,term)) }
+                catch(e: kotlinx.coroutines.CancellationException) { throw e }
+                catch(e: Exception) { Result.failure(e) }
             }
+            value=term to result
         }
     }
     var name by rememberSaveable {mutableStateOf(current.name)}
@@ -138,22 +144,45 @@ import kotlinx.coroutines.withContext
     var zone by rememberSaveable {mutableStateOf(current.zone)}
     var error by rememberSaveable {mutableStateOf(false)}
     val c=LocalPalette.current
-    val english=LocalConfiguration.current.locales[0].language=="en"
-    fun countryName(choice: org.najwa.app.platform.ArabCountry): String = if(english)
-        java.util.Locale.Builder().setRegion(choice.code).build().getDisplayCountry(java.util.Locale.ENGLISH) else choice.name
-    AlertDialog(onDismissRequest=onDismiss,title={Text(uiText(if(manual)"موقع مخصص" else "اختر مدينتك"))},text={
+    val locale=LocalConfiguration.current.locales[0]
+    fun countryName(choice: CatalogCountry): String =
+        choice.arabicName?.takeIf {locale.language=="ar"}
+            ?: Locale.Builder().setRegion(choice.code).build().getDisplayCountry(locale)
+    AlertDialog(onDismissRequest={if(countryMenu)countryMenu=false else onDismiss()},title={
+        Text(if(countryMenu)stringResource(R.string.city_choose_country) else uiText(if(manual)"موقع مخصص" else "اختر مدينتك"))
+    },text={
         Column(Modifier.heightIn(max=440.dp),verticalArrangement=Arrangement.spacedBy(10.dp)) {
-            if(!manual) {
-                Box {
-                    OutlinedButton(onClick={countryMenu=true},modifier=Modifier.fillMaxWidth()) {Text("${uiText("الدولة")} · ${countryName(country)}")}
-                    DropdownMenu(expanded=countryMenu,onDismissRequest={countryMenu=false},modifier=Modifier.heightIn(max=320.dp)) {
-                        ArabCityCatalog.countries.forEach { choice ->
-                            DropdownMenuItem(text={Text(countryName(choice))},onClick={countryCode=choice.code;query="";countryMenu=false})
+            if(countryMenu) {
+                val names=remember(countries,locale) {
+                    val collator=Collator.getInstance(locale)
+                    countries.map {it to countryName(it)}.sortedWith {a,b->collator.compare(a.second,b.second)}
+                }
+                val countryTerm=citySearchKey(countryQuery)
+                val filtered=remember(names,countryTerm) {
+                    names.filter {(choice,name)->
+                        countryTerm in citySearchKey(name) || countryTerm in citySearchKey(choice.code) ||
+                            countryTerm in citySearchKey(Locale.Builder().setRegion(choice.code).build().getDisplayCountry(Locale.ENGLISH))
+                    }
+                }
+                OutlinedTextField(countryQuery,{countryQuery=it},placeholder={Text(stringResource(R.string.city_search_country))},
+                    singleLine=true,modifier=Modifier.fillMaxWidth())
+                LazyColumn(Modifier.weight(1f)) {
+                    items(filtered,key={it.first.code}) { (choice,name) ->
+                        OptionButton(name,choice.code==countryCode,Modifier.fillMaxWidth()) {
+                            countryCode=choice.code
+                            query=""
+                            error=false
+                            countryMenu=false
                         }
                     }
                 }
-                OutlinedTextField(query,{query=it},placeholder={Text(uiText("ابحث بالعربية أو الإنجليزية"))},singleLine=true,modifier=Modifier.fillMaxWidth())
-                val matches=cities?.takeIf {it.first==term}?.second
+            } else if(!manual) {
+                OutlinedButton(onClick={countryQuery="";countryMenu=true},modifier=Modifier.fillMaxWidth()) {
+                    Text("${uiText("الدولة")} · ${countryName(country)}")
+                }
+                OutlinedTextField(query,{query=it;error=false},placeholder={Text(stringResource(R.string.city_search_place))},singleLine=true,modifier=Modifier.fillMaxWidth())
+                val results=cities?.takeIf {it.first==term}?.second
+                val matches=results?.getOrNull()
                 val listState=rememberLazyListState()
                 LaunchedEffect(matches) {if(!matches.isNullOrEmpty())listState.scrollToItem(0)}
                 Box(Modifier.weight(1f).fillMaxWidth()) {
@@ -163,17 +192,23 @@ import kotlinx.coroutines.withContext
                                 else place.name==current.name && place.lat==current.latitude && place.lon==current.longitude
                             val label=if(place.region.isBlank() || place.name==place.region)place.name else "${place.name} · ${place.region}"
                             OptionButton(label,selected,Modifier.fillMaxWidth()) {
-                                if(cities?.first==citySearchKey(query) && countryCode==country.code)onSelect(place.city(country))
+                                if(cities?.first==citySearchKey(query) && countryCode==country.code) {
+                                    val city=runCatching {place.city(country)}.getOrNull()
+                                    error=city==null
+                                    if(city!=null)onSelect(city)
+                                }
                             }
                         }
                     }
                     when {
-                        catalog?.isFailure==true -> Text(uiText("تعذّر تحميل قائمة المدن. يمكنك إدخال موقع مخصص."),color=c.amber)
+                        results?.isFailure==true -> Text(uiText("تعذّر تحميل قائمة المدن. يمكنك إدخال موقع مخصص."),color=c.amber)
                         matches==null -> Text(uiText("جارٍ تحميل المدن…"),color=c.secondary)
                         matches.isEmpty() -> Text(uiText("لم نجد المدينة. جرّب اسمًا آخر أو أدخل موقعًا مخصصًا."),color=c.secondary)
                     }
                 }
-                TextButton(onClick={manual=true}) {Text(uiText("مدينتي غير موجودة · إدخال يدوي"))}
+                if(error)Text(stringResource(R.string.city_unavailable_zone),color=c.amber)
+                if(matches?.size==100)Text(stringResource(R.string.city_search_limit),color=c.secondary,fontSize=12.sp)
+                TextButton(onClick={manual=true;error=false}) {Text(uiText("مدينتي غير موجودة · إدخال يدوي"))}
             } else Column(Modifier.verticalScroll(rememberScrollState()),verticalArrangement=Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(name,{name=it;error=false},label={Text(uiText("اسم الموقع"))},singleLine=true)
                 OutlinedTextField(lat,{lat=it;error=false},label={Text(uiText("خط العرض · −90 إلى 90"))},singleLine=true,keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Decimal))
@@ -186,5 +221,5 @@ import kotlinx.coroutines.withContext
     },confirmButton={if(manual)TextButton(onClick={
         val city=runCatching {require(name.isNotBlank());City(name.trim(),normalizedNumber(lat).toDouble(),normalizedNumber(lon).toDouble(),zone.trim())}.getOrNull()
         error=city==null;if(city!=null)onSelect(city)
-    }) {Text(uiText("حفظ الموقع"))}},dismissButton={TextButton(onClick=onDismiss) {Text(uiText("إغلاق"))}})
+    }) {Text(uiText("حفظ الموقع"))}},dismissButton={TextButton(onClick={if(countryMenu)countryMenu=false else onDismiss()}) {Text(uiText(if(countryMenu)"رجوع" else "إغلاق"))}})
 }

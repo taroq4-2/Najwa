@@ -1,0 +1,2 @@
+# City TSV rows intentionally keep the final empty region column.
+*.tsv whitespace=-blank-at-eol

@@ -58,6 +58,8 @@ License: SIL Open Font License 1.1. The full copyright and license are in `Noto-
 
 The offline places catalog is derived from GeoNames country dumps, under Creative Commons Attribution 4.0. Najwa filters populated places, derives display names and search aliases, and sorts by population. Data refreshed 2026-11-08.
 
+The world extension uses the GeoNames [cities500 export and first-level administrative areas](https://download.geonames.org/export/dump/), under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Najwa selected useful aliases, added region labels and split the export by country or territory. World data fetched 2026-11-11.
+
 Source: https://www.geonames.org/export/ · https://creativecommons.org/licenses/by/4.0/
 
 ## Resolved external runtime artifacts

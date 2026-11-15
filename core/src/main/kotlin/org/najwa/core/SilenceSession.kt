@@ -3,7 +3,7 @@ package org.najwa.core
 import java.util.UUID
 
 enum class Ringer { SILENT, VIBRATE, NORMAL }
-enum class SessionState { IDLE, PREPARED, ACTIVE, RESTORED, USER_OVERRIDE, RESTORE_FAILED, INTERRUPTED, PERMISSION_REVOKED }
+enum class SessionState { IDLE, PREPARED, APPLYING, ACTIVE, RESTORED, USER_OVERRIDE, RESTORE_FAILED, INTERRUPTED, PERMISSION_REVOKED }
 data class Session(val id: String, val eventId: String, val original: Ringer, val applied: Ringer, val startedAt: Long, val deadline: Long, val state: SessionState, val detail: String = "")
 data class SessionJournal(val session: Session? = null, val handled: List<String> = emptyList())
 interface JournalStore { fun read(): SessionJournal; fun write(value: SessionJournal) }
@@ -21,7 +21,7 @@ class SilenceSessionManager(private val store: JournalStore, private val audio: 
         if(eventId in journal.handled || time < scheduledAt || time >= deadline) return journal.session
         if(!audio.capable()) return journal.session
         var old = journal.session
-        if(old?.state in listOf(SessionState.PREPARED,SessionState.RESTORE_FAILED,SessionState.PERMISSION_REVOKED,SessionState.INTERRUPTED)) return old
+        if(old?.state in listOf(SessionState.PREPARED,SessionState.APPLYING,SessionState.RESTORE_FAILED,SessionState.PERMISSION_REVOKED,SessionState.INTERRUPTED)) return old
         if(old?.state == SessionState.ACTIVE && old.deadline <= time) { restore(old.id); journal=store.read(); old=journal.session }
         if(old?.state in listOf(SessionState.RESTORE_FAILED,SessionState.PERMISSION_REVOKED,SessionState.INTERRUPTED)) return old
         val current=audio.current()
@@ -45,15 +45,28 @@ class SilenceSessionManager(private val store: JournalStore, private val audio: 
         val prepared=Session(UUID.randomUUID().toString(),eventId,current,mode,time,deadline,SessionState.PREPARED)
         journal=journal.copy(session=prepared,handled=(journal.handled+eventId).takeLast(64))
         store.write(journal) // Must succeed before any audio write.
+        val applying=prepared.copy(state=SessionState.APPLYING)
+        var attempted=false
         try {
             alarm.schedule(prepared.id,prepared.deadline) // Restoration must be scheduled before muting.
-            if(!audio.capable()) { update(journal,prepared.copy(state=SessionState.PERMISSION_REVOKED)); return store.read().session }
+            if(!audio.capable() || audio.current()!=current) {
+                val released=prepared.copy(state=SessionState.USER_OVERRIDE,detail="changed_before_apply")
+                update(journal,released)
+                alarm.cancel()
+                return released
+            }
+            update(journal,applying)
+            attempted=true
             audio.set(mode)
-            val result=prepared.copy(state=if(audio.current()==mode) SessionState.ACTIVE else SessionState.INTERRUPTED,detail=if(audio.current()==mode) "" else "mode_not_applied")
+            val applied=audio.current()==mode
+            val result=prepared.copy(state=if(applied) SessionState.ACTIVE else SessionState.INTERRUPTED,detail=if(applied) "" else "mode_not_applied")
             update(journal,result)
             return result
         } catch(e: Exception) {
-            // PREPARED remains recoverable if writing this outcome also fails.
+            if(attempted) {
+                // Keep the scheduled recovery if an immediate rollback or journal write fails.
+                return restore(prepared.id,true)
+            }
             val result=prepared.copy(state=SessionState.INTERRUPTED,detail=e.javaClass.simpleName)
             update(journal,result)
             return result
@@ -62,7 +75,7 @@ class SilenceSessionManager(private val store: JournalStore, private val audio: 
     @Synchronized fun restore(id: String, manual: Boolean = false): Session? {
         val journal=store.read(); val s=journal.session ?: return null
         if(s.id != id || s.state in listOf(SessionState.RESTORED,SessionState.USER_OVERRIDE,SessionState.IDLE)) return s
-        if(!manual && s.state != SessionState.ACTIVE) return s
+        if(!manual && s.state !in listOf(SessionState.ACTIVE,SessionState.APPLYING,SessionState.RESTORE_FAILED,SessionState.PERMISSION_REVOKED)) return s
         if(!manual && now() < s.deadline) { alarm.schedule(s.id,s.deadline); return s }
         val result=try {
             when {
@@ -100,7 +113,7 @@ class SilenceSessionManager(private val store: JournalStore, private val audio: 
             if(audio.current()!=s.applied || audio.capable()) return restore(s.id,manual=true)
             return s
         }
-        if(s.state != SessionState.ACTIVE) return s
+        if(s.state !in listOf(SessionState.ACTIVE,SessionState.APPLYING)) return s
         // A wall-clock rollback makes the recorded deadline unreliable. Safely end
         // the owned lease now; INTERRUPTED would make its restore alarm a no-op.
         if(now() < s.startedAt) return restore(s.id,manual=true)

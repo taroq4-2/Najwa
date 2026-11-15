@@ -23,6 +23,9 @@ import androidx.activity.compose.BackHandler
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.najwa.app.prayerDispatcher
 import org.najwa.app.NajwaRuntime
 import org.najwa.app.R
 import org.najwa.core.*
@@ -31,7 +34,9 @@ import java.time.Instant
 @Composable fun NajwaApp(runtime: NajwaRuntime,resumed: Int,homeRequest: Int=0) {
     var prefs by remember { mutableStateOf(runtime.preferences) }
     var now by remember { mutableStateOf(Instant.now()) }
-    var session by remember { mutableStateOf(runtime.session()) }
+    var session by remember { mutableStateOf(runtime.displayedSession()) }
+    val scope=rememberCoroutineScope()
+    var saving by remember {mutableStateOf(false)}
     var trail by rememberSaveable {mutableStateOf(listOf(Screen.HOME.name))}
     val context=LocalContext.current
     val setup=remember(context) {context.getSharedPreferences("first-run",0)}
@@ -67,14 +72,21 @@ import java.time.Instant
     val current=days.first { it.date==now.atZone(prefs.city.zoneId).toLocalDate() }
     val times=timeline(days.flatMap { it.events },now)
     val editingContact=screen==Screen.CONTACT && WindowInsets.ime.getBottom(LocalDensity.current)>0
-    fun save(p: Preferences) {
+    fun save(p: Preferences, onSaved: ()->Unit={}) {
         if(!cityConfirmed && (p.autoSilent || p.adhanNotifications || p.iqamaNotifications || p.fridayReminder)) {
             cityDialog=true
             return
         }
-        runtime.update(p)
-        prefs=runtime.preferences
-        session=runtime.session()
+        if(saving)return
+        saving=true
+        scope.launch {
+            try {
+                withContext(prayerDispatcher) { runtime.update(p) }
+                prefs=runtime.preferences
+                session=runtime.displayedSession()
+                if(prefs==p)onSaved()
+            } finally { saving=false }
+        }
     }
     CompositionLocalProvider(LocalPalette provides colors) {
         NajwaTheme(dark) {
@@ -101,8 +113,16 @@ import java.time.Instant
                             city=prefs.city,cityConfirmed=cityConfirmed,onChooseCity={cityDialog=true},onConfirmCity=::confirmCity,
                             wantsSilence=setupSilence,onWantsSilence={setupSilence=it})
                         Screen.NOTIFICATIONS -> NotificationScreen(runtime,prefs,::save,::back,resumed)
-                        Screen.HOME -> HomeScreen(prefs,now,current,times,runtime.error==null && days.all {it.complete} && prefs.enabled.isNotEmpty() && runtime.audio.capable() && runtime.alarms.exactAccess,onCity={cityDialog=true},onSilence={navigate(Screen.SILENCE)},activeUntil=session?.takeIf {it.state==SessionState.ACTIVE}?.let {Instant.ofEpochMilli(it.deadline)})
-                        Screen.SILENCE -> SilenceScreen(runtime,prefs,session,now,onSave=::save,onAccess={navigate(Screen.PERMISSIONS)},onRestore={runtime.restore();session=runtime.session()})
+                        Screen.HOME -> {
+                            if(!cityConfirmed) {
+                                Text(stringResource(R.string.city_unconfirmed),color=colors.amber,modifier=Modifier.padding(vertical=8.dp))
+                                TextButton(onClick={cityDialog=true}) {Text(stringResource(R.string.en_setup_choose_city))}
+                            }
+                            HomeScreen(prefs,now,current,times,runtime.error==null && days.all {it.complete} && prefs.enabled.isNotEmpty() && runtime.audio.capable() && runtime.alarms.exactAccess,onCity={cityDialog=true},onSilence={navigate(Screen.SILENCE)},activeUntil=session?.takeIf {it.state==SessionState.ACTIVE}?.let {Instant.ofEpochMilli(it.deadline)})
+                        }
+                        Screen.SILENCE -> SilenceScreen(runtime,prefs,session,now,onSave={save(it)},onAccess={navigate(Screen.PERMISSIONS)},onRestore={
+                            scope.launch { withContext(prayerDispatcher) {runtime.restore()};session=runtime.displayedSession() }
+                        })
                         Screen.SETTINGS -> SettingsScreen(prefs,onSave=::save,onCity={cityDialog=true},onNotifications={navigate(Screen.NOTIFICATIONS)},onWidget={navigate(Screen.WIDGET)},onInformation={navigate(Screen.INFORMATION)},onCalculation={navigate(Screen.CALCULATION)},onAppearance={navigate(Screen.APPEARANCE)},onSilence={navigate(Screen.SILENCE)})
                         Screen.CALCULATION -> CalculationScreen(prefs,::save,{cityDialog=true},::back)
                         Screen.APPEARANCE -> AppearanceScreen(prefs,::save,::back)
@@ -114,9 +134,7 @@ import java.time.Instant
                 if(!onboarding && !editingContact)BottomNavigation(screen.tab) {trail=navigateScreens(trail,Screen.forTab(it),true)}
             }
             if(cityDialog) CityDialog(prefs.city,onDismiss={cityDialog=false},onSelect={
-                save(prefs.copy(city=it))
-                if(prefs.city==it)confirmCity()
-                cityDialog=false
+                save(prefs.copy(city=it)) { confirmCity();cityDialog=false }
             })
         }
     }
@@ -125,22 +143,29 @@ import java.time.Instant
  * scroll state of a node that is still attached during a navigation transition. */
 @Composable fun ColumnScope.PageScroll(screen: Screen,content: @Composable ColumnScope.()->Unit) {
     val stateHolder=rememberSaveableStateHolder()
+    LaunchedEffect(screen) {
+        // Preserve a draft during configuration recreation, but clear it on leaving.
+        if(screen!=Screen.CONTACT)stateHolder.removeState(Screen.CONTACT.name)
+    }
     stateHolder.SaveableStateProvider(screen.name) {
         val scroll=rememberScrollState()
         val entrance=remember {Animatable(1f)}
         LaunchedEffect(screen) {entrance.snapTo(.92f);entrance.animateTo(1f,tween(180))}
         Column(Modifier.weight(1f).widthIn(max=600.dp).fillMaxWidth()
             .graphicsLayer {alpha=entrance.value;translationY=(1f-entrance.value)*80f}
-            .verticalScroll(scroll).padding(horizontal=20.dp),content=content)
+            .verticalScroll(scroll).padding(horizontal=if(screen==Screen.HOME)17.dp else 20.dp),content=content)
     }
 }
 @Composable fun BottomNavigation(tab: Int,onTab: (Int)->Unit) {
     val c=LocalPalette.current
-    NavigationBar(containerColor=c.surface,tonalElevation=0.dp,windowInsets=WindowInsets(0,0,0,0)) {
+    Column {
+        HorizontalDivider(color=c.border)
+        NavigationBar(containerColor=c.surface,tonalElevation=0.dp,windowInsets=WindowInsets(0,0,0,0)) {
         listOf(stringResource(R.string.en_tab_home) to "home",stringResource(R.string.en_tab_silence) to "sound",stringResource(R.string.en_tab_settings) to "settings").forEachIndexed { i,item ->
             NavigationBarItem(selected=i==tab,onClick={onTab(i)},icon={Glyph(item.second,if(i==tab)c.mint else c.secondary)},
                 label={Text(item.first,fontSize=12.sp,fontWeight=if(i==tab)FontWeight.Bold else FontWeight.Normal)},
                 colors=NavigationBarItemDefaults.colors(indicatorColor=c.selected,selectedTextColor=c.mint,unselectedTextColor=c.secondary))
+        }
         }
     }
 }

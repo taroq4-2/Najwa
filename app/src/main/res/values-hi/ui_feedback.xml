@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="contact_no_email_app">कोई ईमेल ऐप नहीं मिला। पता कॉपी करें और अपनी पसंद की ईमेल सेवा का उपयोग करें।</string>
+    <string name="contact_email_copied">ईमेल पता कॉपी हो गया।</string>
+    <string name="contact_copy_failed">कॉपी नहीं हो सका। ईमेल: %1$s</string>
+    <string name="brand_version">नजवा · %1$s</string>
+    <string name="app_version_label">संस्करण %1$s</string>
+    <string name="contact_character_count">%2$d में से %1$d अक्षर</string>
+    <string name="contact_privacy_email">गोपनीयता संबंधी प्रश्न: %1$s</string>
+    <string name="widget_pin_complete">होम स्क्रीन के संवाद में विजेट जोड़ना पूरा करें।</string>
+    <string name="widget_pin_manual">होम स्क्रीन की खाली जगह को दबाकर रखें, विजेट चुनें, नजवा खोजें और विजेट को स्क्रीन पर खींचें।</string>
+    <string name="widget_transparency_label">विजेट की पृष्ठभूमि की पारदर्शिता</string>
+    <string name="widget_transparency_value">%1$d प्रतिशत पारदर्शिता</string>
+    <string name="widget_transparency_display">पृष्ठभूमि की पारदर्शिता: %1$d%%</string>
+    <string name="sound_saved">%1$s सहेजा गया</string>
+    <string name="sound_import_failed">ध्वनि सहेजी नहीं जा सकी। 32 एमबी तक की मान्य ऑडियो फ़ाइल चुनें और फ़ोन की सेटिंग में अज़ान का सूचना चैनल चालू करें।</string>
+    <string name="sound_picker_failed">फ़ाइल चयनकर्ता नहीं खुल सका। सुनिश्चित करें कि फ़ोन में फ़ाइल मैनेजर उपलब्ध है।</string>
+    <string name="sound_reset_done">डिफ़ॉल्ट अलार्म ध्वनि बहाल हुई।</string>
+    <string name="sound_reset_failed">ध्वनि बदली नहीं जा सकी। अज़ान की सूचना सेटिंग जाँचें और फिर कोशिश करें।</string>
+    <string name="sound_unavailable_title">सहेजी गई ध्वनि फिर चुनें</string>
+    <string name="sound_unavailable_detail">सहेजी गई ध्वनि का चयन पढ़ा नहीं जा सका। फ़ाइल फिर चुनें या डिफ़ॉल्ट अलार्म ध्वनि बहाल करें। चयन करने तक अज़ान की ध्वनि बंद रहेगी।</string>
+    <string name="sound_phone_silent">फ़ोन की सेटिंग के अनुसार मौन</string>
+    <string name="sound_phone_changed">फ़ोन की सेटिंग में ध्वनि बदली गई</string>
+    <string name="sound_phone_default">फ़ोन पर चुनी गई अज़ान की ध्वनि</string>
+    <string name="sound_alarm_default">डिफ़ॉल्ट अलार्म ध्वनि</string>
+</resources>

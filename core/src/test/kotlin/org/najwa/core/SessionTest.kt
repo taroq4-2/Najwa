@@ -25,8 +25,8 @@ class SessionTest {
         assertEquals(1,f.writes)
     }
     class Fixture {
-        var now=1_000_000L;var state=SessionJournal();var mode=Ringer.NORMAL;var capable=true;var writes=0;var scheduleFails=false;var diskFails=false;var audioFails=false;var scheduled=0L
-        val store=object: JournalStore { override fun read()=state;override fun write(value: SessionJournal) {check(!diskFails);state=value} }
+        var now=1_000_000L;var state=SessionJournal();var mode=Ringer.NORMAL;var capable=true;var writes=0;var scheduleFails=false;var diskFails=false;var activeCommitFails=false;var audioFails=false;var scheduled=0L
+        val store=object: JournalStore { override fun read()=state;override fun write(value: SessionJournal) {check(!diskFails && !(activeCommitFails && value.session?.state==SessionState.ACTIVE));state=value} }
         val audio=object: RingerPort {override fun capable()=capable;override fun current()=mode;override fun set(value: Ringer){check(state.session!=null);check(!audioFails);mode=value;writes++} }
         val alarm=object: RestoreAlarm {override fun schedule(id: String,deadline: Long) {check(!scheduleFails);scheduled=deadline};override fun cancel(){scheduled=0} }
         val manager=SilenceSessionManager(store,audio,alarm,{now})
@@ -46,6 +46,22 @@ class SessionTest {
     @Test fun alreadySilentNotClaimed() {val f=Fixture();f.mode=Ringer.SILENT;assertNull(f.manager.start("a",f.now,15,Ringer.SILENT));assertEquals(0,f.writes);assertTrue("a" in f.state.handled)}
     @Test fun failedAlarmNeverMutes() {val f=Fixture();f.scheduleFails=true;assertEquals(SessionState.INTERRUPTED,f.start().state);assertEquals(0,f.writes)}
     @Test fun failedPersistenceNeverMutes() {val f=Fixture();f.diskFails=true;assertThrows(IllegalStateException::class.java) {f.start()};assertEquals(0,f.writes)}
+    @Test fun failedActiveCommitImmediatelyRestoresRinger() {
+        val f=Fixture()
+        f.activeCommitFails=true
+        assertEquals(SessionState.RESTORED,f.start().state)
+        assertEquals(Ringer.NORMAL,f.mode)
+    }
+    @Test fun processDeathAfterApplyingRecoversAtOriginalDeadline() {
+        val f=Fixture()
+        val session=f.start()
+        f.state=f.state.copy(session=session.copy(state=SessionState.APPLYING))
+        f.manager.reconcile()
+        assertEquals(Ringer.SILENT,f.mode)
+        f.now=session.deadline
+        assertEquals(SessionState.RESTORED,f.manager.restore(session.id)?.state)
+        assertEquals(Ringer.NORMAL,f.mode)
+    }
     @Test fun preparedRecoveryNeverGuesses() {val f=Fixture();val s=f.start();f.state=f.state.copy(session=s.copy(state=SessionState.PREPARED));f.now=s.deadline;f.manager.reconcile();assertEquals(SessionState.INTERRUPTED,f.state.session!!.state);assertEquals(1,f.writes)}
     @Test fun preparedSessionBeforeMuteReleasesFuturePrayersWithoutWritingAudio() {
         val f=Fixture()

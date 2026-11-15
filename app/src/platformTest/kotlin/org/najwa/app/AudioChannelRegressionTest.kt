@@ -39,6 +39,48 @@ class AudioChannelRegressionTest {
         assertFalse(app.runtime.notifications.enabled("missing_selected_channel"))
         assertTrue(app.runtime.notifications.enabled(PrayerNotifications.ADHAN))
     }
+    @Test fun englishChoiceAppliesToNotificationAndWidget() {
+        app.getSharedPreferences("interface-language",0).edit().putString("language","en").commit()
+        app.runtime.notifications.updateChannels()
+        val time=Instant.parse("2026-11-07T09:00:00Z")
+        val prefs=Preferences()
+        val task=ScheduledPrayer(PrayerEvent(Prayer.DHUHR,time),PrayerAction.ADHAN,time)
+        app.runtime.notifications.show(task,prefs)
+        val posted=shadowOf(manager).allNotifications.single()
+        assertEquals("Time for Dhuhr adhan",posted.extras.getCharSequence(Notification.EXTRA_TITLE))
+        assertEquals("Adhan",manager.getNotificationChannel(PrayerNotifications.ADHAN).name)
+        val widget=PrayerWidget.views(app,prefs,time,data=WidgetPrayer(prefs.city.name,Prayer.DHUHR,time,"",null))
+        val view=widget.apply(app,null)
+        assertEquals("Dhuhr",view.findViewById<android.widget.TextView>(R.id.widget_prayer).text.toString())
+    }
+    @Test fun fiveNewLocalesReachNotificationsAndWidget() {
+        val times=mapOf("id" to "Zuhur","ur" to "ظہر","bn" to "যোহর","hi" to "ज़ुहर","tr" to "Öğle")
+        val time=Instant.parse("2026-11-07T09:00:00Z")
+        val prefs=Preferences()
+        for((index,entry) in times.entries.withIndex()) {
+            val (language,expected)=entry
+            val eventTime=time.plusSeconds(index.toLong()*60)
+            val task=ScheduledPrayer(PrayerEvent(Prayer.DHUHR,eventTime),PrayerAction.ADHAN,eventTime)
+            app.getSharedPreferences("interface-language",0).edit().putString("language",language).commit()
+            app.runtime.notifications.updateChannels()
+            val localized=app.prayerLanguage()
+            assertEquals(language,localized.resources.configuration.locales[0].language)
+            val keys=localized.resources.getStringArray(R.array.interface_keys)
+            val labels=localized.resources.getStringArray(R.array.interface_labels)
+            assertEquals(keys.size,labels.size)
+            assertNotEquals("Missing interface translation for $language","الإعدادات",labels[keys.indexOf("الإعدادات")])
+            manager.cancelAll()
+            assertEquals(NotificationDelivery.POSTED,app.runtime.notifications.show(task,prefs))
+            assertTrue("Missing translated prayer in $language",shadowOf(manager).allNotifications.single().extras.getCharSequence(Notification.EXTRA_TITLE).toString().contains(expected))
+            for(expanded in listOf(false,true)) {
+                val notificationView=notificationViews(app,task,prefs,expected,"",expanded,time)
+                    .apply(app,android.widget.FrameLayout(app))
+                assertEquals(expected,notificationView.findViewById<android.widget.TextView>(R.id.notification_title).text.toString())
+            }
+            val view=PrayerWidget.views(app,prefs,time,data=WidgetPrayer(prefs.city.name,Prayer.DHUHR,time,"",null)).apply(app,null)
+            assertEquals(expected,view.findViewById<android.widget.TextView>(R.id.widget_prayer).text.toString())
+        }
+    }
     @Test fun blockedAdhanDoesNotClaimDeliveryOrAffectSilentIqamaChannel() {
         val channel=manager.getNotificationChannel(PrayerNotifications.ADHAN)
         channel.importance=NotificationManager.IMPORTANCE_NONE

@@ -63,6 +63,7 @@ class AndroidJournal(context: Context): JournalStore {
     private val file=JsonFile(context,"session.json")
     @Volatile private var displaySnapshot: SessionJournal? = null
     fun snapshot(): SessionJournal = displaySnapshot ?: read()
+    fun cachedSnapshot(): SessionJournal? = displaySnapshot
     @Synchronized override fun read(): SessionJournal {
         val j=file.read() ?: return SessionJournal().also {displaySnapshot=it}
         val a=j.getJSONArray("handled")

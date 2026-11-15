@@ -26,6 +26,6 @@ fun widgetColors(context: Context,p: Preferences): WidgetColors {
         }
     }
     fun color(hex: String)=Color.parseColor(hex)
-    return if(light)WidgetColors(true,color("#142B35"),color("#36565E"),color("#006B50"),color("#805015"))
-        else WidgetColors(false,color("#F5F8FC"),color("#D0DFE1"),color("#60DFBA"),color("#F0C477"))
+    return if(light)WidgetColors(true,color("#19352E"),color("#405C50"),color("#126D53"),color("#81551E"))
+        else WidgetColors(false,color("#F6F4EC"),color("#B8CBC0"),color("#A5E8C4"),color("#F0C787"))
 }

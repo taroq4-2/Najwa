@@ -1,0 +1,39 @@
+name: Verify distributed APK
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to verify
+        required: true
+      version_name:
+        description: Expected APK version name
+        required: true
+      version_code:
+        description: Expected APK version code
+        required: true
+      sha256:
+        description: SHA-256 from the original signed APK
+        required: true
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Download and verify
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          VERSION_NAME: ${{ inputs.version_name }}
+          VERSION_CODE: ${{ inputs.version_code }}
+          EXPECTED_SHA256: ${{ inputs.sha256 }}
+        run: |
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'build-tools;35.0.0'
+          gh release download --repo "$GITHUB_REPOSITORY" --pattern Najwa.apk -- "$RELEASE_TAG"
+          python3 scripts/verify_release_apk.py Najwa.apk \
+            --build-tools "$ANDROID_HOME/build-tools/35.0.0" \
+            --version-name "$VERSION_NAME" --version-code "$VERSION_CODE" \
+            --expected-sha256 "$EXPECTED_SHA256"

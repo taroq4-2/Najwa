@@ -2,8 +2,12 @@
 
 # نجوى · Najwa
 
+![مدار السكينة — Najwa Madar visual identity](docs/assets/madar-atmosphere.png)
+
 **صلاتك أولاً، وضجيجك لاحقاً.**  
 **Prayer first. Noise can wait.**
+
+**1.2.1 · Build 111** — Android 8.0+ · Offline · 7 languages · Apache 2.0
 
 [تنزيل نجوى لأندرويد](https://github.com/taroq4-2/Najwa/releases/latest/download/Najwa.apk) · [الموقع العربي](https://taroq4-2.github.io/Najwa/) · [English website](https://taroq4-2.github.io/Najwa/en.html) · [الإصدارات · Releases](https://github.com/taroq4-2/Najwa/releases)
 
@@ -21,13 +25,42 @@
 
 Najwa is an open-source Android app that calculates prayer times offline. Set adhan and iqama alerts per prayer and see the next prayer on your home screen. Optional automatic silent mode restores your previous ringer setting after the interval.
 
+<div dir="rtl">
+
+هوية **مدار السكينة** تجمع الألوان الزمردية والعاجية مع واجهة واضحة وويدجت متجاوب. ابحث في أكثر من 459 ألف مكان في 246 دولة وإقليم. تتوفر العربية والإنجليزية والإندونيسية والأردية والبنغالية والهندية والتركية.
+
+يبدأ الصمت الاختياري بعد الأذان بـ20 ثانية، وتُخصّص مدة الإقامة والصمت لكل صلاة. عند الإقامة ينتقل العداد للموعد التالي. مواقيت الإقامة تتبع إعدادك؛ راجع مسجدك للمواعيد الفعلية.
+
+</div>
+
+The **Madar** design pairs emerald and ivory with a clear interface and responsive widgets. Search over 459,000 places across 246 countries and territories. Arabic, English, Indonesian, Urdu, Bengali, Hindi and Turkish are supported. Optional silence starts 20 seconds after adhan; iqama and silence durations are configurable for each prayer.
+
 ## معاينة التطبيق · App preview
 
-| الرئيسية · Home | الويدجت · Widget | الأذان · Adhan alert |
+| الرئيسية الداكنة · Dark | الرئيسية الفاتحة · Light | English |
 | :---: | :---: | :---: |
-| <img src="docs/assets/home.png" width="190" alt="Najwa prayer times and iqama countdown"> | <img src="docs/assets/widget.png" width="115" alt="Najwa home screen widget"> | <img src="docs/assets/notification.png" width="260" alt="Expanded adhan alert and iqama countdown"> |
+| <img src="docs/assets/home.png" width="220" alt="واجهة نجوى الداكنة"> | <img src="docs/assets/home-light.png" width="220" alt="واجهة نجوى الفاتحة"> | <img src="docs/assets/home-en.png" width="220" alt="Najwa English home screen"> |
+
+| الويدجت · Widget | الأذان · Adhan | الإقامة · Iqama |
+| :---: | :---: | :---: |
+| <img src="docs/assets/widget-wide.png" width="280" alt="Wide iqama countdown widget"> | <img src="docs/assets/notification.png" width="280" alt="Expanded adhan alert"> | <img src="docs/assets/iqama.png" width="280" alt="Expanded iqama reminder"> |
+
+معاينات مولّدة من واجهات التطبيق، وليست لقطات جهاز فعلي. تختلف حاوية الإشعارات والويدجت باختلاف الهاتف.
+Previews rendered from the app UI. System notification and widget framing varies by device.
 
 **[من أول موعد إلى أول أذان](https://taroq4-2.github.io/Najwa/#setup)** · [Setup guide in English](https://taroq4-2.github.io/Najwa/en.html#setup)
+
+## الإصدار والتحقق · Release verification
+
+ملف APK موقّع بالمفتاح الرسمي السابق لدعم التحديث. أكّد المستخدم نجاح تجربته. اجتازت المراجعة المحلية 184 اختبارًا، مع فحص 53 مكتبة دون تنبيهات OSV في وقت المراجعة. هذه النتائج لا تعني ضمانًا لجميع الأجهزة؛ تبقى ملاحظات التحسين والقياس موثقة في [التقرير](docs/review-release-111-ar.md).
+
+The APK uses the established release signing key. The user confirmed a successful device trial. Local verification passed 184 tests; OSV returned no advisories for 53 resolved libraries at review time. This is not a guarantee for every device. See the [release verification guide](docs/release-verification.md).
+
+SHA-256 · `Najwa.apk` · 1.2.1 / 111:
+
+```text
+33696188139c6e22cff627a1e3720b70988d40c432c927ccc595f5cf358eff7e
+```
 
 ## البناء والمساهمة · Build and contribute
 

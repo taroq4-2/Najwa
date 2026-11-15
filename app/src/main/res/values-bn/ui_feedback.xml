@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="contact_no_email_app">কোনো ইমেইল অ্যাপ পাওয়া যায়নি। ঠিকানাটি কপি করে আপনার পছন্দের ইমেইল সেবা ব্যবহার করুন।</string>
+    <string name="contact_email_copied">ইমেইল ঠিকানা কপি হয়েছে।</string>
+    <string name="contact_copy_failed">কপি করা যায়নি। ইমেইল: %1$s</string>
+    <string name="brand_version">নাজওয়া · %1$s</string>
+    <string name="app_version_label">সংস্করণ %1$s</string>
+    <string name="contact_character_count">%2$d অক্ষরের মধ্যে %1$d</string>
+    <string name="contact_privacy_email">গোপনীয়তা সম্পর্কিত প্রশ্ন: %1$s</string>
+    <string name="widget_pin_complete">হোম স্ক্রিনের ডায়ালগে উইজেট যোগ করা সম্পন্ন করুন।</string>
+    <string name="widget_pin_manual">হোম স্ক্রিনের ফাঁকা জায়গায় চেপে ধরুন, উইজেট বেছে নিন, নাজওয়া খুঁজুন এবং উইজেটটি স্ক্রিনে টেনে আনুন।</string>
+    <string name="widget_transparency_label">উইজেটের পটভূমির স্বচ্ছতা</string>
+    <string name="widget_transparency_value">%1$d শতাংশ স্বচ্ছতা</string>
+    <string name="widget_transparency_display">পটভূমির স্বচ্ছতা: %1$d%%</string>
+    <string name="sound_saved">%1$s সংরক্ষিত হয়েছে</string>
+    <string name="sound_import_failed">শব্দ সংরক্ষণ করা যায়নি। ৩২ মেগাবাইট পর্যন্ত বৈধ অডিও ফাইল বেছে নিন এবং ফোনের সেটিংসে আজানের বিজ্ঞপ্তি চ্যানেল চালু আছে কি না দেখুন।</string>
+    <string name="sound_picker_failed">ফাইল নির্বাচক খোলা যায়নি। ফোনে ফাইল ম্যানেজার আছে কি না দেখুন।</string>
+    <string name="sound_reset_done">ডিফল্ট অ্যালার্মের শব্দ পুনরুদ্ধার হয়েছে।</string>
+    <string name="sound_reset_failed">শব্দ পরিবর্তন করা যায়নি। আজানের বিজ্ঞপ্তির সেটিংস দেখে আবার চেষ্টা করুন।</string>
+    <string name="sound_unavailable_title">সংরক্ষিত শব্দ আবার বেছে নিন</string>
+    <string name="sound_unavailable_detail">সংরক্ষিত শব্দের নির্বাচন পড়া যায়নি। ফাইল আবার বেছে নিন বা ডিফল্ট অ্যালার্মের শব্দ পুনরুদ্ধার করুন। বেছে না নেওয়া পর্যন্ত আজানের শব্দ বন্ধ থাকবে।</string>
+    <string name="sound_phone_silent">ফোনের সেটিংস অনুযায়ী নীরব</string>
+    <string name="sound_phone_changed">ফোনের সেটিংসে শব্দ পরিবর্তিত হয়েছে</string>
+    <string name="sound_phone_default">ফোনে নির্বাচিত আজানের শব্দ</string>
+    <string name="sound_alarm_default">ডিফল্ট অ্যালার্মের শব্দ</string>
+</resources>

@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="city_unconfirmed">Yerel namaz vakitlerini görmek için şehrinizi onaylayın.</string>
+    <string name="system_adhan">Ezan</string>
+    <string name="system_iqama">Kamet</string>
+    <string name="system_friday">Cuma namazı</string>
+    <string name="system_friday_title">Cuma namazı hatırlatıcısı</string>
+    <string name="system_adhan_title">%1$s ezanı vakti</string>
+    <string name="system_iqama_title">%1$s kameti vakti</string>
+    <string name="system_adhan_test">Ezan testi</string>
+    <string name="system_iqama_test">Kamet testi</string>
+    <string name="system_next">Sıradaki namaz</string>
+    <string name="system_iqama_remaining">Kamete kalan süre</string>
+    <string name="system_to_iqama">Kamete kadar</string>
+    <string name="system_to_adhan">Ezana kadar</string>
+    <string name="system_unavailable">Kullanılamıyor</string>
+    <string name="system_check_calculation">Hesaplama ayarlarını kontrol edin</string>
+    <string name="system_brand">Najwa</string>
+    <string name="system_signature">Önce namaz, sonra ses.</string>
+    <string name="system_private_alert">Bir namaz hatırlatıcınız var</string>
+    <string name="system_friday_detail">Cuma namazına hazırlanın. Hutbe ve namaz saatini caminizden öğrenin.</string>
+    <string name="system_iqama_detail">Kamet ayarınıza göre</string>
+    <string name="system_refresh">Yenile</string>
+    <string name="system_execution">Namaz modu</string>
+    <string name="system_execution_detail">Sessiz mod açılıyor veya zil sesi geri yükleniyor</string>
+    <string name="system_minutes_after">Kamete %1$d dk.</string>
+    <string name="system_hijri_format">%1$s Hicrî</string>
+    <string name="system_clock_required">Namaz uyarıları ve otomatik sessizlik için kesin zamanlı alarmlara izin verin.</string>
+    <string name="system_background_unavailable">Android son planlanan saatte zil sesi hizmetini engelledi. Najwa’dan zil durumunu kontrol edin.</string>
+    <string name="trial_title">Ezan ve sessiz mod testi</string>
+    <string name="trial_description">Ezan 30 saniye sonra okunur. Ezandan 20 saniye sonra sessiz veya titreşim modu, 1 dakika sonra kamet ve 5 dakika sonra önceki zil ayarı devreye girer.</string>
+    <string name="trial_start">Testi planla</string>
+    <string name="trial_scheduled">Test planlandı. İsterseniz ekranı kilitleyin. Ezan 30 saniye sonra başlar.</string>
+    <string name="trial_existing_schedule">Sessiz bir toplantı, sınav ya da dua yakında yapılacak.</string>
+    <string name="trial_permissions_required">Tam alarmları ve çeneler kontrolünü etkinleştirin ve testden önce ezan ve kamet bildirim kanallarını etkinleştirin.</string>
+    <string name="app_language_label">Uygulama dili</string>
+    <string name="city_choose_country">Ülke veya bölge seçin</string>
+    <string name="city_search_country">Ülke veya bölge arayın</string>
+    <string name="city_search_place">Şehrinizi arayın</string>
+    <string name="city_unavailable_zone">Telefonunuz bu şehrin saat dilimini desteklemiyor. Başka bir şehir seçin veya konum girin.</string>
+    <string name="city_search_limit">İlk 100 sonuç gösteriliyor. Diğer sonuçlar için daha belirgin bir ad yazın.</string>
+</resources>

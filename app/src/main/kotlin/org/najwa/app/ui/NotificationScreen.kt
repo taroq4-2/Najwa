@@ -111,7 +111,7 @@ internal fun NotificationReadiness(notificationsAllowed: Boolean,exactAlarmsAllo
             Action("فتح إعدادات إشعارات نجوى",Modifier.fillMaxWidth(),onClick=onNotifications)
         }
         if(!exactAlarmsAllowed) {
-            Text(uiText("اسمح للمنبّهات الدقيقة كي تعمل تنبيهات الصلاة في موعدها."),color=c.text)
+            Text(androidx.compose.ui.res.stringResource(org.najwa.app.R.string.system_clock_required),color=c.text)
             Action("فتح إعدادات المنبّهات الدقيقة",Modifier.fillMaxWidth(),onClick=onAlarms)
         }
     }
@@ -119,15 +119,18 @@ internal fun NotificationReadiness(notificationsAllowed: Boolean,exactAlarmsAllo
 
 @Composable fun NotificationPreferences(p: Preferences,onSave: (Preferences)->Unit) {
     val c=LocalPalette.current
+    val adhanLabel=uiText("تنبيه الأذان")
+    val iqamaLabel=uiText("تذكير الإقامة")
+    val fridayLabel=uiText("تذكير يوم الجمعة")
     SettingsCard("التنبيهات") {
         Row(verticalAlignment=Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {Text(uiText("تنبيه الأذان"),color=c.text);Text(uiText("إشعار مع صوت للصلوات المختارة"),color=c.secondary,fontSize=12.sp)}
-            Switch(p.adhanNotifications,{onSave(p.copy(adhanNotifications=it))},modifier=Modifier.semantics {contentDescription="تنبيه الأذان"})
+            Switch(p.adhanNotifications,{onSave(p.copy(adhanNotifications=it))},modifier=Modifier.semantics {contentDescription=adhanLabel})
         }
         HorizontalDivider(color=c.border)
         Row(verticalAlignment=Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {Text(uiText("تذكير الإقامة"),color=c.text);Text(uiText("إشعار مرئي دون صوت أو اهتزاز"),color=c.secondary,fontSize=12.sp)}
-            Switch(p.iqamaNotifications,{onSave(p.copy(iqamaNotifications=it))},modifier=Modifier.semantics {contentDescription="تذكير الإقامة"})
+            Switch(p.iqamaNotifications,{onSave(p.copy(iqamaNotifications=it))},modifier=Modifier.semantics {contentDescription=iqamaLabel})
         }
         Text(uiText("التنبيهات مستقلة عن الصمت التلقائي، ولا تشمل الشروق."),color=c.secondary,fontSize=12.sp)
         Text(uiText("عند تفعيلها قد يعرض الهاتف رمز المنبّه وموعد تنبيه الصلاة التالي."),color=c.secondary,fontSize=12.sp)
@@ -149,7 +152,7 @@ internal fun NotificationReadiness(notificationsAllowed: Boolean,exactAlarmsAllo
     SettingsCard("صلاة الجمعة","تذكير أسبوعي قبل وقت الظهر المحسوب في مدينتك") {
         Row(verticalAlignment=Alignment.CenterVertically) {
             Text(uiText("تذكير يوم الجمعة"),color=c.text,modifier=Modifier.weight(1f))
-            Switch(p.fridayReminder,{onSave(p.copy(fridayReminder=it))},modifier=Modifier.semantics {contentDescription="تذكير يوم الجمعة"})
+            Switch(p.fridayReminder,{onSave(p.copy(fridayReminder=it))},modifier=Modifier.semantics {contentDescription=fridayLabel})
         }
         if(p.fridayReminder) {
             Text(uiText("وقت التذكير قبل الظهر"),color=c.text)

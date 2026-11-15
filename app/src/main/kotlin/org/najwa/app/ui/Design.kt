@@ -25,16 +25,17 @@ import androidx.compose.material3.*
 import androidx.compose.ui.text.style.TextAlign
 
 data class Palette(val bg: Color,val surface: Color,val text: Color,val secondary: Color,val border: Color,val green: Color,val mint: Color,val amber: Color,val selected: Color,val track: Color)
-val Dark=Palette(Color(0xFF0B1525),Color(0xFF101D30),Color(0xFFF5F8FC),Color(0xFFA8B7CA),Color(0xFF263A54),Color(0xFF16C784),Color(0xFF35DB9B),Color(0xFFF0B95D),Color(0xFF10333C),Color(0xFF1B3048))
-val Light=Palette(Color(0xFFF4F7F5),Color.White,Color(0xFF14243A),Color(0xFF4A5B70),Color(0xFFD4DFDB),Color(0xFF0B9A63),Color(0xFF0B7A52),Color(0xFF8A5713),Color(0xFFE6F4EE),Color(0xFFDDE7E3))
+// Madar Al-Sakeenah: ink, jade and dawn-gold. Text/secondary tones are contrast-led.
+val Dark=Palette(Color(0xFF071715),Color(0xFF112521),Color(0xFFF6F4EC),Color(0xFFA9C0B6),Color(0xFF2D4840),Color(0xFF3EB28C),Color(0xFFA5E8C4),Color(0xFFF0C787),Color(0xFF1B3B32),Color(0xFF29483D))
+val Light=Palette(Color(0xFFF5F3EB),Color(0xFFFEFDF7),Color(0xFF19352E),Color(0xFF58756A),Color(0xFFD8E0D4),Color(0xFF15795C),Color(0xFF126D53),Color(0xFF81551E),Color(0xFFE6F1E8),Color(0xFFDCE7DE))
 val LocalPalette=staticCompositionLocalOf { Dark }
-@Composable fun Panel(modifier: Modifier=Modifier, radius: Int=24, selected: Boolean=false, content: @Composable ColumnScope.()->Unit) {
+@Composable fun Panel(modifier: Modifier=Modifier, radius: Int=28, selected: Boolean=false, content: @Composable ColumnScope.()->Unit) {
     val c=LocalPalette.current; val shape=RoundedCornerShape(radius.dp)
     Column(modifier.clip(shape).background(if(selected) c.selected else c.surface,shape).border(1.dp,if(selected)c.green else c.border,shape),content=content)
 }
 @Composable fun Action(label: String,modifier: Modifier=Modifier,primary: Boolean=false,onClick: ()->Unit) {
     val c=LocalPalette.current
-    if(primary) Button(onClick=onClick,modifier=modifier.heightIn(min=50.dp),shape=RoundedCornerShape(16.dp)) {
+    if(primary) Button(onClick=onClick,modifier=modifier.heightIn(min=50.dp),shape=RoundedCornerShape(18.dp)) {
         Text(uiText(label),fontSize=15.sp,fontWeight=FontWeight.Bold,textAlign=TextAlign.Center)
     } else OutlinedButton(onClick=onClick,modifier=modifier.heightIn(min=50.dp),shape=RoundedCornerShape(16.dp),border=androidx.compose.foundation.BorderStroke(1.dp,c.border)) {
         Text(uiText(label),color=c.text,fontSize=14.sp,fontWeight=FontWeight.Medium,textAlign=TextAlign.Center)
@@ -44,20 +45,24 @@ val LocalPalette=staticCompositionLocalOf { Dark }
 @Composable fun NajwaTheme(dark: Boolean,content: @Composable ()->Unit) {
     val c=if(dark)Dark else Light
     val base=if(dark)darkColorScheme() else lightColorScheme()
-    val scheme=base.copy(primary=if(dark)c.green else c.mint,onPrimary=if(dark)Color(0xFF0B1525) else Color.White,
+    val scheme=base.copy(primary=if(dark)c.green else c.mint,onPrimary=if(dark)Color(0xFF071715) else Color.White,
         primaryContainer=c.selected,onPrimaryContainer=c.mint,secondary=c.mint,onSecondary=c.bg,
         secondaryContainer=c.selected,onSecondaryContainer=c.text,background=c.bg,onBackground=c.text,
         surface=c.surface,onSurface=c.text,surfaceVariant=c.selected,onSurfaceVariant=c.secondary,
         surfaceContainerHigh=c.surface,surfaceContainer=c.surface,surfaceContainerLow=c.surface,
         outline=c.border,outlineVariant=c.border,error=c.amber)
     val locale=androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
-    val direction=if(locale.language=="en")androidx.compose.ui.unit.LayoutDirection.Ltr else androidx.compose.ui.unit.LayoutDirection.Rtl
+    val direction=if(android.text.TextUtils.getLayoutDirectionFromLocale(locale)==android.view.View.LAYOUT_DIRECTION_RTL)
+        androidx.compose.ui.unit.LayoutDirection.Rtl else androidx.compose.ui.unit.LayoutDirection.Ltr
     CompositionLocalProvider(LocalPalette provides c,androidx.compose.ui.platform.LocalLayoutDirection provides direction) {
         MaterialTheme(colorScheme=scheme,typography=najwaTypography(),content=content)
     }
 }
 @Composable fun Mark(modifier: Modifier=Modifier) {
-    androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(org.najwa.app.R.drawable.ic_najwa_mark),null,modifier.size(36.dp))
+    androidx.compose.foundation.Image(
+        androidx.compose.ui.res.painterResource(org.najwa.app.R.drawable.ic_najwa_mark), null,
+        modifier.size(36.dp), colorFilter=androidx.compose.ui.graphics.ColorFilter.tint(LocalPalette.current.mint)
+    )
 }
 @Composable fun Glyph(name: String,color: Color=LocalPalette.current.secondary,modifier: Modifier=Modifier) {
     val rtl=androidx.compose.ui.platform.LocalLayoutDirection.current==androidx.compose.ui.unit.LayoutDirection.Rtl

@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="city_unconfirmed">اپنے مقام کے اوقاتِ نماز دیکھنے کے لیے شہر کی تصدیق کریں۔</string>
+    <string name="system_adhan">اذان</string>
+    <string name="system_iqama">اقامت</string>
+    <string name="system_friday">نمازِ جمعہ</string>
+    <string name="system_friday_title">نمازِ جمعہ کی یاد دہانی</string>
+    <string name="system_adhan_title">%1$s کی اذان کا وقت</string>
+    <string name="system_iqama_title">%1$s کی اقامت کا وقت</string>
+    <string name="system_adhan_test">اذان کی آزمائش</string>
+    <string name="system_iqama_test">اقامت کی آزمائش</string>
+    <string name="system_next">اگلی نماز</string>
+    <string name="system_iqama_remaining">اقامت تک باقی وقت</string>
+    <string name="system_to_iqama">اقامت تک</string>
+    <string name="system_to_adhan">اذان تک</string>
+    <string name="system_unavailable">دستیاب نہیں</string>
+    <string name="system_check_calculation">حساب کی ترتیبات دیکھیں</string>
+    <string name="system_brand">نجویٰ</string>
+    <string name="system_signature">نماز پہلے، شور بعد میں۔</string>
+    <string name="system_private_alert">نماز کی ایک یاد دہانی ہے</string>
+    <string name="system_friday_detail">نمازِ جمعہ کی تیاری کریں۔ خطبے اور نماز کا وقت اپنی مسجد سے معلوم کریں۔</string>
+    <string name="system_iqama_detail">آپ کی اقامت کی ترتیب کے مطابق</string>
+    <string name="system_refresh">تازہ کریں</string>
+    <string name="system_execution">نماز کا موڈ</string>
+    <string name="system_execution_detail">خاموش موڈ لگایا جا رہا ہے یا رنگر بحال ہو رہا ہے</string>
+    <string name="system_minutes_after">اقامت %1$d منٹ بعد</string>
+    <string name="system_hijri_format">%1$s ھ</string>
+    <string name="system_clock_required">نماز کی یاد دہانی اور خودکار خاموشی کے لیے مقررہ وقت کے الارم کی اجازت دیں۔</string>
+    <string name="system_background_unavailable">اینڈرائیڈ نے آخری مقررہ وقت پر رنگر کی سروس روک دی۔ نجویٰ میں رنگر کی حالت دیکھیں۔</string>
+    <string name="trial_title">اذان اور خاموش موڈ کی آزمائش</string>
+    <string name="trial_description">اذان 30 سیکنڈ بعد ہوگی۔ اذان کے 20 سیکنڈ بعد خاموشی یا وائبریشن، ایک منٹ بعد اقامت اور پانچ منٹ بعد رنگر بحال ہوگا۔</string>
+    <string name="trial_start">آزمائش مقرر کریں</string>
+    <string name="trial_scheduled">آزمائش مقرر ہو گئی۔ چاہیں تو اسکرین لاک کریں۔ اذان 30 سیکنڈ بعد ہوگی۔</string>
+    <string name="trial_existing_schedule">یا کوئی خاموش سیشن ہو رہا ہے یا امتحان چل رہا ہے، یا نماز جلد ہی ختم ہونے والی ہے۔ اس کا انتظار کریں اور دوبارہ کوشش کریں۔</string>
+    <string name="trial_permissions_required">درست الارم اور رینگ کنٹرول کی اجازت دیں، اور جانچ سے پہلے اذان اور اقامت نوٹیفکیشن چینلز کو فعال کریں۔</string>
+    <string name="app_language_label">ایپ کی زبان</string>
+    <string name="city_choose_country">ملک یا خطہ منتخب کریں</string>
+    <string name="city_search_country">ملک یا خطہ تلاش کریں</string>
+    <string name="city_search_place">اپنا شہر تلاش کریں</string>
+    <string name="city_unavailable_zone">اس شہر کا ٹائم زون آپ کے فون پر دستیاب نہیں۔ دوسرا شہر چنیں یا مقام خود درج کریں۔</string>
+    <string name="city_search_limit">پہلے 100 نتائج دکھائے جا رہے ہیں۔ مزید نتائج کے لیے زیادہ مخصوص نام لکھیں۔</string>
+</resources>

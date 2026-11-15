@@ -1,1 +1,9 @@
-<resources><style name="Theme.Najwa" parent="android:style/Theme.Material.Light.NoActionBar"><item name="android:fontFamily">sans</item><item name="android:windowLightStatusBar">false</item><item name="android:windowActionModeOverlay">true</item><item name="android:windowBackground">#081426</item><item name="android:colorAccent">#16C784</item></style></resources>
+<resources>
+    <style name="Theme.Najwa" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowBackground">#071715</item>
+        <item name="android:colorAccent">#126D53</item>
+    </style>
+</resources>

@@ -32,7 +32,10 @@ class PrayerAppearanceTest {
             view.layoutParams=ViewGroup.LayoutParams(w*2,h*2)
             val timer=view.findViewById<Chronometer>(R.id.widget_countdown)
             timer.stop();timer.text=if(iqama)"14:00" else "01:00"
-            assertEquals(if(iqama)"المتبقي على الإقامة" else "الصلاة القادمة",view.findViewById<TextView>(R.id.widget_phase).text.toString())
+            val mini=(w<180 && h<250) || (w in 180..259 && h<170)
+            val heading=if(mini) {if(iqama)"الإقامة" else "الأذان"}
+                else {if(iqama)"المتبقي على الإقامة" else "الصلاة القادمة"}
+            assertEquals(heading,view.findViewById<TextView>(R.id.widget_phase).text.toString())
             assertEquals("الظهر",view.findViewById<TextView>(R.id.widget_prayer).text.toString())
             assertTrue(view.findViewById<TextView>(R.id.widget_hijri).text.endsWith("هـ"))
             paparazzi.snapshot(view,"widget_${w}x${h}_${if(iqama)"iqama" else "adhan"}_${scale}")

@@ -27,7 +27,7 @@ import org.najwa.core.City
     var askedOnFirstRun by androidx.compose.runtime.saveable.rememberSaveable {mutableStateOf(false)}
     val request=androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
-    ) {runtime.reconcile();revision++}
+    ) {org.najwa.app.prayerExecutor.execute { runtime.reconcile() };revision++}
     fun notifications() {
         val permission=android.Manifest.permission.POST_NOTIFICATIONS
         val rationale=(context as? android.app.Activity)?.shouldShowRequestPermissionRationale(permission)==true

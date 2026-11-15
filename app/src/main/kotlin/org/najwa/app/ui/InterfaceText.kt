@@ -15,7 +15,7 @@ internal fun InterfaceLanguage(content: @Composable ()->Unit) {
     val language=LocalConfiguration.current.locales[0].language
     val resources=context.resources
     val labels=remember(resources,language) {
-        if(language=="en")resources.getStringArray(R.array.interface_keys).zip(resources.getStringArray(R.array.interface_labels)).toMap()
+        if(language!="ar")resources.getStringArray(R.array.interface_keys).zip(resources.getStringArray(R.array.interface_labels)).toMap()
         else emptyMap()
     }
     CompositionLocalProvider(LocalInterfaceLabels provides labels,content=content)

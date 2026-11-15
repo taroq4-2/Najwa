@@ -16,6 +16,13 @@ import java.time.Instant
 
 @Composable fun SilenceScreen(runtime: NajwaRuntime,p: Preferences,s: Session?,now: Instant,onSave: (Preferences)->Unit,onAccess: ()->Unit,onRestore: ()->Unit) {
     SilenceContent(p,s,now,runtime.audio.capable() && runtime.alarms.exactAccess,runtime.audio.fixed,onSave,onAccess,onRestore)
+    if(org.najwa.app.BuildConfig.TRIAL_BUILD) {
+        SettingsCard(stringResource(R.string.trial_title),stringResource(R.string.trial_description)) {
+            Action(stringResource(R.string.trial_start),Modifier.fillMaxWidth(),onClick={
+                org.najwa.app.prayerExecutor.execute { runtime.scheduledTrial() }
+            })
+        }
+    }
 }
 
 @Composable fun SilenceContent(p: Preferences,s: Session?,now: Instant,ready: Boolean,fixed: Boolean,onSave: (Preferences)->Unit,onAccess: ()->Unit,onRestore: ()->Unit) {

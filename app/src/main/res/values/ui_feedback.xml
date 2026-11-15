@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="contact_no_email_app">لم نجد تطبيق بريد. انسخ العنوان واستخدمه في خدمة البريد التي تفضلها.</string>
+    <string name="contact_email_copied">تم نسخ البريد الإلكتروني.</string>
+    <string name="contact_copy_failed">تعذّر النسخ. البريد: %1$s</string>
+    <string name="brand_version">نجوى · %1$s</string>
+    <string name="app_version_label">الإصدار %1$s</string>
+    <string name="contact_character_count">%1$d من %2$d حرف</string>
+    <string name="contact_privacy_email">استفسارات الخصوصية: %1$s</string>
+    <string name="widget_pin_complete">أكمل إضافة الويدجت من نافذة الشاشة الرئيسية.</string>
+    <string name="widget_pin_manual">اضغط مطولًا على مكان فارغ في الشاشة الرئيسية، ثم اختر الأدوات وابحث عن نجوى واسحب الويدجت إلى الشاشة.</string>
+    <string name="widget_transparency_label">شفافية خلفية الويدجت</string>
+    <string name="widget_transparency_value">شفافية %1$d بالمئة</string>
+    <string name="widget_transparency_display">شفافية الخلفية: %1$d٪</string>
+    <string name="sound_saved">تم حفظ %1$s</string>
+    <string name="sound_import_failed">تعذّر حفظ الصوت. اختر ملفًا صوتيًا صالحًا لا يتجاوز 32 ميغابايت، وتأكد من تفعيل قناة الأذان في إعدادات الهاتف.</string>
+    <string name="sound_picker_failed">تعذّر فتح تطبيق الملفات. تأكد من توفر مدير ملفات على هاتفك.</string>
+    <string name="sound_reset_done">أُعيد صوت المنبّه الافتراضي.</string>
+    <string name="sound_reset_failed">تعذّر تغيير الصوت. راجع إعدادات إشعارات الأذان وحاول مجددًا.</string>
+    <string name="sound_unavailable_title">الصوت المحفوظ يحتاج إلى إعادة اختيار</string>
+    <string name="sound_unavailable_detail">تعذّر قراءة اختيار الصوت المحفوظ. اختر الملف مجددًا أو استعد نغمة المنبّه الافتراضية. يبقى صوت الأذان متوقفًا حتى تختار.</string>
+    <string name="sound_phone_silent">بدون صوت حسب إعدادات الهاتف</string>
+    <string name="sound_phone_changed">صوت معدّل من إعدادات الهاتف</string>
+    <string name="sound_phone_default">صوت الأذان المحدد في الهاتف</string>
+    <string name="sound_alarm_default">نغمة المنبّه الافتراضية</string>
+</resources>

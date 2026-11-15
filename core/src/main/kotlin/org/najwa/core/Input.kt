@@ -13,10 +13,10 @@ fun normalizedNumber(value: String): String = value.trim().map { c ->
     }
 }.joinToString("")
 
-private val combiningMarks = Regex("\\p{M}+")
+private val optionalMarks = Regex("([\\p{IsLatin}\\p{IsArabic}])\\p{M}+")
 
 fun citySearchKey(value: String): String = Normalizer.normalize(value.trim(), Normalizer.Form.NFD)
-    .replace(combiningMarks, "").replace("ـ", "")
+    .replace(optionalMarks, "$1").replace("ـ", "")
     .replace('ى', 'ي').replace('ة', 'ه').lowercase(java.util.Locale.ROOT)
 
 fun searchCities(query: String): List<City> {

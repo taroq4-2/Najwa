@@ -53,6 +53,7 @@ class ScheduledPrayerIntegrationTest {
         } ?: error("No $action alarm at $at; scheduled=${shadowOf(alarm).scheduledAlarms.map {it.triggerAtTime}}")
         shadowOf(alarm).fireAlarm(job)
         shadowOf(Looper.getMainLooper()).idle()
+        prayerExecutor.submit {}.get(10,java.util.concurrent.TimeUnit.SECONDS)
         assertNull(app.runtime.error)
     }
     @Test fun corruptPlanIsRebuiltAndIncomingAlarmStillDelivers() {
@@ -115,6 +116,55 @@ class ScheduledPrayerIntegrationTest {
         assertEquals(AudioManager.RINGER_MODE_SILENT,audio.ringerMode)
         assertTrue(shadowOf(notifications).allNotifications.isEmpty())
     }
+
+    @Test fun prayerAlarmsStayWithinTheRollingDay() {
+        val runtime=coldStart()
+        runtime.update(prefs)
+        val planned=runtime.alarms.saved()
+        assertTrue(planned.isNotEmpty())
+        assertTrue(planned.all { it.at>now && it.at<=now.plusSeconds(86_400) })
+        assertTrue(planned.any {it.action==PrayerAction.ADHAN})
+        assertTrue(planned.any {it.action==PrayerAction.IQAMA})
+        assertTrue(planned.any {it.action==PrayerAction.SILENCE})
+    }
+
+    @Test fun backupAlarmRestoresRingerIfExactAlarmNeverFires() {
+        val event=PrayerCalculator().calculate(LocalDate.of(2026,11,7),prefs).events.first()
+        now=event.time.minusSeconds(60)
+        coldStart().update(prefs)
+        fire(event.time.plusSeconds(20),"org.najwa.prayer")
+        val session=app.runtime.session()!!
+        assertEquals(SessionState.ACTIVE,session.state)
+        assertEquals(AudioManager.RINGER_MODE_SILENT,audio.ringerMode)
+        coldStart()
+        fire(Instant.ofEpochMilli(session.deadline).plusSeconds(120),"org.najwa.restore")
+        assertEquals(AudioManager.RINGER_MODE_NORMAL,audio.ringerMode)
+        assertEquals(SessionState.RESTORED,app.runtime.session()!!.state)
+        assertTrue(shadowOf(alarm).scheduledAlarms.none {
+            shadowOf(it.operation).savedIntent.action=="org.najwa.restore"
+        })
+    }
+    @Test fun repeatedForegroundDenialKeepsRestoreRetryBoundToOriginalSession() {
+        val event=PrayerCalculator().calculate(LocalDate.of(2026,11,7),prefs).events.first()
+        now=event.time.minusSeconds(60)
+        coldStart().update(prefs)
+        fire(event.time.plusSeconds(20),"org.najwa.prayer")
+        val session=app.runtime.session()!!
+        now=Instant.ofEpochMilli(session.deadline)
+        app.runtime.receive("org.najwa.restore",session.id,session.deadline,allowRinger=false)
+        now=now.plusSeconds(30)
+        val retry=shadowOf(alarm).scheduledAlarms.single {
+            it.triggerAtTime==now.toEpochMilli() && shadowOf(it.operation).savedIntent.action=="org.najwa.restore"
+        }
+        val intent=shadowOf(retry.operation).savedIntent
+        assertEquals(session.deadline,intent.getLongExtra("at",0))
+        coldStart().receive(intent.action,intent.getStringExtra("id")!!,intent.getLongExtra("at",0),allowRinger=false)
+        assertEquals(AudioManager.RINGER_MODE_SILENT,audio.ringerMode)
+        assertEquals(session.deadline,app.runtime.session()!!.deadline)
+        fire(now.plusSeconds(300),"org.najwa.restore")
+        assertEquals(AudioManager.RINGER_MODE_NORMAL,audio.ringerMode)
+        assertEquals(SessionState.RESTORED,app.runtime.session()!!.state)
+    }
     @Test fun fridayOnlyReminderRunsWeeklyThroughTheRealAlarmReceiver() {
         val friday=Preferences(fridayReminder=true,fridayLeadMinutes=45)
         val runtime=coldStart()
@@ -143,6 +193,7 @@ class ScheduledPrayerIntegrationTest {
         app.runtime.reconcile()
         val session=app.runtime.session()
         AlarmReceiver().onReceive(app,deliveredIntent)
+        prayerExecutor.submit {}.get(10,java.util.concurrent.TimeUnit.SECONDS)
         assertEquals(session,app.runtime.session())
         assertEquals(1,shadowOf(notifications).allNotifications.size)
         assertEquals(AudioManager.RINGER_MODE_NORMAL,audio.ringerMode)
@@ -155,6 +206,10 @@ class ScheduledPrayerIntegrationTest {
         val original=runtime.preferences
         runtime.scheduledTrial()
         val start=now.plusSeconds(30)
+        now=now.plusSeconds(1)
+        runtime.scheduledTrial()
+        assertNotNull(runtime.error)
+        assertEquals(start,runtime.alarms.trialEvent()?.time)
         coldStart()
         fire(start,"org.najwa.trial")
         assertEquals(AudioManager.RINGER_MODE_NORMAL,audio.ringerMode)

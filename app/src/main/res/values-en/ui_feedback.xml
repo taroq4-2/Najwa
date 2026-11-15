@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="contact_no_email_app">No email app was found. Copy the address and use your preferred email service.</string>
+    <string name="contact_email_copied">Email address copied.</string>
+    <string name="contact_copy_failed">Could not copy. Email: %1$s</string>
+    <string name="brand_version">Najwa · %1$s</string>
+    <string name="app_version_label">Version %1$s</string>
+    <string name="contact_character_count">%1$d of %2$d characters</string>
+    <string name="contact_privacy_email">Privacy enquiries: %1$s</string>
+    <string name="widget_pin_complete">Finish adding the widget in the home screen dialog.</string>
+    <string name="widget_pin_manual">Touch and hold an empty area of your home screen, choose Widgets, find Najwa and drag the widget onto your screen.</string>
+    <string name="widget_transparency_label">Widget background transparency</string>
+    <string name="widget_transparency_value">%1$d percent transparency</string>
+    <string name="widget_transparency_display">Background transparency: %1$d%%</string>
+    <string name="sound_saved">Saved %1$s</string>
+    <string name="sound_import_failed">Could not save the sound. Choose a valid audio file up to 32 MB and make sure the Adhan notification channel is enabled in phone settings.</string>
+    <string name="sound_picker_failed">Could not open the file picker. Make sure a file manager is available on your phone.</string>
+    <string name="sound_reset_done">Default alarm sound restored.</string>
+    <string name="sound_reset_failed">Could not change the sound. Check the Adhan notification settings and try again.</string>
+    <string name="sound_unavailable_title">Select the saved sound again</string>
+    <string name="sound_unavailable_detail">The saved sound selection could not be read. Choose the file again or restore the default alarm sound. Adhan audio stays off until you choose.</string>
+    <string name="sound_phone_silent">Silent according to phone settings</string>
+    <string name="sound_phone_changed">Sound changed in phone settings</string>
+    <string name="sound_phone_default">Adhan sound selected on your phone</string>
+    <string name="sound_alarm_default">Default alarm sound</string>
+</resources>

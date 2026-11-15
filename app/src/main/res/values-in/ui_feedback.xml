@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="contact_no_email_app">Aplikasi email tidak ditemukan. Salin alamat dan gunakan layanan email pilihan Anda.</string>
+    <string name="contact_email_copied">Alamat email disalin.</string>
+    <string name="contact_copy_failed">Tidak dapat menyalin. Email: %1$s</string>
+    <string name="brand_version">Najwa · %1$s</string>
+    <string name="app_version_label">Versi %1$s</string>
+    <string name="contact_character_count">%1$d dari %2$d karakter</string>
+    <string name="contact_privacy_email">Pertanyaan privasi: %1$s</string>
+    <string name="widget_pin_complete">Selesaikan penambahan widget pada dialog layar utama.</string>
+    <string name="widget_pin_manual">Sentuh lama area kosong di layar utama, pilih Widget, cari Najwa lalu seret widget ke layar.</string>
+    <string name="widget_transparency_label">Transparansi latar widget</string>
+    <string name="widget_transparency_value">Transparansi %1$d persen</string>
+    <string name="widget_transparency_display">Transparansi latar: %1$d%%</string>
+    <string name="sound_saved">%1$s disimpan</string>
+    <string name="sound_import_failed">Suara tidak dapat disimpan. Pilih berkas audio yang valid hingga 32 MB dan pastikan kanal notifikasi azan aktif di pengaturan ponsel.</string>
+    <string name="sound_picker_failed">Pemilih berkas tidak dapat dibuka. Pastikan pengelola berkas tersedia di ponsel.</string>
+    <string name="sound_reset_done">Suara alarm bawaan dipulihkan.</string>
+    <string name="sound_reset_failed">Suara tidak dapat diubah. Periksa pengaturan notifikasi azan lalu coba lagi.</string>
+    <string name="sound_unavailable_title">Pilih kembali suara yang tersimpan</string>
+    <string name="sound_unavailable_detail">Pilihan suara tersimpan tidak dapat dibaca. Pilih ulang berkas atau pulihkan suara alarm bawaan. Audio azan tetap nonaktif hingga Anda memilih.</string>
+    <string name="sound_phone_silent">Senyap sesuai pengaturan ponsel</string>
+    <string name="sound_phone_changed">Suara diubah di pengaturan ponsel</string>
+    <string name="sound_phone_default">Suara azan yang dipilih di ponsel</string>
+    <string name="sound_alarm_default">Suara alarm bawaan</string>
+</resources>
