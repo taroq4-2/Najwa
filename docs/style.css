@@ -111,3 +111,14 @@ html[lang=en] .story-copy h3,html[lang=en] .story-title h3{line-height:1.25}
 .open-source{padding-top:0}.footer-top{align-items:flex-start}.footer-top>div{flex-direction:column;gap:10px;font-size:12px}.dedication{margin-top:28px}html[lang=en] h1{font-size:43px;letter-spacing:-1.5px}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
+
+/* Native sharing with an accessible clipboard fallback. */
+.share-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px}
+.share-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:7px 16px;background:transparent;color:var(--green);border:1px solid var(--line);border-radius:30px;font:inherit;font-size:13px;cursor:pointer}
+.share-button:hover{background:#e5ecdf}
+.share-button:focus-visible,.share-link:focus-visible{outline:3px solid #b68a44;outline-offset:4px}
+.share-button:disabled{opacity:.65;cursor:wait}
+.share-status{font-size:12px;color:var(--muted)}
+.share-link{max-width:100%;width:100%;border:1px solid var(--line);background:white;border-radius:9px;padding:12px;color:var(--ink);font:14px system-ui;direction:ltr}
+[hidden]{display:none!important}
+@media(max-width:640px){.share-tools{justify-content:center}}

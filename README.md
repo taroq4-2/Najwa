@@ -2,12 +2,12 @@
 
 # نجوى · Najwa
 
-![نجوى — عرض التطبيق · Najwa product presentation](docs/assets/najwa-product-hero.png)
+![نجوى — عرض التطبيق · Najwa product presentation](docs/assets/najwa-share-v122.jpg)
 
 **صلاتك أولاً، وضجيجك لاحقاً.**  
 **Prayer first. Noise can wait.**
 
-**1.2.1 · Build 111** — Android 8.0+ · Offline · 7 languages · Apache 2.0
+**1.2.2 · Build 113** — Android 8.0+ · Offline · 7 languages · Apache 2.0
 
 [تنزيل نجوى لأندرويد](https://github.com/taroq4-2/Najwa/releases/latest/download/Najwa.apk) · [الموقع العربي](https://taroq4-2.github.io/Najwa/) · [English website](https://taroq4-2.github.io/Najwa/en.html) · [الإصدارات · Releases](https://github.com/taroq4-2/Najwa/releases)
 
@@ -53,14 +53,14 @@ The **Madar** design pairs emerald and ivory with a clear interface and responsi
 
 ## الإصدار والتحقق · Release verification
 
-ملف APK موقّع بالمفتاح الرسمي السابق لدعم التحديث. أكّد المستخدم نجاح تجربته. اجتازت المراجعة المحلية 184 اختبارًا، مع فحص 53 مكتبة دون تنبيهات OSV في وقت المراجعة. هذه النتائج لا تعني ضمانًا لجميع الأجهزة؛ تبقى ملاحظات التحسين والقياس موثقة في [التقرير](docs/review-release-111-ar.md).
+ملف APK موقّع بالمفتاح الرسمي لدعم التحديث مع الحفاظ على بياناتك. نجح 170 اختبارًا محليًا وفحوص GitHub، وفُحصت تحسينات الإشعارات على Samsung S23 Ultra بنظام Android 17. [تفاصيل الإصدار](https://github.com/taroq4-2/Najwa/releases/tag/v1.2.2).
 
-The APK uses the established release signing key. The user confirmed a successful device trial. Local verification passed 184 tests; OSV returned no advisories for 53 resolved libraries at review time. This is not a guarantee for every device. See the [release verification guide](docs/release-verification.md).
+The APK retains the original signing key for seamless updates. All 170 local core and platform tests and GitHub verification passed; notification improvements were exercised on a Samsung S23 Ultra running Android 17. [Release details](https://github.com/taroq4-2/Najwa/releases/tag/v1.2.2).
 
-SHA-256 · `Najwa.apk` · 1.2.1 / 111:
+SHA-256 · `Najwa.apk` · 1.2.2 / 113:
 
 ```text
-33696188139c6e22cff627a1e3720b70988d40c432c927ccc595f5cf358eff7e
+a737b4778128cd6dc58c99d21b972fa650691f156527e59e3d42b04a97488136
 ```
 
 ## البناء والمساهمة · Build and contribute
