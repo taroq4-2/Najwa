@@ -7,7 +7,7 @@
         </shape>
     </item>
     <item android:id="@android:id/progress">
-        <clip android:clipOrientation="horizontal" android:gravity="start">
+        <clip android:clipOrientation="horizontal" android:gravity="left">
             <shape>
                 <solid android:color="#3EB28C" />
                 <corners android:radius="2dp" />

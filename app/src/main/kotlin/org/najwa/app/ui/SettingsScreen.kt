@@ -15,6 +15,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.*
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import org.najwa.core.*
 import org.najwa.app.BuildConfig
 import org.najwa.app.MainActivity
@@ -31,15 +33,48 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
-@Composable fun SettingsScreen(p: Preferences,onSave: (Preferences)->Unit,onCity: ()->Unit,onNotifications: ()->Unit = {},onWidget: ()->Unit = {},onInformation: ()->Unit = {},onCalculation: ()->Unit = {},onAppearance: ()->Unit = {},onSilence: ()->Unit = {}) {
+/** Live phone readiness used by the quick settings card; null in previews. */
+data class SettingsStatus(val alertsReady: Boolean,val silenceReady: Boolean,val silenceFixed: Boolean)
+
+@Composable fun SettingsScreen(p: Preferences,onSave: (Preferences)->Unit,onCity: ()->Unit,onNotifications: ()->Unit = {},onWidget: ()->Unit = {},onInformation: ()->Unit = {},onCalculation: ()->Unit = {},onAppearance: ()->Unit = {},onSilence: ()->Unit = {},
+    status: SettingsStatus?=null,onSilenceSetup: ()->Unit=onSilence) {
     val c=LocalPalette.current
     val activity=LocalContext.current as? MainActivity
     PageHeading("الإعدادات","مساحة واحدة لكل ما يخص صلاتك")
-    SectionLabel("الصلاة والهدوء")
+    // Quick settings: the switches people change most, without opening sub-pages.
+    if(status!=null) {
+        SettingsCard(stringResource(R.string.settings_quick_title),stringResource(R.string.settings_quick_subtitle)) {
+            PreferenceSwitch("تنبيه الأذان","إشعار مع صوت للصلوات المختارة",p.adhanNotifications) {onSave(p.copy(adhanNotifications=it))}
+            PreferenceSwitch("تذكير الإقامة","إشعار مرئي دون صوت أو اهتزاز",p.iqamaNotifications) {onSave(p.copy(iqamaNotifications=it))}
+            PreferenceSwitch("تذكير يوم الجمعة",stringResource(R.string.alerts_friday_subtitle),p.fridayReminder) {onSave(p.copy(fridayReminder=it))}
+            val silenceLabel=stringResource(R.string.settings_quick_silence)
+            Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                Column(Modifier.weight(1f)) {
+                    Text(silenceLabel,color=c.text,fontSize=15.sp,fontWeight=androidx.compose.ui.text.font.FontWeight.Bold)
+                    Text(stringResource(R.string.settings_quick_silence_help),color=c.secondary,fontSize=12.sp)
+                }
+                Switch(p.autoSilent,{if(it && !status.silenceReady)onSilenceSetup() else onSave(p.copy(autoSilent=it))},
+                    enabled=!status.silenceFixed,modifier=Modifier.semantics {contentDescription=silenceLabel})
+            }
+            val alertsOn=p.adhanNotifications || p.iqamaNotifications || p.fridayReminder
+            if(alertsOn && !status.alertsReady) Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(R.string.settings_permissions_missing),Modifier.weight(1f),color=c.amber,fontSize=13.sp)
+                TextButton(onClick=onNotifications) {Text(stringResource(R.string.settings_fix))}
+            }
+        }
+    }
+    val on=stringResource(R.string.settings_on)
+    val off=stringResource(R.string.settings_off)
+    val alertSummary=listOf(
+        stringResource(R.string.system_adhan) to p.adhanNotifications,
+        stringResource(R.string.system_iqama) to p.iqamaNotifications,
+        stringResource(R.string.system_friday) to p.fridayReminder
+    ).joinToString(" · ") {(label,enabled)->"$label: ${if(enabled)on else off}"}
+    SectionLabel(if(status!=null)stringResource(R.string.settings_all_title) else "الصلاة والهدوء")
     Panel(Modifier.fillMaxWidth()) {
         SettingsDestination("مواقيت الصلاة والمدينة","${p.city.name} · ${localizedMethodName(p.method)}","pin",onCalculation)
         SettingsDivider()
-        SettingsDestination("ضبط تنبيهات الصلاة","الأذان والإقامة والجمعة · الصوت والمدد","bell",onNotifications)
+        SettingsDestination("ضبط تنبيهات الصلاة",alertSummary,"bell",onNotifications)
         SettingsDivider()
         SettingsDestination("الصمت أثناء الصلاة",if(p.autoSilent)"مفعّل · تخصيص المدة لكل صلاة" else "التفعيل والمدة واستعادة الرنين","sound",onSilence)
     }
@@ -48,17 +83,25 @@ import kotlinx.coroutines.withContext
         SettingsDestination("المظهر والعرض","${uiText(p.theme.label)} · ${uiText(if(p.hour24)"24 ساعة" else "12 ساعة")}","palette",onAppearance)
         SettingsDivider()
         SettingsDestination("ويدجت الشاشة الرئيسية","أحجام مرنة · مواقيتك بنظرة واحدة","widget",onWidget)
+        if(activity!=null) {
+            var languageDialog by rememberSaveable {mutableStateOf(false)}
+            val current=appLanguage(activity)
+            SettingsDivider()
+            SettingsDestination(stringResource(R.string.app_language_label),supportedLanguages.getValue(current),"sun") {languageDialog=true}
+            if(languageDialog)AlertDialog(onDismissRequest={languageDialog=false},title={Text(stringResource(R.string.app_language_label))},text={
+                Column(Modifier.verticalScroll(rememberScrollState()),verticalArrangement=Arrangement.spacedBy(8.dp)) {
+                    supportedLanguages.forEach {(code,name)->
+                        OptionButton(name,code==current,Modifier.fillMaxWidth()) {
+                            languageDialog=false
+                            if(code!=current)changeAppLanguage(activity,code)
+                        }
+                    }
+                }
+            },confirmButton={TextButton(onClick={languageDialog=false}) {Text(uiText("إغلاق"))}})
+        }
     }
     SectionLabel("المساعدة والمعلومات")
     Panel(Modifier.fillMaxWidth()) {SettingsDestination("معلومات التطبيق","من نحن · تواصل معنا · الخصوصية","shield",onInformation)}
-    if(activity!=null) {
-        Spacer(Modifier.height(16.dp))
-        SettingsCard(stringResource(R.string.app_language_label)) {
-            OptionGrid(supportedLanguages.keys.toList(),appLanguage(activity),supportedLanguages::getValue,2) {
-                if(it!=appLanguage(activity))changeAppLanguage(activity,it)
-            }
-        }
-    }
     Text("${stringResource(R.string.system_brand)} · ${BuildConfig.VERSION_NAME}",color=c.secondary,fontSize=12.sp,modifier=Modifier.fillMaxWidth().padding(vertical=24.dp),textAlign=androidx.compose.ui.text.style.TextAlign.Center)
 }
 

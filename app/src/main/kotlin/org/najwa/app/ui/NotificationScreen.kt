@@ -19,6 +19,13 @@ import org.najwa.app.platform.PrayerNotifications
 import org.najwa.app.platform.openSystemSettings
 import org.najwa.core.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import org.najwa.app.R
+import org.najwa.app.prayerDispatcher
 import java.time.Instant
 
 @Composable fun NotificationScreen(runtime: NajwaRuntime,p: Preferences,onSave: (Preferences)->Unit,onBack: ()->Unit,resumed: Int=0) {
@@ -53,8 +60,27 @@ import java.time.Instant
         }
         "$label · ${localizedPrayerName(it.event.prayer)} · ${localizedUiTime(it.at,p)}"
     }
-    SettingsCard("التنبيه القادم") {
+    val scope=rememberCoroutineScope()
+    var testResult by remember {mutableStateOf<Int?>(null)}
+    var testing by remember {mutableStateOf(false)}
+    fun test(adhan: Boolean) {
+        if(testing)return
+        testing=true
+        scope.launch {
+            val sent=withContext(prayerDispatcher) {runtime.testNotification(adhan)}
+            testResult=if(sent)R.string.alerts_test_sent else R.string.alerts_test_blocked
+            testing=false
+        }
+    }
+    SettingsCard(stringResource(R.string.alerts_status_title)) {
+        Text(uiText("التنبيه القادم"),color=c.secondary,fontSize=13.sp)
         Text(nextLabel ?: uiText("لا يوجد تنبيه جاهز حاليًا"),color=c.text)
+        Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick={test(true)},enabled=!testing,modifier=Modifier.weight(1f)) {Text(stringResource(R.string.alerts_test_adhan))}
+            OutlinedButton(onClick={test(false)},enabled=!testing,modifier=Modifier.weight(1f)) {Text(stringResource(R.string.alerts_test_iqama))}
+        }
+        testResult?.let {Text(stringResource(it),color=if(it==R.string.alerts_test_sent)c.mint else c.amber,fontSize=13.sp)}
+        if(testResult==R.string.alerts_test_sent)Text(stringResource(R.string.alerts_test_stop_hint),color=c.secondary,fontSize=12.sp)
     }
     val channels=remember(resumed,p) {
         listOfNotNull(
@@ -122,52 +148,62 @@ internal fun NotificationReadiness(notificationsAllowed: Boolean,exactAlarmsAllo
     val adhanLabel=uiText("تنبيه الأذان")
     val iqamaLabel=uiText("تذكير الإقامة")
     val fridayLabel=uiText("تذكير يوم الجمعة")
-    SettingsCard("التنبيهات") {
-        Row(verticalAlignment=Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {Text(uiText("تنبيه الأذان"),color=c.text);Text(uiText("إشعار مع صوت للصلوات المختارة"),color=c.secondary,fontSize=12.sp)}
-            Switch(p.adhanNotifications,{onSave(p.copy(adhanNotifications=it))},modifier=Modifier.semantics {contentDescription=adhanLabel})
-        }
+    // 1) The three main switches together; everything else is in collapsible sections.
+    SettingsCard(stringResource(R.string.alerts_main_title),stringResource(R.string.alerts_main_subtitle)) {
+        AlertSwitch(adhanLabel,uiText("إشعار مع صوت للصلوات المختارة"),p.adhanNotifications) {onSave(p.copy(adhanNotifications=it))}
         HorizontalDivider(color=c.border)
-        Row(verticalAlignment=Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {Text(uiText("تذكير الإقامة"),color=c.text);Text(uiText("إشعار مرئي دون صوت أو اهتزاز"),color=c.secondary,fontSize=12.sp)}
-            Switch(p.iqamaNotifications,{onSave(p.copy(iqamaNotifications=it))},modifier=Modifier.semantics {contentDescription=iqamaLabel})
-        }
-        Text(uiText("التنبيهات مستقلة عن الصمت التلقائي، ولا تشمل الشروق."),color=c.secondary,fontSize=12.sp)
-        Text(uiText("عند تفعيلها قد يعرض الهاتف رمز المنبّه وموعد تنبيه الصلاة التالي."),color=c.secondary,fontSize=12.sp)
-    }
-    ExpandableSettings("تخصيص التنبيهات لكل صلاة","اختر الأذان والإقامة لكل صلاة") {
-        Text(uiText("تُطبّق الاختيارات عند تشغيل مفاتيح التنبيهات أعلاه."),color=c.secondary,fontSize=12.sp)
-        for(prayer in dailyPrayers) {
-            val prayerName=localizedPrayerName(prayer)
-            Text(prayerName,color=c.text,style=MaterialTheme.typography.titleMedium)
-            AlertPrayerSwitch("${uiText("تنبيه الأذان")} · $prayerName",prayer in p.adhanPrayers) {selected->
-                onSave(p.copy(adhanPrayers=if(selected)p.adhanPrayers+prayer else p.adhanPrayers-prayer))
-            }
-            AlertPrayerSwitch("${uiText("تذكير الإقامة")} · $prayerName",prayer in p.iqamaPrayers) {selected->
-                onSave(p.copy(iqamaPrayers=if(selected)p.iqamaPrayers+prayer else p.iqamaPrayers-prayer))
-            }
-            if(prayer!=Prayer.ISHA)HorizontalDivider(color=c.border)
-        }
-    }
-    SettingsCard("صلاة الجمعة","تذكير أسبوعي قبل وقت الظهر المحسوب في مدينتك") {
-        Row(verticalAlignment=Alignment.CenterVertically) {
-            Text(uiText("تذكير يوم الجمعة"),color=c.text,modifier=Modifier.weight(1f))
-            Switch(p.fridayReminder,{onSave(p.copy(fridayReminder=it))},modifier=Modifier.semantics {contentDescription=fridayLabel})
-        }
+        AlertSwitch(iqamaLabel,uiText("إشعار مرئي دون صوت أو اهتزاز"),p.iqamaNotifications) {onSave(p.copy(iqamaNotifications=it))}
+        HorizontalDivider(color=c.border)
+        AlertSwitch(fridayLabel,stringResource(R.string.alerts_friday_subtitle),p.fridayReminder) {onSave(p.copy(fridayReminder=it))}
         if(p.fridayReminder) {
-            Text(uiText("وقت التذكير قبل الظهر"),color=c.text)
+            Text(uiText("وقت التذكير قبل الظهر"),color=c.text,fontSize=14.sp)
             val leads=(listOf(5,15,DEFAULT_FRIDAY_LEAD_MINUTES,45,60)+p.fridayLeadMinutes).distinct().sorted()
             OptionGrid(leads,p.fridayLeadMinutes,{"$it دقيقة"},3) {onSave(p.copy(fridayLeadMinutes=it))}
+            Text(uiText("وقت الظهر تقديري، وقد يختلف موعد الخطبة والصلاة حسب المسجد."),color=c.secondary,fontSize=12.sp)
         }
-        Text(uiText("وقت الظهر تقديري، وقد يختلف موعد الخطبة والصلاة حسب المسجد."),color=c.secondary,fontSize=12.sp)
+        Text(uiText("التنبيهات مستقلة عن الصمت التلقائي، ولا تشمل الشروق."),color=c.secondary,fontSize=12.sp)
     }
-    PrayerDurations("الإقامة بعد الأذان","حدّد المدة لكل صلاة حسب مسجدك. هذه تذكيرات حسب إعدادك وليست مواقيت إقامة معتمدة.",p.iqamaMinutes,defaultIqamaMinutes(),1) {onSave(p.copy(iqamaMinutes=it))}
+    // 2) Per-prayer selection as a compact table (prayer · adhan · iqama).
+    ExpandableSettings(stringResource(R.string.alerts_prayers_title),
+        stringResource(R.string.alerts_prayers_summary,p.adhanPrayers.size,p.iqamaPrayers.size)) {
+        Text(uiText("تُطبّق الاختيارات عند تشغيل مفاتيح التنبيهات أعلاه."),color=c.secondary,fontSize=12.sp)
+        Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
+            Spacer(Modifier.weight(1f))
+            Text(stringResource(R.string.system_adhan),Modifier.width(72.dp),color=c.secondary,fontSize=12.sp,textAlign=TextAlign.Center)
+            Text(stringResource(R.string.system_iqama),Modifier.width(72.dp),color=c.secondary,fontSize=12.sp,textAlign=TextAlign.Center)
+        }
+        for(prayer in dailyPrayers) {
+            val prayerName=localizedPrayerName(prayer)
+            Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
+                Text(prayerName,Modifier.weight(1f),color=c.text,fontSize=15.sp)
+                AlertPrayerCheck("$adhanLabel · $prayerName",prayer in p.adhanPrayers,p.adhanNotifications) {selected->
+                    onSave(p.copy(adhanPrayers=if(selected)p.adhanPrayers+prayer else p.adhanPrayers-prayer))
+                }
+                AlertPrayerCheck("$iqamaLabel · $prayerName",prayer in p.iqamaPrayers,p.iqamaNotifications) {selected->
+                    onSave(p.copy(iqamaPrayers=if(selected)p.iqamaPrayers+prayer else p.iqamaPrayers-prayer))
+                }
+            }
+        }
+    }
+    // 3) Iqama minutes (also used by the home countdown and the widget).
+    ExpandableSettings(stringResource(R.string.alerts_iqama_times_title),stringResource(R.string.alerts_iqama_times_summary)) {
+        PrayerDurations("الإقامة بعد الأذان","حدّد المدة لكل صلاة حسب مسجدك. هذه تذكيرات حسب إعدادك وليست مواقيت إقامة معتمدة.",p.iqamaMinutes,defaultIqamaMinutes(),1,framed=false) {onSave(p.copy(iqamaMinutes=it))}
+    }
 }
 
 @Composable
-private fun AlertPrayerSwitch(label: String,selected: Boolean,onChange: (Boolean)->Unit) {
-    Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
-        Text(label,Modifier.weight(1f),color=LocalPalette.current.text,fontSize=14.sp)
-        Switch(selected,onChange,modifier=Modifier.semantics {contentDescription=label})
+private fun AlertSwitch(title: String,subtitle: String,checked: Boolean,onChange: (Boolean)->Unit) {
+    val c=LocalPalette.current
+    Row(verticalAlignment=Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {Text(title,color=c.text);Text(subtitle,color=c.secondary,fontSize=12.sp)}
+        Switch(checked,onChange,modifier=Modifier.semantics {contentDescription=title})
+    }
+}
+
+/** Dimmed (but still editable) when the matching main switch is off. */
+@Composable
+private fun AlertPrayerCheck(label: String,selected: Boolean,active: Boolean,onChange: (Boolean)->Unit) {
+    Box(Modifier.width(72.dp).alpha(if(active)1f else .5f),contentAlignment=Alignment.Center) {
+        Checkbox(selected,onChange,modifier=Modifier.semantics {contentDescription=label})
     }
 }

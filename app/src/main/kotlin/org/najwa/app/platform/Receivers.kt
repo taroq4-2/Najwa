@@ -44,3 +44,12 @@ class SystemReceiver: BroadcastReceiver() {
         }
     }
 }
+
+/** Handles buttons on prayer notifications (currently "Stop adhan"). */
+class NotificationActionReceiver: BroadcastReceiver() {
+    override fun onReceive(context: Context,intent: Intent) {
+        if(intent.action!=PrayerNotifications.STOP_ADHAN)return
+        val runtime=(context.applicationContext as NajwaApplication).runtime
+        runPrayerWork { runtime.notifications.stopAdhan(intent,runtime.preferences) }
+    }
+}

@@ -45,7 +45,9 @@ import org.najwa.app.R
             }
         }
     }
-    AdhanSoundContent(name,choice.fileName!=null || choice.error!=null,busy,message ?: choice.error?.let {context.getString(R.string.sound_unavailable_detail)},
+    // Collapsed by default: the current sound is visible in the header, details on demand.
+    ExpandableSettings("صوت الأذان",name,initiallyExpanded=choice.error!=null) {
+    AdhanSoundContent(name,choice.fileName!=null || choice.error!=null,busy,message ?: choice.error?.let {context.getString(R.string.sound_unavailable_detail)},framed=false,
         onChoose={try {picker.launch(arrayOf("audio/*","application/ogg"))} catch(_: Exception) {message=context.getString(R.string.sound_picker_failed)}},
         onReset={
             busy=true
@@ -56,12 +58,21 @@ import org.najwa.app.R
             }
         },
         onSystem={open(Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE,context.packageName).putExtra(Settings.EXTRA_CHANNEL_ID,runtime.notifications.adhanChannel))})
+    }
 }
 
-@Composable fun AdhanSoundContent(name: String,custom: Boolean,busy: Boolean,message: String?,onChoose: ()->Unit,onReset: ()->Unit,onSystem: ()->Unit) {
+@Composable fun AdhanSoundContent(name: String,custom: Boolean,busy: Boolean,message: String?,onChoose: ()->Unit,onReset: ()->Unit,onSystem: ()->Unit) =
+    AdhanSoundContent(name,custom,busy,message,true,onChoose,onReset,onSystem)
+
+@Composable fun AdhanSoundContent(name: String,custom: Boolean,busy: Boolean,message: String?,framed: Boolean,onChoose: ()->Unit,onReset: ()->Unit,onSystem: ()->Unit) {
     val c=LocalPalette.current
-    SettingsCard("صوت الأذان","اختر تسجيلًا من ملفات هاتفك") {
-        Text(name,color=c.mint,fontSize=15.sp)
+    val frame: @Composable (@Composable ColumnScope.()->Unit)->Unit = {body->
+        if(framed)SettingsCard("صوت الأذان","اختر تسجيلًا من ملفات هاتفك",body)
+        else Column(verticalArrangement=Arrangement.spacedBy(12.dp),content=body)
+    }
+    frame {
+        if(framed)Text(name,color=c.mint,fontSize=15.sp)
+        else Text(uiText("اختر تسجيلًا من ملفات هاتفك"),color=c.secondary,fontSize=13.sp)
         if(busy) {LinearProgressIndicator(Modifier.fillMaxWidth());Text(uiText("جارٍ فحص الملف وحفظه…"),color=c.secondary)}
         else {
             Action("اختيار ملف أذان من الهاتف",Modifier.fillMaxWidth(),true,onChoose)

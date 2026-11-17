@@ -95,7 +95,22 @@ import java.time.Instant
                     runtime.error?.let { Text(it,color=colors.amber,modifier=Modifier.padding(vertical=10.dp)) }
                     runtime.notice?.let {Text(it,color=colors.mint,modifier=Modifier.padding(vertical=10.dp))}
                     when(screen) {
-                        Screen.PERMISSIONS -> PermissionsScreen(runtime,
+                        Screen.PERMISSIONS -> if(onboarding) SetupWizard(runtime,prefs,cityConfirmed,
+                            onChooseCity={cityDialog=true},onConfirmCity=::confirmCity,onSave={save(it)},
+                            onFinish={choice,advanced->
+                                // Alerts follow the person's choice (Settings flags missing permissions);
+                                // silence is only switched on when the phone can really change the ringer.
+                                save(prefs.copy(
+                                    adhanNotifications=prefs.adhanNotifications || choice.adhan,
+                                    iqamaNotifications=prefs.iqamaNotifications || choice.iqama,
+                                    fridayReminder=prefs.fridayReminder || choice.friday,
+                                    autoSilent=prefs.autoSilent || (choice.silence && runtime.audio.capable() && runtime.alarms.exactAccess)
+                                ))
+                                finishSetup()
+                                if(advanced)trail=navigateScreens(trail,Screen.SETTINGS,true)
+                            },
+                            onSkip={finishSetup()})
+                        else PermissionsScreen(runtime,
                             onDone={
                                 if(onboarding && cityConfirmed) {
                                     val alerts=runtime.notifications.granted && runtime.alarms.exactAccess
@@ -123,7 +138,14 @@ import java.time.Instant
                         Screen.SILENCE -> SilenceScreen(runtime,prefs,session,now,onSave={save(it)},onAccess={navigate(Screen.PERMISSIONS)},onRestore={
                             scope.launch { withContext(prayerDispatcher) {runtime.restore()};session=runtime.displayedSession() }
                         })
-                        Screen.SETTINGS -> SettingsScreen(prefs,onSave=::save,onCity={cityDialog=true},onNotifications={navigate(Screen.NOTIFICATIONS)},onWidget={navigate(Screen.WIDGET)},onInformation={navigate(Screen.INFORMATION)},onCalculation={navigate(Screen.CALCULATION)},onAppearance={navigate(Screen.APPEARANCE)},onSilence={navigate(Screen.SILENCE)})
+                        Screen.SETTINGS -> {
+                            val status=remember(resumed,prefs) {SettingsStatus(
+                                runtime.notifications.granted && runtime.alarms.exactAccess,
+                                runtime.audio.capable() && runtime.alarms.exactAccess,
+                                runtime.audio.fixed)}
+                            SettingsScreen(prefs,onSave=::save,onCity={cityDialog=true},onNotifications={navigate(Screen.NOTIFICATIONS)},onWidget={navigate(Screen.WIDGET)},onInformation={navigate(Screen.INFORMATION)},onCalculation={navigate(Screen.CALCULATION)},onAppearance={navigate(Screen.APPEARANCE)},onSilence={navigate(Screen.SILENCE)},
+                                status=status,onSilenceSetup={navigate(Screen.PERMISSIONS)})
+                        }
                         Screen.CALCULATION -> CalculationScreen(prefs,::save,{cityDialog=true},::back)
                         Screen.APPEARANCE -> AppearanceScreen(prefs,::save,::back)
                         Screen.WIDGET -> WidgetScreen(prefs,now,::back,::save)

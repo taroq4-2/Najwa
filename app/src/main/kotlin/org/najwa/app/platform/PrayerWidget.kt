@@ -32,6 +32,7 @@ class PrayerWidget: AppWidgetProvider() {
     }
     companion object {
         private const val REFRESH="org.najwa.widget.REFRESH"
+        private val SOON: java.time.Duration=java.time.Duration.ofMinutes(10)
         private fun component(context: Context)=ComponentName(context,PrayerWidget::class.java)
         private fun refreshIntent(context: Context)=PendingIntent.getBroadcast(context,401,Intent(context,PrayerWidget::class.java).setAction(REFRESH),PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         private fun cancelRefresh(context: Context) {runCatching {context.getSystemService(AlarmManager::class.java).cancel(refreshIntent(context))}}
@@ -57,75 +58,103 @@ class PrayerWidget: AppWidgetProvider() {
                 setImageViewResource(R.id.widget_backdrop,if(colors.light)R.drawable.widget_background_light else R.drawable.widget_background)
                 setInt(R.id.widget_backdrop,"setImageAlpha",p.widgetOpacity*255/100)
                 setInt(R.id.widget_mark,"setColorFilter",colors.adhan)
+                setInt(R.id.widget_refresh,"setColorFilter",colors.secondary)
                 setInt(R.id.widget_city,"setBackgroundResource",if(colors.light)R.drawable.widget_pill_light else R.drawable.widget_pill)
                 listOf(R.id.widget_brand,R.id.widget_prayer).forEach {setTextColor(it,colors.text)}
-                listOf(R.id.widget_city,R.id.widget_phase,R.id.widget_time,R.id.widget_countdown_label,R.id.widget_footer).forEach {setTextColor(it,colors.secondary)}
-                setTextColor(R.id.widget_refresh,colors.adhan)
+                listOf(R.id.widget_city,R.id.widget_phase,R.id.widget_time,R.id.widget_countdown_label,R.id.widget_hijri).forEach {setTextColor(it,colors.secondary)}
                 setTextViewText(R.id.widget_city,p.city.name)
                 val date=strings.hijriLabel(now.atZone(p.city.zoneId).toLocalDate())
                 setTextViewText(R.id.widget_hijri,date)
-                setTextColor(R.id.widget_hijri,colors.secondary)
                 val iqama=data?.phase==CountdownPhase.IQAMA
-                val mini=layout==R.layout.prayer_widget_mini
-                val wide=layout==R.layout.prayer_widget_wide
-                val slim=layout==R.layout.prayer_widget_slim
-                val compact=layout==R.layout.prayer_widget_compact
-                val withDateFooter=layout==R.layout.prayer_widget_large || layout==R.layout.prayer_widget_medium
-                if(mini || wide)setViewVisibility(R.id.widget_hijri,View.GONE)
-                if(mini)setViewVisibility(R.id.widget_brand,View.GONE)
-                if(slim && data!=null)setViewVisibility(R.id.widget_phase,View.GONE)
-                if(compact) {
-                    setViewVisibility(R.id.widget_compact_footer,if(height>=240)View.VISIBLE else View.GONE)
-                    if(height<200)setViewVisibility(R.id.widget_countdown_label,View.GONE)
-                }
-                if(withDateFooter) {
-                    setInt(R.id.widget_divider,"setBackgroundColor",if(colors.light)0xFFC9D6C3.toInt() else 0xFF4F715D.toInt())
-                }
-                if(Build.VERSION.SDK_INT>=31 && (wide || withDateFooter)) {
+                val praying=data?.phase==CountdownPhase.PRAYER
+                if(layout==R.layout.prayer_widget_compact)
+                    setViewVisibility(R.id.widget_compact_footer,if(height>=220)View.VISIBLE else View.GONE)
+                if(Build.VERSION.SDK_INT>=31 && layout!=R.layout.prayer_widget_mini && layout!=R.layout.prayer_widget_slim) {
                     setInt(R.id.widget_countdown,"setGravity",Gravity.CENTER_VERTICAL or if(rtl)Gravity.LEFT else Gravity.RIGHT)
                 }
                 val brand=strings.getString(R.string.system_brand)
-                val heading=strings.getString(if(iqama)R.string.system_iqama_remaining else R.string.system_next)
+                val heading=strings.getString(when {iqama->R.string.system_iqama_remaining;praying->R.string.widget_prayer_now;else->R.string.system_next})
                 val prayer=data?.prayer?.let {strings.prayerName(it)}
                 val time=data?.time?.let {strings.prayerTime(it,p)}
                 setTextViewText(R.id.widget_brand,brand)
-                setTextViewText(R.id.widget_phase,if(mini)strings.getString(
-                    if(iqama)R.string.system_iqama else R.string.system_adhan) else heading)
-                setContentDescription(R.id.widget_refresh,strings.getString(R.string.system_refresh))
-                setTextViewText(R.id.widget_countdown_label,strings.getString(if(iqama)R.string.system_to_iqama else R.string.system_to_adhan))
-                val phaseColor=if(iqama)colors.iqama else colors.adhan
+                setTextViewText(R.id.widget_phase,if(layout==R.layout.prayer_widget_mini)strings.getString(
+                    if(iqama)R.string.system_iqama else if(praying)R.string.widget_prayer_now else R.string.system_next) else heading)
+                setTextViewText(R.id.widget_countdown_label,strings.getString(when {
+                    iqama->R.string.system_to_iqama
+                    praying->if(p.autoSilent && data!!.prayer in p.enabled)R.string.widget_ringer_back else R.string.widget_prayer_ends
+                    else->R.string.system_to_adhan
+                }))
+                // Ten minutes before adhan the countdown switches to the alert colour.
+                val soon=data?.phase==CountdownPhase.ADHAN && java.time.Duration.between(now,data.time)<=SOON
+                val phaseColor=when {iqama->colors.iqama;praying->colors.prayer;soon->colors.soon;else->colors.adhan}
+                // Every stage has one colour: countdown, its label, the bar and the highlighted prayer.
+                if(soon || praying || iqama) {
+                    setTextColor(R.id.widget_countdown_label,phaseColor)
+                    setTextColor(R.id.widget_phase,phaseColor)
+                }
+                val highlight=when {
+                    iqama -> if(colors.light)R.drawable.widget_cell_iqama_light else R.drawable.widget_cell_iqama
+                    praying -> if(colors.light)R.drawable.widget_cell_prayer_light else R.drawable.widget_cell_prayer
+                    soon -> if(colors.light)R.drawable.widget_cell_soon_light else R.drawable.widget_cell_soon
+                    else -> if(colors.light)R.drawable.widget_cell_adhan_light else R.drawable.widget_cell_adhan
+                }
                 setTextColor(R.id.widget_countdown,phaseColor)
                 if(Build.VERSION.SDK_INT>=31) {
                     setColorStateList(R.id.widget_progress,"setProgressTintList",ColorStateList.valueOf(phaseColor))
                 }
-                if(!wide && !withDateFooter)setInt(R.id.widget_counter_box,"setBackgroundResource",when {
-                    colors.light && iqama->R.drawable.widget_counter_gold_light
-                    colors.light->R.drawable.widget_counter_mint_light
-                    iqama->R.drawable.widget_counter_gold
-                    else->R.drawable.widget_counter_mint
-                })
                 setTextViewText(R.id.widget_prayer,prayer ?: strings.getString(R.string.system_unavailable))
-                setTextViewText(R.id.widget_time,time ?: strings.getString(R.string.system_check_calculation))
+                setTextViewText(R.id.widget_time,when {
+                    time==null -> strings.getString(R.string.system_check_calculation)
+                    iqama -> "${strings.getString(R.string.system_iqama)} $time"
+                    praying -> strings.getString(R.string.widget_prayer_until,time)
+                    // Roomy sizes also show when the iqama of the next prayer will be.
+                    data.iqamaLabel!=null && (layout==R.layout.prayer_widget_large || layout==R.layout.prayer_widget_medium) ->
+                        "$time · ${strings.getString(R.string.system_iqama)} ${strings.prayerTime(data.time.plusSeconds(p.iqamaMinutes.getValue(data.prayer)*60L),p)}"
+                    else -> time
+                })
                 setViewVisibility(R.id.widget_countdown,if(data!=null)View.VISIBLE else View.GONE)
                 val duration=data?.start?.let {java.time.Duration.between(it,data.time).toMillis()} ?: 0L
                 val remaining=data?.let {java.time.Duration.between(now,it.time).toMillis()} ?: 0L
                 setViewVisibility(R.id.widget_progress,if(duration>0)View.VISIBLE else View.GONE)
-                if(duration>0)setProgressBar(R.id.widget_progress,100,(remaining.toDouble()/duration*100).toInt().coerceIn(0,100),false)
+                // Fills up as the prayer (or iqama) approaches: elapsed share of the waiting period.
+                if(duration>0)setProgressBar(R.id.widget_progress,100,((1-remaining.toDouble()/duration)*100).toInt().coerceIn(0,100),false)
                 if(data!=null) {
                     setChronometerCountDown(R.id.widget_countdown,true)
                     setChronometer(R.id.widget_countdown,SystemClock.elapsedRealtime()+data.time.toEpochMilli()-now.toEpochMilli(),null,true)
                 }
-                val footer=when {
-                    slim -> p.city.name
-                    iqama -> "${strings.getString(R.string.system_iqama)} · $prayer"
-                    else -> strings.getString(R.string.system_signature)
-                }
-                setTextViewText(R.id.widget_footer,footer)
-                setContentDescription(R.id.widget_root,listOfNotNull(brand,date,heading,prayer,time,p.city.name).joinToString(" · "))
+                val day=fillDay(this,strings,p,now,data,colors,phaseColor,highlight)
+                setContentDescription(R.id.widget_root,listOfNotNull(brand,date,heading,prayer,time,p.city.name,day).joinToString(" · "))
                 val open=PendingIntent.getActivity(context,400,Intent(context,MainActivity::class.java).putExtra("open_home",true).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP),PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
                 setOnClickPendingIntent(R.id.widget_root,open)
                 setOnClickPendingIntent(R.id.widget_refresh,refreshIntent(context))
             }
+        }
+        private val cells=listOf(
+            Triple(R.id.widget_p0,R.id.widget_p0_name,R.id.widget_p0_time),
+            Triple(R.id.widget_p1,R.id.widget_p1_name,R.id.widget_p1_time),
+            Triple(R.id.widget_p2,R.id.widget_p2_name,R.id.widget_p2_time),
+            Triple(R.id.widget_p3,R.id.widget_p3_name,R.id.widget_p3_time),
+            Triple(R.id.widget_p4,R.id.widget_p4_name,R.id.widget_p4_time))
+
+        /** Fills the five daily prayers (layouts without these cells ignore the calls).
+         * Shows the day of the highlighted prayer, so after Isha it is tomorrow's list. */
+        private fun fillDay(views: RemoteViews,strings: Context,p: Preferences,now: Instant,data: WidgetPrayer?,colors: WidgetColors,accent: Int,highlight: Int): String? {
+            val zone=p.city.zoneId
+            val date=(data?.time ?: now).atZone(zone).toLocalDate()
+            val events=runCatching {PrayerCalculator().calculate(date,p).events.filter {it.prayer.isPrayer}}.getOrDefault(emptyList())
+            if(events.size!=5) {views.setViewVisibility(R.id.widget_day,View.GONE);return null}
+            views.setViewVisibility(R.id.widget_day,View.VISIBLE)
+            events.forEachIndexed {index,event->
+                val (cell,name,time)=cells[index]
+                val active=event.prayer==data?.prayer
+                val passed=!active && event.time<=now
+                views.setTextViewText(name,strings.prayerName(event.prayer))
+                views.setTextViewText(time,strings.prayerTime(event.time,p))
+                views.setTextColor(name,if(active)accent else colors.secondary)
+                views.setTextColor(time,when {active->accent;passed->colors.secondary;else->colors.text})
+                views.setInt(cell,"setBackgroundResource",if(active)highlight else 0)
+            }
+            return events.joinToString("، ") {"${strings.prayerName(it.prayer)} ${strings.prayerTime(it.time,p)}"}
         }
         fun updateAll(context: Context) {
             // A launcher or vendor widget error must never crash the main activity.
@@ -158,8 +187,9 @@ class PrayerWidget: AppWidgetProvider() {
                 }
                 val alarm=context.getSystemService(AlarmManager::class.java)
                 val midnight=now.atZone(p.city.zoneId).toLocalDate().plusDays(1).atStartOfDay(p.city.zoneId).toInstant()
-                val progressInterval=if(next?.phase==CountdownPhase.IQAMA)60L else 900L
-                val at=listOfNotNull(next?.time,midnight,now.plusSeconds(progressInterval)).min().toEpochMilli()
+                val soonAt=next?.takeIf {it.phase==CountdownPhase.ADHAN}?.time?.minus(SOON)
+                val progressInterval=if(next?.phase!=CountdownPhase.ADHAN || (soonAt!=null && soonAt<=now))60L else 900L
+                val at=listOfNotNull(next?.time,soonAt?.takeIf {it>now},midnight,now.plusSeconds(progressInterval)).min().toEpochMilli()
                 // Non-wakeup: the widget must not wake a sleeping phone or contend
                 // with the idle quota reserved for sound restoration.
                 if(Build.VERSION.SDK_INT<31 || alarm.canScheduleExactAlarms())alarm.setExact(AlarmManager.RTC,at,refreshIntent(context))

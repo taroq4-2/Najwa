@@ -16,7 +16,9 @@ enum class Screen(val tab: Int) {
     }
 }
 
-enum class CountdownPhase { ADHAN, IQAMA }
+/** ADHAN: waiting for the next adhan. IQAMA: adhan called, waiting for iqama.
+ * PRAYER (widget only): iqama reached, prayer in progress until the prayer's silence window ends. */
+enum class CountdownPhase { ADHAN, IQAMA, PRAYER }
 
 /** A tab starts its own trail; a detail retains the actual screen that opened it. */
 fun navigateScreens(trail: List<String>,destination: Screen,tab: Boolean=false): List<String> {
@@ -30,14 +32,17 @@ data class WidgetPrayer(val city: String,val prayer: Prayer,val time: java.time.
     val heading get()=if(phase==CountdownPhase.IQAMA)"المتبقي على الإقامة" else "الصلاة القادمة"
 }
 fun widgetPrayer(now: java.time.Instant,p: Preferences): WidgetPrayer? {
-    return prayerCountdown(PrayerCalculator().around(now,p).flatMap {it.events},now,p)
+    return prayerCountdown(PrayerCalculator().around(now,p).flatMap {it.events},now,p,includePrayer=true)
 }
-fun prayerCountdown(events: List<PrayerEvent>,now: java.time.Instant,p: Preferences): WidgetPrayer? {
+fun prayerCountdown(events: List<PrayerEvent>,now: java.time.Instant,p: Preferences,includePrayer: Boolean=false): WidgetPrayer? {
     val prayers=events.filter {it.prayer.isPrayer}.sortedBy {it.time}
     val previous=prayers.lastOrNull {it.time<=now}
     if(p.showIqamaCountdown && previous!=null) {
         val iqama=previous.time.plusSeconds(p.iqamaMinutes.getValue(previous.prayer)*60L)
         if(now<iqama)return WidgetPrayer(p.city.name,previous.prayer,iqama,displayTime(iqama,p),displayTime(iqama,p),CountdownPhase.IQAMA,previous.time)
+        // The prayer lasts until the silence window chosen for it (counted from adhan) ends.
+        val end=previous.time.plusSeconds(p.silenceMinutes.getValue(previous.prayer)*60L)
+        if(includePrayer && now<end)return WidgetPrayer(p.city.name,previous.prayer,end,displayTime(end,p),displayTime(iqama,p),CountdownPhase.PRAYER,iqama)
     }
     val event=prayers.firstOrNull {it.time>now} ?: return null
     return WidgetPrayer(p.city.name,event.prayer,event.time,displayTime(event.time,p),

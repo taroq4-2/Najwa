@@ -100,15 +100,17 @@ class NajwaRuntime(private val context: Context,private val clock: ()->Instant =
             notice=strings.getString(org.najwa.app.R.string.trial_scheduled)
         }
     }
-    @Synchronized fun testNotification(adhan: Boolean) {
-        if(!begin())return
+    /** Posts a sample adhan/iqama notification. The caller shows a localized result. */
+    @Synchronized fun testNotification(adhan: Boolean): Boolean {
+        if(!begin())return false
+        val channel=if(adhan)PrayerNotifications.ADHAN else PrayerNotifications.IQAMA
+        if(!notifications.enabled(channel))return false
+        var delivered=false
         attempt("تعذّر عرض إشعار التجربة") {
-            val channel=if(adhan)PrayerNotifications.ADHAN else PrayerNotifications.IQAMA
-            check(notifications.enabled(channel))
             val now=clock()
-            notifications.show(ScheduledPrayer(PrayerEvent(Prayer.DHUHR,now),if(adhan)PrayerAction.ADHAN else PrayerAction.IQAMA,now),preferences,true)
-            notice="أُرسل إشعار التجربة. راجع لوحة إشعارات الهاتف."
+            delivered=notifications.show(ScheduledPrayer(PrayerEvent(Prayer.DHUHR,now),if(adhan)PrayerAction.ADHAN else PrayerAction.IQAMA,now),preferences,true)==NotificationDelivery.POSTED
         }
+        return delivered
     }
     private fun record(tasks: List<ScheduledPrayer>,now: Instant,delivery: Map<String,String>) {
         if(tasks.isEmpty())return

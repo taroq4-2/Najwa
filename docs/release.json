@@ -1,8 +1,8 @@
 {
-  "version": "1.2.1",
-  "versionCode": 111,
+  "version": "1.3.0",
+  "versionCode": 114,
   "package": "org.najwa.app",
   "download": "https://github.com/taroq4-2/Najwa/releases/latest/download/Najwa.apk",
-  "sha256": "33696188139c6e22cff627a1e3720b70988d40c432c927ccc595f5cf358eff7e",
-  "bytes": 19332431
+  "sha256": "9b9b88b59a71154b9a549ab389bc5c2556b98346c523f776065c821600ffd2ab",
+  "bytes": 19436891
 }

@@ -42,12 +42,20 @@ class NavigationWidgetTest {
         assertEquals(Prayer.FAJR,widgetPrayer(fajr.time.minusSeconds(1),p)!!.prayer)
         assertEquals(CountdownPhase.IQAMA,widgetPrayer(fajr.time,p)!!.phase)
         assertEquals(Prayer.FAJR,widgetPrayer(fajr.time,p)!!.prayer)
-        assertEquals(Prayer.DHUHR,widgetPrayer(fajr.time.plusSeconds(20*60),p)!!.prayer)
+        // Iqama (20 min) → prayer in progress until the Fajr silence window (35 min) ends.
+        val prayer=widgetPrayer(fajr.time.plusSeconds(20*60),p)!!
+        assertEquals(CountdownPhase.PRAYER,prayer.phase)
+        assertEquals(Prayer.FAJR,prayer.prayer)
+        assertEquals(fajr.time.plusSeconds(35*60),prayer.time)
+        assertEquals(Prayer.DHUHR,widgetPrayer(fajr.time.plusSeconds(35*60),p)!!.prayer)
+        // The home screen keeps its two phases.
+        assertEquals(Prayer.DHUHR,prayerCountdown(day.events,fajr.time.plusSeconds(20*60),p)!!.prayer)
     }
     @Test fun widgetAdvancesToTomorrowAfterIsha() {
         val p=Preferences()
         val isha=PrayerCalculator().calculate(java.time.LocalDate.of(2026,11,7),p).events.last()
-        val next=widgetPrayer(isha.time.plusSeconds(15*60),p)!!
+        assertEquals(CountdownPhase.PRAYER,widgetPrayer(isha.time.plusSeconds(15*60),p)!!.phase)
+        val next=widgetPrayer(isha.time.plusSeconds(30*60),p)!!
         assertEquals(Prayer.FAJR,next.prayer)
         assertTrue(next.time>isha.time)
     }

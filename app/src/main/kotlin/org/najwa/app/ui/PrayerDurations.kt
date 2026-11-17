@@ -15,10 +15,15 @@ import androidx.compose.ui.unit.*
 import org.najwa.core.*
 import org.najwa.app.R
 
-@Composable fun PrayerDurations(title: String,subtitle: String,values: Map<Prayer,Int>,defaults: Map<Prayer,Int>,minimum: Int,enabledPrayers: Set<Prayer>?=null,onEnabled: ((Prayer,Boolean)->Unit)?=null,onChange: (Map<Prayer,Int>)->Unit) {
+@Composable fun PrayerDurations(title: String,subtitle: String,values: Map<Prayer,Int>,defaults: Map<Prayer,Int>,minimum: Int,enabledPrayers: Set<Prayer>?=null,onEnabled: ((Prayer,Boolean)->Unit)?=null,framed: Boolean=true,onChange: (Map<Prayer,Int>)->Unit) {
     val c=LocalPalette.current
     var editing by rememberSaveable {mutableStateOf<Prayer?>(null)}
-    SettingsCard(title,subtitle) {
+    // framed=false renders inside an existing panel (e.g. a collapsible section).
+    val frame: @Composable (@Composable ColumnScope.()->Unit)->Unit = {body->
+        if(framed)SettingsCard(title,subtitle,body)
+        else Column(verticalArrangement=Arrangement.spacedBy(12.dp)) {Text(uiText(subtitle),color=c.secondary,fontSize=13.sp);body()}
+    }
+    frame {
         Prayer.entries.filter {it.isPrayer}.forEach {prayer->
             val prayerName=localizedPrayerName(prayer)
             val silenceLabel=stringResource(R.string.en_duration_switch,prayerName)

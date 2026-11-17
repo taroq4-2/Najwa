@@ -11,13 +11,14 @@
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity>
         <receiver android:name=".platform.AlarmReceiver" android:exported="false" />
+        <receiver android:name=".platform.NotificationActionReceiver" android:exported="false" />
         <service android:name=".platform.PrayerExecutionService" android:exported="false" android:foregroundServiceType="specialUse">
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="Execute user-scheduled prayer ringer-mode changes and restore the previous ringer mode at exact alarm delivery on Android 17; stops immediately after execution." />
         </service>
         <provider android:name=".platform.AdhanFileProvider" android:authorities="${applicationId}.adhan.files" android:exported="false" android:grantUriPermissions="true">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/adhan_audio_paths" />
         </provider>
-        <receiver android:name=".platform.PrayerWidget" android:exported="false" android:label="نجوى · الصلاة القادمة">
+        <receiver android:name=".platform.PrayerWidget" android:exported="false" android:label="@string/widget_label">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/prayer_widget_info" />
         </receiver>
