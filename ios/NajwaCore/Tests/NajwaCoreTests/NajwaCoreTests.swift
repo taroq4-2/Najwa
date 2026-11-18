@@ -69,7 +69,8 @@ final class CountdownTests: XCTestCase {
     func testBoundariesIncludeEveryStageChange() {
         let adhan = dhuhr().time
         let points = stageBoundaries(from: adhan.addingTimeInterval(-3600), prefs: prefs)
-        for offset in [-600.0, 0, 15 * 60, 30 * 60] { XCTAssertTrue(points.contains(adhan.addingTimeInterval(offset)), "\(offset)") }
+        let offsets: [TimeInterval] = [-600, 0, 15 * 60, 30 * 60]
+        for offset in offsets { XCTAssertTrue(points.contains(adhan.addingTimeInterval(offset)), "\(offset)") }
     }
 
     func testAlertsAreCappedSortedAndIncludeFriday() {
