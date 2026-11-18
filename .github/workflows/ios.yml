@@ -53,6 +53,8 @@ jobs:
           shot settings-ar dark ar -NajwaDemo -NajwaTab settings
           shot home-en-dark dark en -NajwaDemo
           shot settings-en light en -NajwaDemo -NajwaTab settings
+          shot widgets-ar dark ar -NajwaDemo -NajwaWidgets
+          shot widgets-en dark en -NajwaDemo -NajwaWidgets
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:

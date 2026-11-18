@@ -63,7 +63,7 @@ struct CalculationView: View {
             }
             Section("settings.method") {
                 Picker("settings.method", selection: $model.prefs.method) {
-                    ForEach(NajwaCore.Method.allCases, id: \.self) { Text(LocalizedStringKey("method.\($0.rawValue)")).tag($0) }
+                    ForEach(NajwaCore.Method.allCases, id: \.self) { Text(LocalizedStringKey.key("method." + $0.rawValue)).tag($0) }
                 }
                 if model.prefs.method == .custom {
                     Stepper(value: $model.prefs.customFajr, in: 1...30, step: 0.5) { LabeledContent("settings.fajr_angle", value: "\(model.prefs.customFajr)°") }
@@ -74,7 +74,7 @@ struct CalculationView: View {
                     Text("asr.hanafi").tag(true)
                 }
                 Picker("settings.high_latitude", selection: $model.prefs.highLatitude) {
-                    ForEach(HighLatitude.allCases, id: \.self) { Text(LocalizedStringKey("high.\($0.rawValue)")).tag($0) }
+                    ForEach(HighLatitude.allCases, id: \.self) { Text(LocalizedStringKey.key("high." + $0.rawValue)).tag($0) }
                 }
             }
         }

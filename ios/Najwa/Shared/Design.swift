@@ -32,9 +32,15 @@ extension Color {
     }
 }
 
+extension LocalizedStringKey {
+    /// A key computed at runtime, looked up verbatim.
+    static func key(_ value: String) -> LocalizedStringKey { LocalizedStringKey(stringLiteral: value) }
+}
+
 extension Prayer {
-    var title: LocalizedStringKey { LocalizedStringKey("prayer.\(rawValue)") }
-    var name: String { String(localized: String.LocalizationValue("prayer.\(rawValue)")) }
+    /// Built keys must not go through interpolation (that would look up "prayer.%@").
+    var title: LocalizedStringKey { .key("prayer." + rawValue) }
+    var name: String { NSLocalizedString("prayer." + rawValue, comment: "") }
 }
 
 extension Stage {

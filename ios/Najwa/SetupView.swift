@@ -54,7 +54,7 @@ struct SetupView: View {
                 }
                 Divider()
                 Picker("settings.method", selection: $model.prefs.method) {
-                    ForEach(NajwaCore.Method.allCases, id: \.self) { Text(LocalizedStringKey("method.\($0.rawValue)")).tag($0) }
+                    ForEach(NajwaCore.Method.allCases, id: \.self) { Text(LocalizedStringKey.key("method." + $0.rawValue)).tag($0) }
                 }
                 Picker("settings.asr", selection: $model.prefs.hanafi) {
                     Text("asr.standard").tag(false)

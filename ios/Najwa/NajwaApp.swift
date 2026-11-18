@@ -109,7 +109,9 @@ struct NajwaApp: App {
 struct RootView: View {
     @EnvironmentObject private var model: AppModel
     var body: some View {
-        if model.setupDone {
+        if ProcessInfo.processInfo.arguments.contains("-NajwaWidgets") {
+            WidgetGallery(prefs: model.prefs)
+        } else if model.setupDone {
             TabView(selection: $model.tab) {
                 HomeView().tabItem { Label("tab.home", systemImage: "house") }.tag(0)
                 SettingsView().tabItem { Label("tab.settings", systemImage: "gearshape") }.tag(1)
