@@ -29,11 +29,34 @@ jobs:
         run: |
           cd ios
           xcodebuild build -project Najwa.xcodeproj -scheme Najwa \
-            -destination 'generic/platform=iOS Simulator' \
+            -destination 'generic/platform=iOS Simulator' -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO | tee build.log | grep -E "error:|warning: .*(Najwa|NajwaWidget)|BUILD (SUCCEEDED|FAILED)" || true
           grep -q "BUILD SUCCEEDED" build.log
+      - name: Screenshots on the iPhone simulator
+        run: |
+          cd ios
+          DEVICE=$(xcrun simctl list devices available -j | python3 -c "import json,sys;d=json.load(sys.stdin)['devices'];print(next(x['udid'] for k,v in d.items() if 'iOS' in k for x in v if x['name'].startswith('iPhone 16 Pro')))")
+          xcrun simctl boot "$DEVICE"; xcrun simctl bootstatus "$DEVICE" -b
+          xcrun simctl status_bar "$DEVICE" override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
+          xcrun simctl install "$DEVICE" build/Build/Products/Debug-iphonesimulator/Najwa.app
+          mkdir -p shots
+          shot() { # name, appearance, language, extra launch args...
+            local name=$1 look=$2 lang=$3; shift 3
+            xcrun simctl ui "$DEVICE" appearance "$look"
+            xcrun simctl terminate "$DEVICE" org.najwa.app || true
+            xcrun simctl launch "$DEVICE" org.najwa.app -AppleLanguages "($lang)" -AppleLocale "$lang" "$@"
+            sleep 6; xcrun simctl io "$DEVICE" screenshot "shots/$name.png"
+          }
+          shot setup-ar dark ar
+          shot home-ar-dark dark ar -NajwaDemo
+          shot home-ar-light light ar -NajwaDemo
+          shot settings-ar dark ar -NajwaDemo -NajwaTab settings
+          shot home-en-dark dark en -NajwaDemo
+          shot settings-en light en -NajwaDemo -NajwaTab settings
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
-          name: ios-build-log
-          path: ios/build.log
+          name: ios-screenshots
+          path: |
+            ios/shots/
+            ios/build.log

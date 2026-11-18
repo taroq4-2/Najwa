@@ -11,9 +11,19 @@ final class AppModel: ObservableObject {
     let calculator = PrayerCalculator()
     let catalog = CityCatalog()
 
+    /// Opened tab; `-NajwaTab settings` selects Settings (used for screenshots).
+    @Published var tab = 0
+
     init() {
         prefs = SettingsStore.load()
         setupDone = SettingsStore.setupDone
+        // Screenshot mode for CI: skip setup with alerts on. Never set by the app itself.
+        let args = ProcessInfo.processInfo.arguments
+        if args.contains("-NajwaDemo") {
+            setupDone = true
+            prefs.adhanNotifications = true; prefs.iqamaNotifications = true; prefs.fridayReminder = true
+        }
+        if let i = args.firstIndex(of: "-NajwaTab"), args.indices.contains(i + 1), args[i + 1] == "settings" { tab = 1 }
     }
 
     private func persist() {
@@ -100,9 +110,9 @@ struct RootView: View {
     @EnvironmentObject private var model: AppModel
     var body: some View {
         if model.setupDone {
-            TabView {
-                HomeView().tabItem { Label("tab.home", systemImage: "house") }
-                SettingsView().tabItem { Label("tab.settings", systemImage: "gearshape") }
+            TabView(selection: $model.tab) {
+                HomeView().tabItem { Label("tab.home", systemImage: "house") }.tag(0)
+                SettingsView().tabItem { Label("tab.settings", systemImage: "gearshape") }.tag(1)
             }
         } else {
             SetupView()
