@@ -1,0 +1,83 @@
+name: Najwa
+options:
+  bundleIdPrefix: org.najwa
+  deploymentTarget:
+    iOS: "17.0"
+  developmentLanguage: ar
+  createIntermediateGroups: true
+settings:
+  base:
+    MARKETING_VERSION: "1.3.0"
+    CURRENT_PROJECT_VERSION: "114"
+    SWIFT_VERSION: "5.9"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+    LOCALIZATION_PREFERS_STRING_CATALOGS: NO
+packages:
+  NajwaCore:
+    path: NajwaCore
+targets:
+  Najwa:
+    type: application
+    platform: iOS
+    sources:
+      - path: Najwa
+      - path: ../app/src/main/assets/cities
+        type: folder
+        buildPhase: resources
+      - path: ../app/src/main/assets/cities-world
+        type: folder
+        buildPhase: resources
+    dependencies:
+      - package: NajwaCore
+      - target: NajwaWidget
+        embed: true
+    entitlements:
+      path: Najwa/Najwa.entitlements
+      properties:
+        com.apple.security.application-groups: [group.org.najwa.app]
+        com.apple.developer.usernotifications.time-sensitive: true
+    info:
+      path: Najwa/Info.plist
+      properties:
+        CFBundleDisplayName: نجوى
+        CFBundleDevelopmentRegion: ar
+        CFBundleLocalizations: [ar, en]
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIApplicationSupportsIndirectInputEvents: true
+        ITSAppUsesNonExemptEncryption: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.najwa.app
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        TARGETED_DEVICE_FAMILY: "1"
+  NajwaWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: NajwaWidget
+      - path: Najwa/Shared
+    dependencies:
+      - package: NajwaCore
+    entitlements:
+      path: NajwaWidget/NajwaWidget.entitlements
+      properties:
+        com.apple.security.application-groups: [group.org.najwa.app]
+    info:
+      path: NajwaWidget/Info.plist
+      properties:
+        CFBundleDisplayName: نجوى
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.najwa.app.widget
+        TARGETED_DEVICE_FAMILY: "1"
+schemes:
+  Najwa:
+    build:
+      targets:
+        Najwa: all
+        NajwaWidget: all

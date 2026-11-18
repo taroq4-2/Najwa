@@ -1,0 +1,39 @@
+name: iOS verification
+on:
+  push:
+    paths: ['ios/**', 'core/src/main/**', '.github/workflows/ios.yml']
+  pull_request:
+    paths: ['ios/**', 'core/src/main/**', '.github/workflows/ios.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ios:
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Toolchain
+        run: |
+          sudo xcode-select -s "$(ls -d /Applications/Xcode_16*.app | sort -V | tail -1)"
+          xcodebuild -version
+      - name: NajwaCore tests (matches the Android core to the second)
+        run: swift test --package-path ios/NajwaCore
+      - name: Generate Xcode project
+        run: |
+          brew install xcodegen
+          cd ios && xcodegen generate
+      - name: Build app and widget for the simulator (unsigned)
+        run: |
+          cd ios
+          xcodebuild build -project Najwa.xcodeproj -scheme Najwa \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO | tee build.log | grep -E "error:|warning: .*(Najwa|NajwaWidget)|BUILD (SUCCEEDED|FAILED)" || true
+          grep -q "BUILD SUCCEEDED" build.log
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: ios-build-log
+          path: ios/build.log

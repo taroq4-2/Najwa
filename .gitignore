@@ -13,3 +13,8 @@ local.properties
 keystore.properties
 captures/
 *.hprof
+ios/Najwa.xcodeproj/
+ios/build.log
+ios/.build/
+ios/NajwaCore/.build/
+ios/NajwaCore/.swiftpm/
