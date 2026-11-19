@@ -149,7 +149,6 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         await LiveIqama.sync(SettingsStore.load())
     }
 }
-}
 
 @main
 struct NajwaApp: App {
