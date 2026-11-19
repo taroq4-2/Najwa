@@ -97,6 +97,17 @@ struct AlertsView: View {
                     }
                 }
             } footer: { Text("alerts.footer") }
+            Section {
+                Toggle("live.toggle", isOn: $model.prefs.liveIqama)
+                if model.prefs.liveIqama {
+                    Picker("live.lead", selection: $model.prefs.liveIqamaLead) {
+                        Text("live.lead_5").tag(5)
+                        Text("live.lead_10").tag(10)
+                        Text("live.lead_15").tag(15)
+                        Text("live.lead_adhan").tag(0)
+                    }
+                }
+            } header: { Text("live.title") } footer: { Text(LiveIqama.canSchedule ? "live.footer_auto" : "live.footer_manual") }
             Section("alerts.prayers") {
                 ForEach(Prayer.daily, id: \.self) { prayer in
                     HStack {
@@ -145,18 +156,41 @@ struct AppearanceView: View {
             }.pickerStyle(.inline)
             Toggle("appearance.hour24", isOn: $model.prefs.hour24)
             Toggle("appearance.iqama_countdown", isOn: $model.prefs.showIqamaCountdown)
+            Section("appearance.widget") {
+                Picker("appearance.widget_theme", selection: $model.prefs.widgetTheme) {
+                    Text("theme.auto").tag(WidgetTheme.auto)
+                    Text("theme.dark").tag(WidgetTheme.dark)
+                    Text("theme.light").tag(WidgetTheme.light)
+                }.pickerStyle(.segmented)
+            }
         }
         .navigationTitle("settings.appearance")
     }
 }
 
-/// iOS does not let apps change the ringer; offer the system's own tools instead.
+/// iOS does not let apps change the ringer. Najwa instead runs the person's own Shortcut
+/// (Set Focus: Do Not Disturb until now + prayer minutes) from the adhan notification.
 struct SilenceInfoView: View {
+    @EnvironmentObject private var model: AppModel
     var body: some View {
         Form {
             Section { Text("silence.explain") }
+            Section {
+                Toggle("silence.button", isOn: $model.prefs.silenceButton)
+                LabeledContent("silence.shortcut_name") {
+                    TextField("silence.shortcut_name", text: $model.prefs.silenceShortcutName).multilineTextAlignment(.trailing)
+                }
+            } footer: { Text("silence.button_footer") }
+            Section("silence.setup_title") {
+                ForEach(1...5, id: \.self) { i in
+                    HStack(alignment: .top, spacing: 10) {
+                        Text("\(i)").font(.caption.bold()).foregroundStyle(.white).frame(width: 22, height: 22).background(Madar.green, in: Circle())
+                        Text(LocalizedStringKey.key("silence.step\(i)"))
+                    }
+                }
+                Button("silence.test") { PrayerSilence.run(model.prefs, minutes: 1) }
+            }
             Section("silence.focus_title") { Text("silence.focus_steps") }
-            Section("silence.shortcut_title") { Text("silence.shortcut_steps") }
         }
         .navigationTitle("settings.silence")
     }

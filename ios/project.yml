@@ -47,6 +47,13 @@ targets:
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIApplicationSupportsIndirectInputEvents: true
         ITSAppUsesNonExemptEncryption: false
+        NSSupportsLiveActivities: true
+        BGTaskSchedulerPermittedIdentifiers: [org.najwa.app.refresh]
+        UIBackgroundModes: [fetch]
+        LSApplicationQueriesSchemes: [shortcuts]
+        CFBundleURLTypes:
+          - CFBundleURLName: org.najwa.app
+            CFBundleURLSchemes: [najwa]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: org.najwa.app

@@ -19,15 +19,22 @@ struct PrayerProvider: TimelineProvider {
     }
 }
 
-@main
 struct NajwaWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "NajwaPrayerWidget", provider: PrayerProvider()) { entry in
             NajwaWidgetView(entry: entry)
-                .containerBackground(for: .widget) { Madar.heroGradient }
+                .containerBackground(for: .widget) { WidgetBackground(theme: entry.prefs.widgetTheme) }
         }
         .configurationDisplayName("widget.name")
         .description("widget.description")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .accessoryRectangular, .accessoryCircular, .accessoryInline])
+    }
+}
+
+@main
+struct NajwaWidgets: WidgetBundle {
+    var body: some Widget {
+        NajwaWidget()
+        IqamaLiveActivity()
     }
 }

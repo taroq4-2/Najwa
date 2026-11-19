@@ -24,6 +24,7 @@ final class AppModel: ObservableObject {
             prefs.adhanNotifications = true; prefs.iqamaNotifications = true; prefs.fridayReminder = true
         }
         if let i = args.firstIndex(of: "-NajwaTab"), args.indices.contains(i + 1), args[i + 1] == "settings" { tab = 1 }
+        if args.contains("-NajwaLiveStart") { startDemoLiveActivity(prefs) }
     }
 
     private func persist() {
@@ -35,6 +36,7 @@ final class AppModel: ObservableObject {
     /// Re-plans pending notifications; iOS caps them at 64, so this also runs on every launch/foreground.
     func reschedule() async {
         await NotificationScheduler.reschedule(prefs)
+        await LiveIqama.sync(prefs)
         await refreshPermission()
     }
 
@@ -56,6 +58,7 @@ enum NotificationScheduler {
         center.removeAllPendingNotificationRequests()
         let settings = await center.notificationSettings()
         guard settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional else { return }
+        var requests: [UNNotificationRequest] = []
         for alert in upcomingAlerts(from: now, prefs: prefs) {
             let content = UNMutableNotificationContent()
             let prayer = alert.event.prayer.name
@@ -67,6 +70,10 @@ enum NotificationScheduler {
                 content.body = String(format: String(localized: "notify.adhan_body %@ %@ %@"), time, iqama, prefs.city.name)
                 content.sound = .default
                 content.interruptionLevel = .timeSensitive
+                if prefs.silenceButton {
+                    content.categoryIdentifier = NotificationIDs.adhanCategory
+                    content.userInfo = ["minutes": prefs.prayerWindow(alert.event.prayer)]
+                }
             case .iqama:
                 content.title = String(format: String(localized: "notify.iqama_title %@"), prayer)
                 content.body = String(format: String(localized: "notify.iqama_body %@"), prefs.city.name)
@@ -81,15 +88,72 @@ enum NotificationScheduler {
             // Absolute delay: stays correct if the phone's own time zone differs from the city's.
             let delay = alert.at.timeIntervalSince(now)
             guard delay > 1 else { continue }
-            let request = UNNotificationRequest(identifier: alert.id, content: content,
-                                                trigger: UNTimeIntervalNotificationTrigger(timeInterval: delay, repeats: false))
-            try? await center.add(request)
+            requests.append(UNNotificationRequest(identifier: alert.id, content: content,
+                                                  trigger: UNTimeIntervalNotificationTrigger(timeInterval: delay, repeats: false)))
         }
+        // Before iOS 26 a Live Activity cannot start by itself: remind at the window's start;
+        // opening the notification starts the iqama countdown in the Dynamic Island.
+        if !LiveIqama.canSchedule && prefs.liveIqamaLead > 0 {
+            for window in iqamaWindows(from: now, prefs: prefs, horizon: 6 * 86_400) where window.showFrom > now {
+                let content = UNMutableNotificationContent()
+                let minutes = Int((window.iqama.timeIntervalSince(window.showFrom) / 60).rounded())
+                content.title = String(format: String(localized: "live.soon_title %lld %@"), minutes, window.prayer.name)
+                content.body = String(localized: "live.soon_body")
+                content.interruptionLevel = .active
+                content.threadIdentifier = "najwa.live"
+                requests.append(UNNotificationRequest(identifier: "live:" + window.id, content: content,
+                    trigger: UNTimeIntervalNotificationTrigger(timeInterval: window.showFrom.timeIntervalSince(now), repeats: false)))
+            }
+        }
+        // iOS keeps at most 64 pending requests: keep the soonest.
+        let sorted = requests.sorted {
+            ($0.trigger as? UNTimeIntervalNotificationTrigger)?.timeInterval ?? 0 < ($1.trigger as? UNTimeIntervalNotificationTrigger)?.timeInterval ?? 0
+        }
+        for request in sorted.prefix(maxPendingNotifications) { try? await center.add(request) }
     }
+}
+
+enum NotificationIDs {
+    static let adhanCategory = "NAJWA_ADHAN"
+    static let silenceAction = "NAJWA_SILENCE"
+
+    static func registerCategories() {
+        let silence = UNNotificationAction(identifier: silenceAction, title: String(localized: "notify.silence_action"),
+                                           options: [.foreground], icon: UNNotificationActionIcon(systemImageName: "moon.fill"))
+        let category = UNNotificationCategory(identifier: adhanCategory, actions: [silence], intentIdentifiers: [])
+        UNUserNotificationCenter.current().setNotificationCategories([category])
+    }
+}
+
+/// Registers background work and handles taps on Najwa notifications.
+final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+        UNUserNotificationCenter.current().delegate = self
+        NotificationIDs.registerCategories()
+        LiveIqama.registerBackgroundTask()
+        return true
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
+        [.banner, .sound, .list]
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+        let minutes = response.notification.request.content.userInfo["minutes"] as? Int
+        let action = response.actionIdentifier
+        await MainActor.run {
+            let prefs = SettingsStore.load()
+            if action == NotificationIDs.silenceAction { PrayerSilence.run(prefs, minutes: minutes ?? 30) }
+        }
+        // Any Najwa notification opened inside an iqama window starts the countdown (pre-iOS 26 path).
+        await LiveIqama.sync(SettingsStore.load())
+    }
+}
 }
 
 @main
 struct NajwaApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var model = AppModel()
     @Environment(\.scenePhase) private var phase
 
@@ -109,8 +173,11 @@ struct NajwaApp: App {
 struct RootView: View {
     @EnvironmentObject private var model: AppModel
     var body: some View {
-        if ProcessInfo.processInfo.arguments.contains("-NajwaWidgets") {
+        let args = ProcessInfo.processInfo.arguments
+        if args.contains("-NajwaWidgets") {
             WidgetGallery(prefs: model.prefs)
+        } else if args.contains("-NajwaLive") {
+            LiveGallery(prefs: model.prefs)
         } else if model.setupDone {
             TabView(selection: $model.tab) {
                 HomeView().tabItem { Label("tab.home", systemImage: "house") }.tag(0)

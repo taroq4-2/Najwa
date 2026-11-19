@@ -72,3 +72,31 @@ public func stageBoundaries(from now: Date, prefs: Preferences, horizon: TimeInt
     points.append(today.adding(days: 1).utcStart.addingTimeInterval(-TimeInterval(prefs.city.timeZone.secondsFromGMT(for: now))))
     return Array(Set(points.filter { $0 > now && $0 <= end })).sorted()
 }
+
+/// The span in which the iqama countdown Live Activity is shown for one prayer.
+public struct IqamaWindow: Equatable, Sendable {
+    public let prayer: Prayer
+    public let adhan: Date
+    public let iqama: Date
+    /// End of the prayer window ("the prayer has begun" until here).
+    public let end: Date
+    /// When the countdown should appear: `lead` minutes before iqama, never before adhan.
+    public let showFrom: Date
+    public var id: String { "\(prayer.rawValue):\(Int(adhan.timeIntervalSince1970))" }
+}
+
+/// Upcoming (or current) iqama windows, soonest first. Empty when the feature is off.
+public func iqamaWindows(from now: Date, prefs: Preferences, horizon: TimeInterval = 36 * 3600,
+                         calculator: PrayerCalculator = PrayerCalculator()) -> [IqamaWindow] {
+    guard prefs.liveIqama else { return [] }
+    var windows: [IqamaWindow] = []
+    for event in calculator.around(now, prefs).flatMap(\.events) where event.prayer.isPrayer {
+        let iqama = event.time.addingTimeInterval(TimeInterval(prefs.iqama(event.prayer) * 60))
+        let end = max(iqama, event.time.addingTimeInterval(TimeInterval(prefs.prayerWindow(event.prayer) * 60)))
+        let lead = TimeInterval(max(prefs.liveIqamaLead, 0) * 60)
+        let showFrom = prefs.liveIqamaLead <= 0 ? event.time : max(event.time, iqama.addingTimeInterval(-lead))
+        guard iqama > now, showFrom <= now.addingTimeInterval(horizon) else { continue }
+        windows.append(IqamaWindow(prayer: event.prayer, adhan: event.time, iqama: iqama, end: end, showFrom: showFrom))
+    }
+    return windows.sorted { $0.showFrom < $1.showFrom }
+}

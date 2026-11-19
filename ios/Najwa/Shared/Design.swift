@@ -65,3 +65,47 @@ extension Countdown {
         }
     }
 }
+
+/// Widget colours for the chosen widget theme (auto follows the phone's light/dark mode).
+struct WidgetPalette {
+    let light: Bool
+    var text: Color { light ? Madar.ink : Madar.ivory }
+    var secondary: Color { light ? Color(hex: 0x536B60) : Madar.sage }
+    var mark: Color { light ? Color(hex: 0x126D53) : Madar.mint }
+    var chip: Color { light ? Madar.ink.opacity(0.06) : Color.white.opacity(0.08) }
+    func accent(_ stage: Stage) -> Color {
+        guard light else { return Madar.accent(stage) }
+        switch stage {
+        case .adhan: return Color(hex: 0x126D53)
+        case .soon: return Color(hex: 0xB4471B)
+        case .iqama: return Color(hex: 0x81551E)
+        case .prayer: return Color(hex: 0x1F6E8C)
+        }
+    }
+    var background: LinearGradient {
+        light ? LinearGradient(colors: [Color(hex: 0xFBFAF4), Color(hex: 0xE5ECDF)], startPoint: .topLeading, endPoint: .bottomTrailing)
+              : Madar.heroGradient
+    }
+    static func resolve(_ theme: WidgetTheme, _ scheme: ColorScheme) -> WidgetPalette {
+        switch theme {
+        case .light: return WidgetPalette(light: true)
+        case .dark: return WidgetPalette(light: false)
+        case .auto: return WidgetPalette(light: scheme == .light)
+        }
+    }
+}
+
+private struct WidgetPaletteKey: EnvironmentKey { static let defaultValue = WidgetPalette(light: false) }
+extension EnvironmentValues {
+    var najwaPalette: WidgetPalette {
+        get { self[WidgetPaletteKey.self] }
+        set { self[WidgetPaletteKey.self] = newValue }
+    }
+}
+
+/// Widget background following the widget theme.
+struct WidgetBackground: View {
+    @Environment(\.colorScheme) private var scheme
+    let theme: WidgetTheme
+    var body: some View { Rectangle().fill(WidgetPalette.resolve(theme, scheme).background) }
+}

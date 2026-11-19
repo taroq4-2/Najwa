@@ -62,11 +62,40 @@ public struct Preferences: Codable, Equatable, Sendable {
     /// Length of the "prayer has begun" window, counted from adhan (mirrors Android's silence window).
     public var prayerMinutes: [Prayer: Int] = defaultSilenceMinutes
     public var showIqamaCountdown = true
+    /// Iqama countdown in the Dynamic Island / lock screen (Live Activity).
+    public var liveIqama = true
+    /// Minutes before iqama to show the Live Activity; 0 = from adhan.
+    public var liveIqamaLead = 10
+    /// Adds a "silence for prayer" button to adhan notifications (runs the user's Shortcut).
+    public var silenceButton = false
+    public var silenceShortcutName = "صمت نجوى"
+    public var widgetTheme: WidgetTheme = .auto
     public init() {}
 
     public func iqama(_ prayer: Prayer) -> Int { iqamaMinutes[prayer] ?? defaultIqamaMinutes[prayer] ?? 15 }
     public func prayerWindow(_ prayer: Prayer) -> Int { prayerMinutes[prayer] ?? defaultSilenceMinutes[prayer] ?? 30 }
+
+    /// Tolerant decoding: settings saved by an older version keep their values and
+    /// new fields take defaults, instead of the whole object failing to decode.
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let d = Preferences()
+        func v<T: Decodable>(_ key: CodingKeys, _ fallback: T) -> T { (try? c.decodeIfPresent(T.self, forKey: key)) ?? fallback }
+        city = v(.city, d.city); method = v(.method, d.method); hanafi = v(.hanafi, d.hanafi)
+        highLatitude = v(.highLatitude, d.highLatitude); customFajr = v(.customFajr, d.customFajr); customIsha = v(.customIsha, d.customIsha)
+        theme = v(.theme, d.theme); hour24 = v(.hour24, d.hour24)
+        adhanNotifications = v(.adhanNotifications, d.adhanNotifications); iqamaNotifications = v(.iqamaNotifications, d.iqamaNotifications)
+        fridayReminder = v(.fridayReminder, d.fridayReminder); fridayLeadMinutes = v(.fridayLeadMinutes, d.fridayLeadMinutes)
+        adhanPrayers = v(.adhanPrayers, d.adhanPrayers); iqamaPrayers = v(.iqamaPrayers, d.iqamaPrayers)
+        iqamaMinutes = v(.iqamaMinutes, d.iqamaMinutes); prayerMinutes = v(.prayerMinutes, d.prayerMinutes)
+        showIqamaCountdown = v(.showIqamaCountdown, d.showIqamaCountdown)
+        liveIqama = v(.liveIqama, d.liveIqama); liveIqamaLead = v(.liveIqamaLead, d.liveIqamaLead)
+        silenceButton = v(.silenceButton, d.silenceButton); silenceShortcutName = v(.silenceShortcutName, d.silenceShortcutName)
+        widgetTheme = v(.widgetTheme, d.widgetTheme)
+    }
 }
+
+public enum WidgetTheme: String, CaseIterable, Codable, Sendable { case auto = "AUTO", dark = "DARK", light = "LIGHT" }
 
 public struct PrayerEvent: Equatable, Sendable {
     public let prayer: Prayer

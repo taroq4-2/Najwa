@@ -83,3 +83,41 @@ final class CountdownTests: XCTestCase {
         XCTAssertEqual(Set(alerts.map(\.id)).count, alerts.count)
     }
 }
+
+final class LiveIqamaTests: XCTestCase {
+    private func dhuhr(_ p: Preferences) -> Date {
+        PrayerCalculator().calculate(CivilDate(year: 2026, month: 11, day: 18), p).events.first { $0.prayer == .dhuhr }!.time
+    }
+
+    func testWindowStartsLeadMinutesBeforeIqamaButNotBeforeAdhan() {
+        var p = Preferences()
+        p.liveIqamaLead = 10                              // Dhuhr iqama after 15 min
+        let adhan = dhuhr(p)
+        let w = iqamaWindows(from: adhan.addingTimeInterval(-3600), prefs: p).first { $0.prayer == .dhuhr }!
+        XCTAssertEqual(w.iqama, adhan.addingTimeInterval(15 * 60))
+        XCTAssertEqual(w.showFrom, adhan.addingTimeInterval(5 * 60))
+        XCTAssertEqual(w.end, adhan.addingTimeInterval(30 * 60))
+        p.liveIqamaLead = 0                               // from adhan
+        XCTAssertEqual(iqamaWindows(from: adhan.addingTimeInterval(-3600), prefs: p).first { $0.prayer == .dhuhr }!.showFrom, adhan)
+        p.liveIqamaLead = 15; p.iqamaMinutes[.dhuhr] = 5  // lead longer than iqama → clamp to adhan
+        XCTAssertEqual(iqamaWindows(from: adhan.addingTimeInterval(-3600), prefs: p).first { $0.prayer == .dhuhr }!.showFrom, adhan)
+    }
+
+    func testCurrentWindowIncludedUntilIqamaThenDropped() {
+        let p = Preferences()
+        let adhan = dhuhr(p)
+        XCTAssertEqual(iqamaWindows(from: adhan.addingTimeInterval(10 * 60), prefs: p).first?.prayer, .dhuhr)
+        XCTAssertNotEqual(iqamaWindows(from: adhan.addingTimeInterval(16 * 60), prefs: p).first?.prayer, .dhuhr)
+        var off = p; off.liveIqama = false
+        XCTAssertTrue(iqamaWindows(from: adhan, prefs: off).isEmpty)
+    }
+
+    func testOldSettingsDecodeWithNewDefaults() throws {
+        let old = #"{"city":{"name":"Cairo","latitude":30.0444,"longitude":31.2357,"zone":"Africa/Cairo"},"hour24":true}"#
+        let p = try JSONDecoder().decode(Preferences.self, from: Data(old.utf8))
+        XCTAssertEqual(p.city.name, "Cairo")
+        XCTAssertTrue(p.hour24)
+        XCTAssertTrue(p.liveIqama)
+        XCTAssertEqual(p.liveIqamaLead, 10)
+    }
+}
