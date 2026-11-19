@@ -11,7 +11,8 @@ import NajwaCore
 enum LiveIqama {
     /// Scheduled activities count toward the system's simultaneous limit; keep it small.
     static let scheduledAhead = 2
-    static var canSchedule: Bool { if #available(iOS 26.0, *) { return true } else { return false } }
+    /// Pure OS-version check, safe from any thread.
+    nonisolated static var canSchedule: Bool { if #available(iOS 26.0, *) { return true } else { return false } }
 
     static func sync(_ prefs: Preferences, now: Date = Date()) async {
         let windows = iqamaWindows(from: now, prefs: prefs)
