@@ -69,6 +69,23 @@ jobs:
           sleep 8; cat shots/live.log || true
           xcrun simctl launch "$DEVICE" com.apple.Preferences
           sleep 5; xcrun simctl io "$DEVICE" screenshot shots/island-ar.png
+      - name: Unsigned device IPA (testers sign it with their own Apple ID)
+        run: |
+          cd ios
+          xcodebuild build -project Najwa.xcodeproj -scheme Najwa -configuration Release \
+            -destination 'generic/platform=iOS' -derivedDataPath device \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" | tee device.log | grep -E "error:|BUILD (SUCCEEDED|FAILED)" || true
+          grep -q "BUILD SUCCEEDED" device.log
+          APP=device/Build/Products/Release-iphoneos/Najwa.app
+          test -d "$APP/PlugIns/NajwaWidget.appex"
+          mkdir -p ipa/Payload && cp -R "$APP" ipa/Payload/
+          (cd ipa && zip -qry ../Najwa-iOS.ipa Payload)
+          ls -l Najwa-iOS.ipa && shasum -a 256 Najwa-iOS.ipa
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: najwa-ios-ipa
+          path: ios/Najwa-iOS.ipa
+          if-no-files-found: error
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
