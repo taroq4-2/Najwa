@@ -42,7 +42,7 @@ targets:
       properties:
         CFBundleDisplayName: نجوى
         CFBundleDevelopmentRegion: ar
-        CFBundleLocalizations: [ar, en]
+        CFBundleLocalizations: [ar, en, id, ur, bn, hi, tr]
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIApplicationSupportsIndirectInputEvents: true

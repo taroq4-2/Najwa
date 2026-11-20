@@ -56,14 +56,17 @@ jobs:
           shot settings-ar dark ar -NajwaDemo -NajwaTab settings
           shot home-en-dark dark en -NajwaDemo
           shot settings-en light en -NajwaDemo -NajwaTab settings
+          shot home-ur dark ur -NajwaDemo
+          shot home-tr light tr -NajwaDemo
+          shot settings-id light id -NajwaDemo -NajwaTab settings
           shot widgets-ar dark ar -NajwaDemo -NajwaWidgets
           shot widgets-en dark en -NajwaDemo -NajwaWidgets
           shot live-ar dark ar -NajwaDemo -NajwaLive
           shot live-en dark en -NajwaDemo -NajwaLive
           # A real Live Activity, then another app in front so the Dynamic Island shows it.
           xcrun simctl terminate "$DEVICE" org.najwa.app || true
-          xcrun simctl launch "$DEVICE" org.najwa.app -AppleLanguages "(ar)" -AppleLocale ar -NajwaDemo -NajwaLiveStart
-          sleep 6
+          xcrun simctl launch --stdout="$PWD/shots/live.log" --stderr="$PWD/shots/live.log" "$DEVICE" org.najwa.app -AppleLanguages "(ar)" -AppleLocale ar -NajwaDemo -NajwaLiveStart
+          sleep 8; cat shots/live.log || true
           xcrun simctl launch "$DEVICE" com.apple.Preferences
           sleep 5; xcrun simctl io "$DEVICE" screenshot shots/island-ar.png
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

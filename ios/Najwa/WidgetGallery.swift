@@ -108,5 +108,11 @@ func startDemoLiveActivity(_ prefs: Preferences) {
     let now = Date()
     let attributes = IqamaAttributes(prayer: Prayer.dhuhr.rawValue, city: prefs.city.name, key: "demo")
     let state = IqamaAttributes.ContentState(adhan: now.addingTimeInterval(-6 * 60), iqama: now.addingTimeInterval(9 * 60), end: now.addingTimeInterval(24 * 60))
-    _ = try? Activity.request(attributes: attributes, content: ActivityContent(state: state, staleDate: state.iqama), pushType: nil)
+    print("NajwaLive enabled=\(ActivityAuthorizationInfo().areActivitiesEnabled)")
+    do {
+        let activity = try Activity.request(attributes: attributes, content: ActivityContent(state: state, staleDate: state.iqama), pushType: nil)
+        print("NajwaLive started id=\(activity.id) state=\(activity.activityState)")
+    } catch {
+        print("NajwaLive failed: \(error)")
+    }
 }

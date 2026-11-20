@@ -24,7 +24,6 @@ final class AppModel: ObservableObject {
             prefs.adhanNotifications = true; prefs.iqamaNotifications = true; prefs.fridayReminder = true
         }
         if let i = args.firstIndex(of: "-NajwaTab"), args.indices.contains(i + 1), args[i + 1] == "settings" { tab = 1 }
-        if args.contains("-NajwaLiveStart") { startDemoLiveActivity(prefs) }
     }
 
     private func persist() {
@@ -162,6 +161,12 @@ struct NajwaApp: App {
                 .environmentObject(model)
                 .preferredColorScheme(model.prefs.theme == .dark ? .dark : model.prefs.theme == .light ? .light : nil)
                 .tint(Madar.green)
+                .task {
+                    // CI only: a Live Activity can start only once the app is in the foreground.
+                    guard ProcessInfo.processInfo.arguments.contains("-NajwaLiveStart") else { return }
+                    try? await Task.sleep(for: .seconds(2))
+                    startDemoLiveActivity(model.prefs)
+                }
         }
         .onChange(of: phase) { _, newPhase in
             if newPhase == .active { Task { await model.reschedule(); WidgetCenter.shared.reloadAllTimelines() } }
