@@ -32,7 +32,7 @@ struct SettingsView: View {
                 Section {
                     Link(destination: URL(string: "https://taroq4-2.github.io/Najwa/")!) { row("settings.website", nil, "safari") }
                 } footer: {
-                    Text("Najwa 1.3.0 · اللهم ارحم ابي").frame(maxWidth: .infinity).padding(.top, 12)
+                    Text(verbatim: "Najwa \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "") · اللهم ارحم ابي").frame(maxWidth: .infinity).padding(.top, 12)
                 }
             }
             .navigationTitle("tab.settings")

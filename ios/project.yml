@@ -7,8 +7,8 @@ options:
   createIntermediateGroups: true
 settings:
   base:
-    MARKETING_VERSION: "1.3.0"
-    CURRENT_PROJECT_VERSION: "114"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.9"
     DEVELOPMENT_TEAM: ""
     CODE_SIGN_STYLE: Automatic
@@ -41,6 +41,8 @@ targets:
       path: Najwa/Info.plist
       properties:
         CFBundleDisplayName: نجوى
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         CFBundleDevelopmentRegion: ar
         CFBundleLocalizations: [ar, en, id, ur, bn, hi, tr]
         UILaunchScreen: {}
@@ -76,6 +78,8 @@ targets:
       path: NajwaWidget/Info.plist
       properties:
         CFBundleDisplayName: نجوى
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
