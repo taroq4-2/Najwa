@@ -226,7 +226,7 @@ private fun healthText(issue: HealthIssue)=when(issue) {
 
 @Composable fun WhatsNewDialog(onDismiss: ()->Unit) {
     val c=LocalPalette.current
-    val items=listOf(R.string.new16_1,R.string.new16_2,R.string.new16_3,R.string.new16_4,R.string.new16_5,R.string.new16_6,
+    val items=listOf(R.string.new17_1,R.string.new17_2,R.string.new17_3,R.string.new16_1,R.string.new16_2,R.string.new16_3,R.string.new16_4,R.string.new16_5,R.string.new16_6,
         R.string.new_1,R.string.new_2,R.string.new_3,R.string.new_5)
     AlertDialog(onDismissRequest=onDismiss,title={Text(stringResource(R.string.whats_new_heading,BuildConfig.VERSION_NAME))},text={
         Column(Modifier.verticalScroll(rememberScrollState()),verticalArrangement=Arrangement.spacedBy(10.dp)) {
@@ -247,6 +247,7 @@ private fun healthText(issue: HealthIssue)=when(issue) {
         PreferenceSwitch(stringResource(R.string.log_setting),stringResource(R.string.log_setting_help),p.prayerLog) {onSave(p.copy(prayerLog=it))}
         if(p.prayerLog)PreferenceSwitch(stringResource(R.string.log_check_setting),stringResource(R.string.log_check_setting_help),p.logCheckIn) {onSave(p.copy(logCheckIn=it))}
     }
+    WorshipCompanionSettings()
     SettingsCard(stringResource(R.string.ramadan_title),stringResource(R.string.ramadan_help)) {
         PreferenceSwitch(stringResource(R.string.ramadan_mode),stringResource(R.string.ramadan_mode_help),p.ramadanMode) {onSave(p.copy(ramadanMode=it))}
         if(p.ramadanMode) {

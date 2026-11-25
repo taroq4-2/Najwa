@@ -10,8 +10,8 @@ android {
         applicationId = "org.najwa.app"
         minSdk = 26
         targetSdk = if (providers.gradleProperty("previewSdk").orNull == "35") 35 else 36
-        versionCode = 117
-        versionName = "1.6.0"
+        versionCode = 118
+        versionName = "1.7.0"
         buildConfigField("boolean","TRIAL_BUILD","false")
         manifestPlaceholders["najwaLabel"] = "@string/system_brand"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

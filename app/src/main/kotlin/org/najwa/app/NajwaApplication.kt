@@ -293,11 +293,13 @@ class NajwaRuntime(private val context: Context,private val clock: ()->Instant =
         val log=prayerLog.read()
         if(log.prayed(date,prayer)!=prayed)prayerLog.write(log.toggled(date,prayer))
         org.najwa.app.platform.PrayerLogWidget.update(context)
+        org.najwa.app.platform.DayWidget.update(context)
     }
     /** Records how a prayer was prayed (null clears the mark). */
     @Synchronized fun setStatus(date: java.time.LocalDate,prayer: Prayer,status: PrayerStatus?) {
         prayerLog.write(prayerLog.read().withStatus(date,prayer,status))
         org.najwa.app.platform.PrayerLogWidget.update(context)
+        org.najwa.app.platform.DayWidget.update(context)
     }
     @Synchronized fun setSunnah(date: java.time.LocalDate,prayer: SunnahPrayer,done: Boolean) =
         prayerLog.write(prayerLog.read().withSunnah(date,prayer,done))

@@ -32,7 +32,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.semantics.Role
 
 @Composable fun HomeScreen(p: Preferences,now: Instant,day: PrayerDay,t: Timeline?,capable: Boolean,onCity: ()->Unit,onSilence: ()->Unit,activeUntil: Instant?=null,onQibla: ()->Unit={},
-    tomorrow: PrayerDay?=null,logged: Set<Prayer> = emptySet(),onTogglePrayed: ((Prayer)->Unit)?=null,onTool: (Screen)->Unit={},mosqueName: String?=null) {
+    tomorrow: PrayerDay?=null,logged: Set<Prayer> = emptySet(),onTogglePrayed: ((Prayer)->Unit)?=null,onTool: (Screen)->Unit={},mosqueName: String?=null,onAdhkar: (Int)->Unit={}) {
     val c=LocalPalette.current
     val largeText=LocalDensity.current.fontScale>1.4f
     val focus=t?.let {prayerCountdown(listOf(it.previous,it.next),now,p)}
@@ -158,6 +158,11 @@ import androidx.compose.ui.semantics.Role
     RamadanCard(p,now,day,tomorrow)
     SecondCityCard(p,now)
     Spacer(Modifier.height(10.dp))
+    // Worship companion: one optional card summarising today's confirmed records (off restores the 1.6 home).
+    val context=androidx.compose.ui.platform.LocalContext.current
+    val minute=now.epochSecond/60
+    val worship=remember(minute) {org.najwa.app.platform.WorshipSettingsStore.read(context)}
+    if(worship.enabled && worship.summary)DaySummaryCard(worship,(minute+logged.hashCode()).toInt(),onPrayers={onTool(Screen.PRAYER_LOG)},onQuran={onTool(Screen.QURAN)},onAdhkar=onAdhkar)
     ToolsGrid(p) {if(it==Screen.QIBLA)onQibla() else onTool(it)}
     if(p.dailyDua)DuaOfDay(now.atZone(p.city.zoneId).toLocalDate())
     Row(Modifier.fillMaxWidth().padding(top=12.dp),verticalAlignment=Alignment.CenterVertically) {

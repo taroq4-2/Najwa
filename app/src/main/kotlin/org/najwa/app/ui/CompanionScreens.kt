@@ -223,7 +223,7 @@ private fun printTimetable(context: Context,p: Preferences,days: List<PrayerDay>
 
 /** The private prayer log: today at a glance, how each prayer was prayed, sunnah prayers, a five-week map,
  * per-prayer consistency, gentle insights and milestones. Nothing leaves the phone. */
-@Composable fun PrayerLogScreen(runtime: NajwaRuntime,p: Preferences,onSave: (Preferences)->Unit,onBack: ()->Unit) {
+@Composable fun PrayerLogScreen(runtime: NajwaRuntime,p: Preferences,onSave: (Preferences)->Unit,onAdhkar: ()->Unit,onBack: ()->Unit) {
     val c=LocalPalette.current
     val scope=rememberCoroutineScope()
     var log by remember {mutableStateOf(runtime.log())}
@@ -231,6 +231,10 @@ private fun printTimetable(context: Context,p: Preferences,days: List<PrayerDay>
     var selected by rememberSaveable {mutableStateOf(today.toString())}
     val day=LocalDate.parse(selected)
     var picking by remember {mutableStateOf<Prayer?>(null)}
+    // Worship companion: after marking a prayer today, offer its adhkar (nothing is marked automatically).
+    val appContext=androidx.compose.ui.platform.LocalContext.current
+    val companion=remember {org.najwa.app.platform.WorshipSettingsStore.read(appContext).enabled}
+    var justPrayed by remember {mutableStateOf<Prayer?>(null)}
     val locale=androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
     fun refresh() {log=runtime.log()}
     val order=dailyPrayers.sortedBy {it.ordinal}
@@ -268,6 +272,15 @@ private fun printTimetable(context: Context,p: Preferences,days: List<PrayerDay>
                 }
             }
             StatusLegend()
+        }
+    }
+    justPrayed?.takeIf {companion && log.prayed(today,it)}?.let {prayer->
+        Surface(onClick=onAdhkar,shape=RoundedCornerShape(18.dp),color=accent("teal").tint,modifier=Modifier.fillMaxWidth().padding(top=10.dp)) {
+            Row(Modifier.padding(horizontal=16.dp,vertical=12.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(10.dp)) {
+                Glyph("beads",accent("teal").ink,Modifier.size(20.dp))
+                Text(stringResource(R.string.after_prayer_link,localizedPrayerName(prayer)),Modifier.weight(1f),color=c.text,fontSize=14.sp)
+                Glyph("chevron",c.secondary,Modifier.size(16.dp))
+            }
         }
     }
     Spacer(Modifier.height(14.dp))
@@ -366,7 +379,8 @@ private fun printTimetable(context: Context,p: Preferences,days: List<PrayerDay>
         AlertDialog(onDismissRequest={picking=null},title={Text(stringResource(R.string.log_how,localizedPrayerName(prayer)))},text={
             Column(verticalArrangement=Arrangement.spacedBy(8.dp)) {
                 PrayerStatus.entries.forEach {status->
-                    Surface(onClick={picking=null;scope.launch {withContext(prayerDispatcher) {runtime.setStatus(day,prayer,status)};refresh()}},
+                    Surface(onClick={picking=null;justPrayed=if(status.prayed && day==today)prayer else null
+                        scope.launch {withContext(prayerDispatcher) {runtime.setStatus(day,prayer,status)};refresh()}},
                         shape=RoundedCornerShape(14.dp),color=if(status==current)c.selected else c.surface,
                         border=BorderStroke(1.dp,if(status==current)c.green else c.border),modifier=Modifier.fillMaxWidth()) {
                         Row(Modifier.padding(12.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(12.dp)) {

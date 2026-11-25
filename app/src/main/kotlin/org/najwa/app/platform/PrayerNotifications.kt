@@ -418,6 +418,7 @@ const val ACTION_ADHKAR="org.najwa.action.ADHKAR"
 const val ACTION_HEALTH="org.najwa.action.HEALTH"
 const val ACTION_PRAYER_LOG="org.najwa.action.PRAYER_LOG"
 const val ACTION_TASBEEH="org.najwa.action.TASBEEH"
+const val ACTION_QURAN="org.najwa.action.QURAN"
 
 private fun iqamaDeadline(task: ScheduledPrayer,p: Preferences) =
     task.event.time.toEpochMilli()+p.iqamaMinutes.getValue(task.event.prayer)*60_000L

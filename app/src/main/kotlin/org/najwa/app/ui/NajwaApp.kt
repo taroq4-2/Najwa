@@ -76,6 +76,7 @@ import java.time.Instant
             org.najwa.app.platform.ACTION_HEALTH -> trail=navigateScreens(trail,Screen.SETTINGS,true)
             org.najwa.app.platform.ACTION_PRAYER_LOG -> {log=runtime.log();trail=navigateScreens(navigateScreens(trail,Screen.HOME,true),Screen.PRAYER_LOG)}
             org.najwa.app.platform.ACTION_TASBEEH -> trail=navigateScreens(navigateScreens(trail,Screen.HOME,true),Screen.TASBEEH)
+            org.najwa.app.platform.ACTION_QURAN -> trail=navigateScreens(navigateScreens(trail,Screen.HOME,true),Screen.QURAN)
             ACTION_MOSQUE -> {mosqueImport=actionData;trail=navigateScreens(navigateScreens(trail,Screen.SETTINGS,true),Screen.MOSQUES)}
         }
     }
@@ -164,7 +165,7 @@ import java.time.Instant
                         Screen.TASBEEH -> TasbeehScreen(::back)
                         Screen.ADHKAR -> AdhkarScreen(adhkarTab,::back)
                         Screen.TIMETABLE -> TimetableScreen(prefs,::back)
-                        Screen.PRAYER_LOG -> PrayerLogScreen(runtime,prefs,{save(it)}) {log=runtime.log();back()}
+                        Screen.PRAYER_LOG -> PrayerLogScreen(runtime,prefs,{save(it)},{adhkarTab=2;navigate(Screen.ADHKAR)}) {log=runtime.log();back()}
                         Screen.QURAN -> QuranScreen(::back)
                         Screen.HOME -> {
                             if(!cityConfirmed) {
@@ -175,7 +176,7 @@ import java.time.Instant
                                 onSilence={navigate(Screen.SILENCE)},onQibla={navigate(Screen.QIBLA)},activeUntil=session?.takeIf {it.state==SessionState.ACTIVE}?.let {Instant.ofEpochMilli(it.deadline)},
                                 tomorrow=days.firstOrNull {it.date==current.date.plusDays(1)},logged=if(prefs.prayerLog)log.days[current.date].orEmpty() else emptySet(),
                                 onTogglePrayed=if(prefs.prayerLog) {prayer->scope.launch {withContext(prayerDispatcher) {runtime.setPrayed(current.date,prayer,!log.prayed(current.date,prayer))};log=runtime.log()}} else null,
-                                onTool={navigate(it)},mosqueName=prefs.activeMosque?.let {id->mosques.firstOrNull {it.id==id}?.name})
+                                onTool={navigate(it)},mosqueName=prefs.activeMosque?.let {id->mosques.firstOrNull {it.id==id}?.name},onAdhkar={adhkarTab=it;navigate(Screen.ADHKAR)})
                         }
                         Screen.SILENCE -> SilenceScreen(runtime,prefs,session,now,onSave={save(it)},onAccess={navigate(Screen.PERMISSIONS)},onRestore={
                             scope.launch { withContext(prayerDispatcher) {runtime.restore()};session=runtime.displayedSession() }

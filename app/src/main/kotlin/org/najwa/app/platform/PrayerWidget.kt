@@ -194,14 +194,14 @@ class PrayerWidget: AppWidgetProvider() {
         }
         fun updateAll(context: Context) {
             // The companion widgets follow the same theme and day changes.
-            PrayerLogWidget.update(context);TasbeehWidget.update(context)
+            PrayerLogWidget.update(context);TasbeehWidget.update(context);DayWidget.update(context)
             // A launcher or vendor widget error must never crash the main activity.
             runCatching {
                 val manager=AppWidgetManager.getInstance(context)
                 val ids=manager.getAppWidgetIds(component(context))
                 val listIds=manager.getAppWidgetIds(ComponentName(context,PrayerListWidget::class.java))
                 val minimalIds=manager.getAppWidgetIds(ComponentName(context,MinimalWidget::class.java))
-                if(ids.isEmpty() && listIds.isEmpty() && minimalIds.isEmpty()) {cancelRefresh(context);return}
+                if(ids.isEmpty() && listIds.isEmpty() && minimalIds.isEmpty() && !DayWidget.present(context)) {cancelRefresh(context);return}
                 val p=PreferencesStore(context).read()
                 val now=Instant.now()
                 val next=widgetPrayer(now,p)

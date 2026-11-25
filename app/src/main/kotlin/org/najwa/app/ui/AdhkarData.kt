@@ -108,6 +108,12 @@ object Adhkar {
     )
     fun duaOfDay(date: java.time.LocalDate)=daily[Math.floorMod(date.toEpochDay(),daily.size.toLong()).toInt()]
 
+    /** For the worship companion: identifies the texts that its evidence rules refer to. */
+    val KURSI_TEXT get()=KURSI
+    val MUAWWIDHAT_TEXTS get()=setOf(IKHLAS,FALAQ,NAS)
+    /** The four after-prayer items that make the hundred: 33 tasbih, 33 tahmid, 33 takbir and the closing tahlil. */
+    fun isAfterPrayerHundred(d: Dhikr)=(d.count==33 && d.text in setOf("سُبْحَانَ اللَّهِ","الْحَمْدُ لِلَّهِ","اللَّهُ أَكْبَرُ")) || d.source.startsWith("تمام المائة")
+
     /** Phrases offered by the tasbeeh counter. */
     val tasbeeh=listOf("سُبْحَانَ اللَّهِ","الْحَمْدُ لِلَّهِ","اللَّهُ أَكْبَرُ","لَا إِلَهَ إِلَّا اللَّهُ","أَسْتَغْفِرُ اللَّهَ","سُبْحَانَ اللَّهِ وَبِحَمْدِهِ","اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ")
 }

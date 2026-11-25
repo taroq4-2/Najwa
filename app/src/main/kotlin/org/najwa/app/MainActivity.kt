@@ -21,6 +21,7 @@ import org.najwa.app.platform.ACTION_ADHKAR
 import org.najwa.app.platform.ACTION_HEALTH
 import org.najwa.app.platform.ACTION_PRAYER_LOG
 import org.najwa.app.platform.ACTION_TASBEEH
+import org.najwa.app.platform.ACTION_QURAN
 import org.najwa.app.platform.prayerLanguage
 import org.najwa.app.ui.NajwaApp
 import org.najwa.app.ui.InterfaceLanguage
@@ -55,7 +56,7 @@ class MainActivity: ComponentActivity() {
         if(intent.action==Intent.ACTION_VIEW && intent.data?.scheme=="najwa" && intent.data?.host=="mosque") {
             action.value=org.najwa.app.ui.ACTION_MOSQUE;actionData.value=intent.dataString;actionRequest.intValue++;return
         }
-        val requested=intent.action?.takeIf {it in setOf(ACTION_SILENCE_NOW,ACTION_QIBLA,ACTION_CHOOSE_CITY,ACTION_ADHKAR,ACTION_HEALTH,ACTION_PRAYER_LOG,ACTION_TASBEEH)} ?: return
+        val requested=intent.action?.takeIf {it in setOf(ACTION_SILENCE_NOW,ACTION_QIBLA,ACTION_CHOOSE_CITY,ACTION_ADHKAR,ACTION_HEALTH,ACTION_PRAYER_LOG,ACTION_TASBEEH,ACTION_QURAN)} ?: return
         action.value=requested
         actionData.value=if(requested==ACTION_ADHKAR)intent.getIntExtra("adhkar",0).toString() else null
         actionRequest.intValue++

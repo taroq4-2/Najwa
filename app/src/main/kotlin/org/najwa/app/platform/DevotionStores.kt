@@ -59,6 +59,9 @@ object TasbeehStore {
         val result=next.copy(total=s.total+1)
         write(context,result)
         addToday(context,today,1)
+        // A completed round of a phrase with linked evidence becomes one worship record (the sequence is not mapped).
+        if(outcome==Outcome.ROUND && !s.sequenceMode && WorshipSettingsStore.read(context).enabled)
+            WorshipRecorder.onTasbeehRound(context,s.phrase,target,today)
         return result to outcome
     }
     /** Takes back the last tap of the current round (an accidental double tap). */
@@ -128,6 +131,20 @@ object QuranStore {
         val result=s.copy(page=page.coerceIn(0,PAGES-1),khatmas=khatmas)
         write(context,result)
         addToday(context,today,pages)
+        if(WorshipSettingsStore.read(context).enabled)WorshipRecorder.onQuranRead(context,s.page+1,pages,today)
+        return result
+    }
+    /** Takes back the last reading recorded today: the page, the day's count and its worship record. */
+    @Synchronized fun undoLast(context: Context,today: LocalDate=LocalDate.now()): State? {
+        val last=WorshipRecorder.lastQuranRange(context,today) ?: return null
+        val s=read(context)
+        val pages=last.count.toInt()
+        val wrapped=last.from-1+pages>=PAGES
+        val result=s.copy(page=(last.from-1).coerceIn(0,PAGES-1),khatmas=if(wrapped)(s.khatmas-1).coerceAtLeast(0) else s.khatmas)
+        write(context,result)
+        addToday(context,today,-pages)
+        WorshipStore.remove(context,today,last.id)
+        DayWidget.update(context)
         return result
     }
     /** Jumps to the page you reached (counted as read today when it moves forward). */
@@ -141,7 +158,7 @@ object QuranStore {
     }
     private fun addToday(context: Context,today: LocalDate,pages: Int) {
         val days=DayCounts.parse(prefs(context).getString("days",null)).toMutableMap()
-        days[today]=(days[today] ?: 0)+pages
+        days[today]=((days[today] ?: 0)+pages).coerceAtLeast(0)
         prefs(context).edit().putString("days",DayCounts.format(days,today,400)).apply()
     }
     fun days(context: Context)=DayCounts.parse(prefs(context).getString("days",null))
