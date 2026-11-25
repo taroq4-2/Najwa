@@ -91,6 +91,8 @@
     <string name="virtue_dhikr_kalimat_evening">शाम «अऊज़ु बिकलिमातिल्लाहित ताम्मात»: कोई चीज़ नुक़सान नहीं देती</string>
     <string name="virtue_dhikr_sayyid_istighfar_morning">सुबह यक़ीन के साथ सय्यिदुल इस्तिग़फ़ार: उसी दिन मौत हो तो जन्नत वालों में</string>
     <string name="virtue_dhikr_sayyid_istighfar_evening">शाम यक़ीन के साथ सय्यिदुल इस्तिग़फ़ार: उसी रात मौत हो तो जन्नत वालों में</string>
+    <string name="reading_night">रात का पठन</string>
+    <string name="reading_paper">काग़ज़ी पठन</string>
     <string name="mushaf_title">मुसहफ़</string>
     <string name="mushaf_intro">मुसहफ़ से पढ़ें और पूरा पन्ना दर्ज करें ताकि रोज़ का विर्द और ख़त्म आगे बढ़े।</string>
     <string name="mushaf_continue">पढ़ना जारी रखें</string>

@@ -91,6 +91,8 @@
     <string name="virtue_dhikr_kalimat_evening">A\'udzu bikalimatillahit tammat di sore hari: tak ada yang membahayakannya</string>
     <string name="virtue_dhikr_sayyid_istighfar_morning">Sayyidul istighfar di pagi hari dengan yakin: termasuk ahli surga jika wafat hari itu</string>
     <string name="virtue_dhikr_sayyid_istighfar_evening">Sayyidul istighfar di sore hari dengan yakin: termasuk ahli surga jika wafat malam itu</string>
+    <string name="reading_night">Mode malam</string>
+    <string name="reading_paper">Mode kertas</string>
     <string name="mushaf_title">Mushaf</string>
     <string name="mushaf_intro">Baca dari mushaf dan konfirmasi yang selesai untuk mengikuti wirid dan khatammu.</string>
     <string name="mushaf_continue">Lanjut membaca</string>

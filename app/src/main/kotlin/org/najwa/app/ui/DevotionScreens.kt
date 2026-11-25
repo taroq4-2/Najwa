@@ -261,6 +261,9 @@ enum class AdhkarCategory(val key: String,val title: Int,val glyph: String,val t
     var confirmRestart by remember {mutableStateOf(false)}
     var finished by remember(tab) {mutableStateOf<Int?>(null)}
     var statusTick by remember {mutableIntStateOf(0)}
+    // Dhikr texts use the calm reading colours (paper or night), like the mushaf.
+    var mode by remember {mutableStateOf(ReadingPrefs.mode(context))}
+    val r=readingColors(mode)
     val a=accent(category.tone)
     fun save(next: List<Int>) {
         val before=remaining
@@ -338,6 +341,7 @@ enum class AdhkarCategory(val key: String,val title: Int,val glyph: String,val t
             contentPadding=PaddingValues(0.dp)) {Text("أ−",color=c.mint,fontSize=15.sp,modifier=Modifier.semantics {contentDescription=context.getString(R.string.adhkar_smaller)})}
         TextButton(onClick={scale=(scale+.1f).coerceAtMost(1.6f);AdhkarProgressStore.setTextScale(context,scale)},Modifier.size(48.dp),
             contentPadding=PaddingValues(0.dp)) {Text("أ+",color=c.mint,fontSize=19.sp,modifier=Modifier.semantics {contentDescription=context.getString(R.string.adhkar_larger)})}
+        ReadingModeButton(mode) {mode=it}
     }
     if(companion) Row(Modifier.fillMaxWidth().padding(top=8.dp),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
         Pill(stringResource(if(focus)R.string.focus_exit else R.string.focus_enter),focus,glyph="sparkle") {focus=!focus}
@@ -364,13 +368,13 @@ enum class AdhkarCategory(val key: String,val title: Int,val glyph: String,val t
         val i=remaining.indexOfFirst {it>0}
         if(i>=0) {
             val dhikr=items[i];val left=remaining[i]
-            Surface(onClick={tap(i)},shape=RoundedCornerShape(28.dp),color=c.surface,border=BorderStroke(1.dp,a.ink),
+            Surface(onClick={tap(i)},shape=RoundedCornerShape(26.dp),color=r.page,border=BorderStroke(1.dp,r.frame),
                 modifier=Modifier.fillMaxWidth().heightIn(min=420.dp)) {
-                Column(Modifier.padding(22.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(18.dp)) {
-                    Text(dhikr.text,color=c.text,fontSize=(21*scale).sp,lineHeight=(38*scale).sp,
+                Column(Modifier.padding(24.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(18.dp)) {
+                    Text(dhikr.text,color=r.ink,fontSize=(22*scale).sp,lineHeight=(44*scale).sp,
                         style=LocalTextStyle.current.copy(textDirection=TextDirection.Rtl,textAlign=TextAlign.Center))
-                    LuminousPath(dhikr.count-left,dhikr.count,a,large=true)
-                    Text(dhikr.source,color=c.secondary,fontSize=12.sp)
+                    LuminousPath(dhikr.count-left,dhikr.count,a,large=true,ink=r.ink,muted=r.muted)
+                    Text(dhikr.source,color=r.muted,fontSize=12.sp)
                 }
             }
         }
@@ -383,14 +387,14 @@ enum class AdhkarCategory(val key: String,val title: Int,val glyph: String,val t
                 Glyph("check",a.ink,Modifier.size(18.dp))
                 Text(dhikr.text.lineSequence().last(),Modifier.weight(1f),color=c.secondary,fontSize=13.sp,maxLines=1,overflow=TextOverflow.Ellipsis)
             }
-        } else Surface(onClick={tap(i)},shape=RoundedCornerShape(22.dp),color=c.surface,border=BorderStroke(1.dp,c.border),
-            modifier=Modifier.fillMaxWidth().padding(bottom=10.dp).animateContentSize()) {
-            Column(Modifier.padding(18.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
-                Text(dhikr.text,color=c.text,fontSize=(19*scale).sp,lineHeight=(34*scale).sp,
+        } else Surface(onClick={tap(i)},shape=RoundedCornerShape(22.dp),color=r.page,border=BorderStroke(1.dp,r.frame),
+            modifier=Modifier.fillMaxWidth().padding(bottom=12.dp).animateContentSize()) {
+            Column(Modifier.padding(horizontal=20.dp,vertical=18.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
+                Text(dhikr.text,color=r.ink,fontSize=(20*scale).sp,lineHeight=(40*scale).sp,
                     style=LocalTextStyle.current.copy(textDirection=TextDirection.Rtl,textAlign=TextAlign.Start))
                 Row(verticalAlignment=Alignment.CenterVertically) {
-                    Text(dhikr.source,Modifier.weight(1f),color=c.secondary,fontSize=12.sp)
-                    if(companion)LuminousPath(dhikr.count-left,dhikr.count,a) else CountRing(dhikr.count-left,dhikr.count,a)
+                    Text(dhikr.source,Modifier.weight(1f),color=r.muted,fontSize=12.sp)
+                    if(companion)LuminousPath(dhikr.count-left,dhikr.count,a,ink=r.ink,muted=r.muted,badge=r.band) else CountRing(dhikr.count-left,dhikr.count,a)
                 }
             }
         }

@@ -91,6 +91,8 @@
     <string name="virtue_dhikr_kalimat_evening">شام «اعوذ بکلمات اللہ التامات»: کوئی چیز نقصان نہیں دیتی</string>
     <string name="virtue_dhikr_sayyid_istighfar_morning">صبح یقین کے ساتھ سید الاستغفار: اسی دن وفات ہو تو اہلِ جنت میں سے</string>
     <string name="virtue_dhikr_sayyid_istighfar_evening">شام یقین کے ساتھ سید الاستغفار: اسی رات وفات ہو تو اہلِ جنت میں سے</string>
+    <string name="reading_night">رات کی قراءت</string>
+    <string name="reading_paper">کاغذی قراءت</string>
     <string name="mushaf_title">مصحف</string>
     <string name="mushaf_intro">مصحف سے پڑھیں اور مکمل صفحہ درج کریں تاکہ روزانہ کا ورد اور ختم آگے بڑھے۔</string>
     <string name="mushaf_continue">پڑھنا جاری رکھیں</string>

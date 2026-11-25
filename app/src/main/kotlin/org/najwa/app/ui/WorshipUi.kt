@@ -59,8 +59,12 @@ private fun num(v: Long)=numbers.format(v)
  * At most 33 points are drawn; for larger counts each point stands for several repetitions,
  * while the number shown is always the exact count.
  */
-@Composable fun LuminousPath(done: Int,total: Int,a: Accent,modifier: Modifier=Modifier,large: Boolean=false) {
+@Composable fun LuminousPath(done: Int,total: Int,a: Accent,modifier: Modifier=Modifier,large: Boolean=false,
+                              ink: androidx.compose.ui.graphics.Color?=null,muted: androidx.compose.ui.graphics.Color?=null,
+                              badge: androidx.compose.ui.graphics.Color?=null) {
     val c=LocalPalette.current
+    val text=ink ?: c.text
+    val secondary=muted ?: c.secondary
     val reduced=reducedMotion()
     val points=total.coerceIn(1,33)
     val target=if(total<=0) 0f else done.coerceIn(0,total)*points/total.toFloat()
@@ -70,8 +74,8 @@ private fun num(v: Long)=numbers.format(v)
     val description=stringResource(R.string.path_description,done,total)
     Column(modifier.semantics {contentDescription=description},horizontalAlignment=Alignment.CenterHorizontally) {
         if(large) {
-            Text(String.format(Locale.ROOT,"%d",done),color=c.text,fontSize=56.sp,fontWeight=FontWeight.Bold)
-            Text(stringResource(R.string.path_of,total),color=c.secondary,fontSize=13.sp)
+            Text(String.format(Locale.ROOT,"%d",done),color=text,fontSize=56.sp,fontWeight=FontWeight.Bold)
+            Text(stringResource(R.string.path_of,total),color=secondary,fontSize=13.sp)
             Spacer(Modifier.height(8.dp))
         }
         Box(contentAlignment=Alignment.CenterEnd) {
@@ -82,7 +86,7 @@ private fun num(v: Long)=numbers.format(v)
                 val start=Offset(pad,pad);val end=Offset(w-pad,pad);val ctrl=Offset(w/2,h*1.6f-pad)
                 fun at(t: Float)=Offset((1-t)*(1-t)*start.x+2*(1-t)*t*ctrl.x+t*t*end.x,(1-t)*(1-t)*start.y+2*(1-t)*t*ctrl.y+t*t*end.y)
                 val path=Path().apply {moveTo(start.x,start.y);quadraticTo(ctrl.x,ctrl.y,end.x,end.y)}
-                drawPath(path,c.track,style=Stroke(1.5.dp.toPx()))
+                drawPath(path,secondary.copy(alpha=.35f),style=Stroke(1.5.dp.toPx()))
                 val r=(if(large)4.5.dp else 3.dp).toPx()
                 for(i in 0 until points) {
                     val t=if(points==1) .5f else i/(points-1f)
@@ -91,11 +95,11 @@ private fun num(v: Long)=numbers.format(v)
                     if(glow>0f) {
                         drawCircle(a.ink.copy(alpha=.22f*glow),r*2.4f,p)
                         drawCircle(a.ink.copy(alpha=.35f+.65f*glow),r,p)
-                    } else drawCircle(c.track,r*.72f,p)
+                    } else drawCircle(secondary.copy(alpha=.45f),r*.72f,p)
                 }
             }
-            if(!large)Box(Modifier.size(34.dp).background(if(left==0)a.ink else a.tint,CircleShape),contentAlignment=Alignment.Center) {
-                Text(String.format(Locale.ROOT,"%d",left),color=if(left==0)c.bg else c.text,fontSize=13.sp,fontWeight=FontWeight.Bold)
+            if(!large)Box(Modifier.size(34.dp).background(if(left==0)a.ink else badge ?: a.tint,CircleShape),contentAlignment=Alignment.Center) {
+                Text(String.format(Locale.ROOT,"%d",left),color=if(left==0)c.bg else text,fontSize=13.sp,fontWeight=FontWeight.Bold)
             }
         }
     }

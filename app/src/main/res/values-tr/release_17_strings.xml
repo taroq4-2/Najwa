@@ -91,6 +91,8 @@
     <string name="virtue_dhikr_kalimat_evening">Akşam Eûzü bi kelimâtillâhi\'t-tâmmât: hiçbir şey ona zarar vermez</string>
     <string name="virtue_dhikr_sayyid_istighfar_morning">Sabah yakîn ile Seyyidü\'l-istiğfâr: o gün ölürse cennet ehlindendir</string>
     <string name="virtue_dhikr_sayyid_istighfar_evening">Akşam yakîn ile Seyyidü\'l-istiğfâr: o gece ölürse cennet ehlindendir</string>
+    <string name="reading_night">Gece okuma</string>
+    <string name="reading_paper">Kağıt okuma</string>
     <string name="mushaf_title">Mushaf</string>
     <string name="mushaf_intro">Mushaftan oku, bitirdiğini onayla; günlük virdin ve hatmin ilerlesin.</string>
     <string name="mushaf_continue">Okumaya devam</string>

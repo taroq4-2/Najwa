@@ -50,7 +50,7 @@ import org.najwa.app.platform.QuranStore
     val scope=rememberCoroutineScope()
     val data by produceState<Mushaf.Data?>(null) {value=withContext(Dispatchers.IO) {runCatching {Mushaf.load(context)}.getOrNull()}}
     val english=LocalConfiguration.current.locales[0].language!="ar"
-    val gold=accent("amber")
+    var mode by remember {mutableStateOf(ReadingPrefs.mode(context))}
     var scale by remember {mutableFloatStateOf(QuranStore.readerScale(context))}
     var index by rememberSaveable {mutableStateOf(openIndex)}
     var readToday by remember {mutableStateOf(QuranStore.readToday(context))}
@@ -69,13 +69,18 @@ import org.najwa.app.platform.QuranStore
     val surahs=d.surahsOn(page)
     Row(verticalAlignment=Alignment.CenterVertically,modifier=Modifier.padding(top=4.dp)) {
         Column(Modifier.weight(1f)) {
-            Text(surahs.joinToString(" · ") {if(english)it.latin else context.getString(R.string.mushaf_surah,it.name)},color=c.text,fontSize=20.sp,fontWeight=FontWeight.Bold,maxLines=1)
+            // One surah: "سورة الكهف"; two on a page: just their names, so the title never gets cut.
+            val title=if(surahs.size==1) (if(english)surahs[0].latin else context.getString(R.string.mushaf_surah,surahs[0].name))
+                else surahs.joinToString(" · ") {if(english)it.latin else it.name}
+            Text(title,color=c.text,fontSize=19.sp,fontWeight=FontWeight.Bold,maxLines=1,overflow=androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             Text(stringResource(R.string.mushaf_where,d.juzOf(page),page),color=c.secondary,fontSize=13.sp)
         }
         TextButton(onClick={scale=(scale-.1f).coerceAtLeast(.8f);QuranStore.setReaderScale(context,scale)},Modifier.size(44.dp),contentPadding=PaddingValues(0.dp)) {
             Text("أ−",color=c.mint,fontSize=15.sp,modifier=Modifier.semantics {contentDescription=context.getString(R.string.adhkar_smaller)})}
         TextButton(onClick={scale=(scale+.1f).coerceAtMost(1.8f);QuranStore.setReaderScale(context,scale)},Modifier.size(44.dp),contentPadding=PaddingValues(0.dp)) {
             Text("أ+",color=c.mint,fontSize=19.sp,modifier=Modifier.semantics {contentDescription=context.getString(R.string.adhkar_larger)})}
+        ReadingModeButton(mode) {mode=it}
+        Spacer(Modifier.width(6.dp))
         Surface(onClick={index=true},shape=CircleShape,color=c.selected,modifier=Modifier.size(44.dp)) {
             Box(contentAlignment=Alignment.Center) {Glyph("mushaf",c.mint,Modifier.size(20.dp))}
         }
@@ -84,7 +89,7 @@ import org.najwa.app.platform.QuranStore
     // Pages always turn right to left, whatever the interface language.
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         HorizontalPager(pager,modifier=Modifier.fillMaxWidth(),beyondViewportPageCount=1,verticalAlignment=Alignment.Top) {i->
-            MushafPage(d,i+1,scale,gold)
+            MushafPage(d,i+1,scale,readingColors(mode))
         }
     }
     Spacer(Modifier.height(12.dp))
@@ -109,6 +114,7 @@ import org.najwa.app.platform.QuranStore
     Text(stringResource(R.string.mushaf_hint),color=c.secondary,fontSize=12.sp,modifier=Modifier.padding(top=8.dp))
     Text(stringResource(R.string.mushaf_source),color=c.secondary,fontSize=11.sp,modifier=Modifier.padding(top=4.dp,bottom=16.dp))
 
+    val gold=accent("amber")
     if(index)Dialog(onDismissRequest={index=false}) {
         Surface(shape=RoundedCornerShape(24.dp),color=c.surface,modifier=Modifier.fillMaxWidth().heightIn(max=620.dp)) {
             Column(Modifier.padding(16.dp)) {
@@ -149,40 +155,41 @@ import org.najwa.app.platform.QuranStore
     }
 }
 
-/** One mushaf page: a framed sheet with surah headings, the basmalah, and verse markers in dawn-gold. */
-@Composable private fun MushafPage(d: Mushaf.Data,page: Int,scale: Float,gold: Accent) {
-    val c=LocalPalette.current
+/**
+ * One mushaf page in the reading colours: a warm sheet with a fine double frame, a quiet surah band with the
+ * basmalah, and verse markers in a muted tone. Text is right-aligned (no justification gaps), large and well spaced.
+ */
+@Composable private fun MushafPage(d: Mushaf.Data,page: Int,scale: Float,r: ReadingColors) {
     val verses=d.page(page)
     val basmalah=d.verses.first().text
-    Surface(shape=RoundedCornerShape(26.dp),color=c.surface,border=BorderStroke(1.5.dp,gold.ink.copy(alpha=.55f)),modifier=Modifier.fillMaxWidth()) {
-        // A second, finer gold line inside the frame, as in printed mushafs.
-        Column(Modifier.padding(5.dp).border(BorderStroke(.8.dp,gold.ink.copy(alpha=.35f)),RoundedCornerShape(22.dp))) {
-            Column(Modifier.padding(horizontal=16.dp,vertical=14.dp),horizontalAlignment=Alignment.CenterHorizontally) {
-                // Verses are grouped into runs; a new surah starts a heading.
+    Surface(shape=RoundedCornerShape(22.dp),color=r.page,border=BorderStroke(1.dp,r.frame),modifier=Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(6.dp).border(BorderStroke(.6.dp,r.frame),RoundedCornerShape(18.dp))) {
+            Column(Modifier.padding(horizontal=18.dp,vertical=18.dp),horizontalAlignment=Alignment.CenterHorizontally) {
+                // Verses are grouped into runs; a new surah starts with its band and the basmalah.
                 val runs=mutableListOf<MutableList<Mushaf.Verse>>()
                 verses.forEach {v-> if(v.aya==1 || runs.isEmpty())runs+=mutableListOf(v) else runs.last()+=v}
                 runs.forEach {run->
                     val first=run.first()
                     if(first.aya==1) {
                         val s=d.surahs[first.sura-1]
-                        Box(Modifier.fillMaxWidth().padding(vertical=8.dp).clip(RoundedCornerShape(14.dp)).background(gold.tint).padding(vertical=8.dp),
-                            contentAlignment=Alignment.Center) {
-                            Text("سُورَةُ ${s.name}",color=gold.ink,fontSize=(19*scale).sp,fontWeight=FontWeight.Bold)
+                        Box(Modifier.fillMaxWidth().padding(top=6.dp,bottom=10.dp).clip(RoundedCornerShape(12.dp)).background(r.band)
+                            .border(BorderStroke(.6.dp,r.frame),RoundedCornerShape(12.dp)).padding(vertical=9.dp),contentAlignment=Alignment.Center) {
+                            Text("سُورَةُ ${s.name}",color=r.accentInk,fontSize=(19*scale).sp,fontWeight=FontWeight.Bold)
                         }
                         if(first.sura!=1 && first.sura!=9)
-                            Text(basmalah,color=c.text,fontSize=(21*scale).sp,textAlign=TextAlign.Center,modifier=Modifier.padding(bottom=6.dp))
+                            Text(basmalah,color=r.ink,fontSize=(22*scale).sp,textAlign=TextAlign.Center,modifier=Modifier.padding(bottom=8.dp))
                     }
                     Text(buildAnnotatedString {
                         run.forEach {v->
                             append(d.displayText(v))
-                            withStyle(SpanStyle(color=gold.ink)) {append(" ﴿${Mushaf.arabicDigits(v.aya)}﴾ ")}
+                            withStyle(SpanStyle(color=r.marker,fontSize=(17*scale).sp)) {append(" ﴿${Mushaf.arabicDigits(v.aya)}﴾ ")}
                         }
-                    },color=c.text,fontSize=(21*scale).sp,lineHeight=(42*scale).sp,
-                        style=LocalTextStyle.current.copy(textDirection=TextDirection.Rtl,textAlign=TextAlign.Justify),modifier=Modifier.fillMaxWidth())
+                    },color=r.ink,fontSize=(23*scale).sp,lineHeight=(50*scale).sp,
+                        style=LocalTextStyle.current.copy(textDirection=TextDirection.Rtl,textAlign=TextAlign.Start),modifier=Modifier.fillMaxWidth())
                 }
-                Spacer(Modifier.height(10.dp))
-                Text(Mushaf.arabicDigits(page),color=c.secondary,fontSize=13.sp,
-                    modifier=Modifier.clip(CircleShape).background(c.selected).padding(horizontal=14.dp,vertical=4.dp))
+                Spacer(Modifier.height(12.dp))
+                Text(Mushaf.arabicDigits(page),color=r.muted,fontSize=13.sp,
+                    modifier=Modifier.clip(CircleShape).background(r.band).padding(horizontal=16.dp,vertical=4.dp))
             }
         }
     }

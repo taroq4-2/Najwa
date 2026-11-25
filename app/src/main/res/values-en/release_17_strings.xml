@@ -91,6 +91,8 @@
     <string name="virtue_dhikr_kalimat_evening">A\'udhu bi kalimatillahit-tammat in the evening: nothing would harm him</string>
     <string name="virtue_dhikr_sayyid_istighfar_morning">Sayyid al-istighfar in the morning with conviction: of the people of Paradise if he dies that day</string>
     <string name="virtue_dhikr_sayyid_istighfar_evening">Sayyid al-istighfar in the evening with conviction: of the people of Paradise if he dies that night</string>
+    <string name="reading_night">Night reading</string>
+    <string name="reading_paper">Paper reading</string>
     <string name="mushaf_title">The mushaf</string>
     <string name="mushaf_intro">Read from the mushaf and confirm what you finish to follow your daily portion and khatma.</string>
     <string name="mushaf_continue">Continue reading</string>

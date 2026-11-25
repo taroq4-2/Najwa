@@ -91,6 +91,8 @@
     <string name="virtue_dhikr_kalimat_evening">«أعوذ بكلمات الله التامات من شر ما خلق» مساءً: لم يضره شيء</string>
     <string name="virtue_dhikr_sayyid_istighfar_morning">سيد الاستغفار صباحًا موقنًا بها: من أهل الجنة إن مات من يومه</string>
     <string name="virtue_dhikr_sayyid_istighfar_evening">سيد الاستغفار مساءً موقنًا بها: من أهل الجنة إن مات من ليلته</string>
+    <string name="reading_night">القراءة الليلية</string>
+    <string name="reading_paper">القراءة الورقية</string>
     <string name="mushaf_title">المصحف</string>
     <string name="mushaf_intro">اقرأ من المصحف، وسجّل ما أتممته ليتابع وِردك وختمتك.</string>
     <string name="mushaf_continue">تابع القراءة</string>

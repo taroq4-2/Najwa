@@ -91,6 +91,8 @@
     <string name="virtue_dhikr_kalimat_evening">সন্ধ্যায় «আউযু বিকালিমাতিল্লাহিত তাম্মাত»: কিছুই ক্ষতি করে না</string>
     <string name="virtue_dhikr_sayyid_istighfar_morning">সকালে দৃঢ় বিশ্বাসে সাইয়্যিদুল ইস্তিগফার: সেদিন মারা গেলে জান্নাতবাসী</string>
     <string name="virtue_dhikr_sayyid_istighfar_evening">সন্ধ্যায় দৃঢ় বিশ্বাসে সাইয়্যিদুল ইস্তিগফার: সে রাতে মারা গেলে জান্নাতবাসী</string>
+    <string name="reading_night">রাতের পাঠ</string>
+    <string name="reading_paper">কাগজের পাঠ</string>
     <string name="mushaf_title">মুসহাফ</string>
     <string name="mushaf_intro">মুসহাফ থেকে পড়ুন, শেষ করা পৃষ্ঠা নিশ্চিত করুন যাতে দৈনিক পাঠ ও খতম এগোয়।</string>
     <string name="mushaf_continue">পড়া চালিয়ে যান</string>
