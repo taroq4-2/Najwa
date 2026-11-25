@@ -4,5 +4,6 @@ Najwa is a calm, private prayer companion. It works offline, asks for no account
 • Adhan alert with two built-in recordings or your own file, iqama reminder, a reminder before adhan and a Friday reminder
 • Home-screen widgets in every size, from 1×1 to large, following each stage: next prayer, waiting for iqama and prayer in progress
 • Auto silence during prayer that restores your ringer afterwards, plus “Silence now” from Quick Settings
+• A private prayer log with a one-tap widget, tasbeeh, adhkar and a Quran reading tracker
 • Qibla compass, Hijri date with local correction, Jumu'ah mode and settings backup
 • Seven languages: Arabic, English, Indonesian, Urdu, Bengali, Hindi and Turkish

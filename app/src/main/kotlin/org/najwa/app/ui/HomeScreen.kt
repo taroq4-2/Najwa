@@ -245,8 +245,9 @@ import androidx.compose.ui.semantics.Role
                             else -> Glyph("check",c.mint,Modifier.size(20.dp))
                         }
                     }
-                    Text(title,color=c.text,fontSize=13.sp,fontWeight=FontWeight.Bold,maxLines=1,overflow=TextOverflow.Ellipsis)
-                    Text(detail,color=c.secondary,fontSize=11.sp,maxLines=1,overflow=TextOverflow.Ellipsis)
+                    // Two lines so longer names ("Qibla direction", "Morning and evening") are never cut off.
+                    Text(title,color=c.text,fontSize=13.sp,lineHeight=17.sp,fontWeight=FontWeight.Bold,maxLines=2,overflow=TextOverflow.Ellipsis)
+                    Text(detail,color=c.secondary,fontSize=11.sp,lineHeight=15.sp,maxLines=2,overflow=TextOverflow.Ellipsis)
                 }
             }
         }

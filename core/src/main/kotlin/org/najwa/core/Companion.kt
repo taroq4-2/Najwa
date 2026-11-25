@@ -175,9 +175,12 @@ data class PrayerLog(val days: Map<LocalDate,Set<Prayer>> = emptyMap(), val qada
     fun jamaah(today: LocalDate, count: Int) = (0 until count).sumOf {i->detail[today.minusDays(i.toLong())]?.values?.count {it==PrayerStatus.JAMAAH} ?: 0}
     /** Days in the last [count] on which [prayer] was prayed. */
     fun prayerDays(prayer: Prayer, today: LocalDate, count: Int) = (0 until count).count {prayed(today.minusDays(it.toLong()),prayer)}
+    /** Like [prayerDays], but today only counts once [prayer] is marked, so a prayer not yet due is not a miss. */
+    fun recentDays(prayer: Prayer, today: LocalDate, count: Int) =
+        prayerDays(prayer,if(prayed(today,prayer)) today else today.minusDays(1),count)
     /** The prayer most often left unmarked lately, when one clearly lags (null if all are equal). */
     fun weakest(today: LocalDate, count: Int = 14): Prayer? {
-        val rates=dailyPrayers.associateWith {prayerDays(it,today,count)}
+        val rates=dailyPrayers.associateWith {recentDays(it,today,count)}
         val low=rates.minByOrNull {it.value} ?: return null
         return low.key.takeIf {low.value<rates.values.max()}
     }

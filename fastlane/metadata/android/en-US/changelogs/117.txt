@@ -1,0 +1,7 @@
+Najwa 1.6.0
+• Prayer log: congregation, on time or late, sunnah prayers, a five-week map and milestones
+• Today's prayers widget: tap once for prayed, twice for congregation
+• Optional "Have you prayed?" check-in before each prayer's time ends
+• New tasbeeh with the after-prayer sequence and volume-key counting, plus a tasbeeh widget
+• Sleep, waking and mosque adhkar, a Quran reading tracker and a dua of the day
+• Settings organised into six sections with quick switches

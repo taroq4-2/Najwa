@@ -287,7 +287,7 @@ private fun printTimetable(context: Context,p: Preferences,days: List<PrayerDay>
         Row(Modifier.padding(16.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(12.dp)) {
             IconBadge("sparkle",accent("amber"))
             Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(4.dp)) {
-                if(weakest!=null)Text(stringResource(R.string.log_insight_weakest,localizedPrayerName(weakest),log.prayerDays(weakest,today,14)),color=c.text,fontSize=14.sp)
+                if(weakest!=null)Text(stringResource(R.string.log_insight_weakest,localizedPrayerName(weakest),log.recentDays(weakest,today,14)),color=c.text,fontSize=14.sp)
                 if(fajrStreak>1)Text(stringResource(R.string.log_insight_fajr,fajrStreak),color=c.mint,fontSize=13.sp,fontWeight=FontWeight.Bold)
             }
         }
@@ -318,7 +318,7 @@ private fun printTimetable(context: Context,p: Preferences,days: List<PrayerDay>
     // 5) Consistency of each prayer over 30 days.
     SettingsCard(stringResource(R.string.log_by_prayer)) {
         order.forEach {prayer->
-            val n=log.prayerDays(prayer,today,30)
+            val n=log.recentDays(prayer,today,30)
             Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(10.dp)) {
                 Text(localizedPrayerName(prayer),Modifier.width(64.dp),color=c.text,fontSize=13.sp)
                 Box(Modifier.weight(1f).height(8.dp).clip(CircleShape).background(c.track)) {

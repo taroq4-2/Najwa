@@ -41,6 +41,20 @@ class Release16Test {
         assertEquals(10,log.prayerDays(Prayer.ASR,day,14))
     }
 
+    @Test fun prayersNotYetDueTodayAreNotMisses() {
+        var log=PrayerLog()
+        for(i in 1..14) dailyPrayers.forEach {log=log.withStatus(day.minusDays(i.toLong()),it,PrayerStatus.ON_TIME)}
+        // Morning: only Fajr is marked so far; nothing lags.
+        log=log.withStatus(day,Prayer.FAJR,PrayerStatus.JAMAAH)
+        assertNull(log.weakest(day))
+        assertEquals(14,log.recentDays(Prayer.DHUHR,day,14))
+        assertEquals(14,log.recentDays(Prayer.FAJR,day,14))
+        // A real miss yesterday still shows.
+        log=log.withStatus(day.minusDays(1),Prayer.ASR,null)
+        assertEquals(Prayer.ASR,log.weakest(day))
+        assertEquals(13,log.recentDays(Prayer.ASR,day,14))
+    }
+
     @Test fun sunnahPrayersToggle() {
         val log=PrayerLog().withSunnah(day,SunnahPrayer.WITR,true).withSunnah(day,SunnahPrayer.DUHA,true).withSunnah(day,SunnahPrayer.DUHA,false)
         assertEquals(setOf(SunnahPrayer.WITR),log.sunnah[day])

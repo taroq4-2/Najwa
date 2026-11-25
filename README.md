@@ -15,33 +15,53 @@ Accurate prayer times, refined adhan and iqama alerts, a widget that follows eve
 
 [الموقع العربي](https://taroq4-2.github.io/Najwa/) · [English website](https://taroq4-2.github.io/Najwa/en.html) · [الإصدارات · Releases](https://github.com/taroq4-2/Najwa/releases)
 
-![Version](https://img.shields.io/badge/version-1.3.0-0F5A43) ![Android](https://img.shields.io/badge/Android-8.0%2B-3EB28C) ![Offline](https://img.shields.io/badge/offline-100%25-997239) ![Languages](https://img.shields.io/badge/languages-7-193C30) [![Android verification](https://github.com/taroq4-2/Najwa/actions/workflows/android.yml/badge.svg)](https://github.com/taroq4-2/Najwa/actions/workflows/android.yml) [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-087A53)](LICENSE)
+![Version](https://img.shields.io/badge/version-1.6.0-0F5A43) ![Android](https://img.shields.io/badge/Android-8.0%2B-3EB28C) ![Offline](https://img.shields.io/badge/offline-100%25-997239) ![Languages](https://img.shields.io/badge/languages-7-193C30) [![Android verification](https://github.com/taroq4-2/Najwa/actions/workflows/android.yml/badge.svg)](https://github.com/taroq4-2/Najwa/actions/workflows/android.yml) [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-087A53)](LICENSE)
 
 ![نجوى — صلاتك أولاً · Najwa — Prayer first](docs/assets/najwa-share.jpg)
 
 </div>
 
-## ما الجديد في 1.3.0 · What's new
+## ما الجديد في 1.6.0 · What's new
 
 <div dir="rtl">
 
-- **ويدجت بمراحل الصلاة:** قبل الأذان بالأخضر، ويتحوّل إلى لون تنبيه في آخر 10 دقائق، ثم «المتبقي على الإقامة» بالذهبي، ثم **«قد قامت الصلاة»** حتى نهاية مدة الصلاة التي حددتها، مع مواقيت اليوم الخمس في كل المقاسات المناسبة.
-- **إشعار أصلي كامل:** يملأ بطاقة الإشعار ويتبع سمة هاتفك، مع عدّاد حيّ إلى الإقامة وزر **«إيقاف الأذان»** الذي يوقف الصوت ويُبقي العدّاد.
-- **إعداد أول في أربع خطوات:** المدينة وطريقة الحساب، ثم ما تريده من نجوى، ثم الأذونات اللازمة فقط، ثم ملخص جاهز مع «تخصيص متقدم».
-- **إعدادات أسهل:** «الإعدادات السريعة» في الأعلى، وصفحة التنبيهات بأقسام قابلة للطي، وزرّا تجربة للأذان والإقامة، دون إزالة أي خيار.
+- **سجل صلوات أذكى:** سجّل كل صلاة «في جماعة» أو «في وقتها» أو «متأخرة»، ومعها السنن الرواتب والضحى والوتر وقيام الليل، مع خريطة لخمسة أسابيع ونسبة كل صلاة وإنجازات عند 7 و30 و40 و100 يوم. يبقى السجل على هاتفك فقط.
+- **ويدجت «صلواتي اليوم»:** لمسة تعني صلّيت، ولمستان في جماعة، وثلاث تمسح. وتذكير **«هل صلّيت؟»** اختياري قبل خروج الوقت.
+- **مسبحة وأذكار حيّة:** تسبيح ما بعد الصلاة (33·33·34) ينتقل وحده، والعدّ بزر الصوت، وويدجت للمسبحة، وأذكار النوم والاستيقاظ والمسجد بعدّاد لكل ذكر وخط قابل للتكبير.
+- **وِرد القرآن ودعاء اليوم:** تابع ختمتك يومًا بيوم، ودعاء قصير يتغيّر كل يوم في الرئيسية.
+- **إعدادات مرتّبة:** بطاقة جاهزية التنبيهات، وثلاثة أزرار سريعة، وستة أقسام ملوّنة؛ وكل خيار في مكان واحد.
+- **ومنذ 1.3.0 أيضًا:** أذانان مدمجان وأذان مستقل للفجر، وعدّاد الإقامة الحي على شاشة القفل، ومساجد بأوقات إقامة تُشارك برمز QR، ووضع رمضان، وبوصلة القبلة، وجدول شهري للطباعة. [كل التفاصيل](docs/releases/1.6.0.md).
 
 </div>
 
-- **Stage‑aware widget:** green before adhan, an alert colour in the last 10 minutes, gold “time to iqama”, then **“The prayer has begun”** until your prayer window ends, plus today's five times in every roomy size.
-- **Complete native notification:** fills the card and follows your phone theme, with a live iqama countdown and a **Stop adhan** button that silences the sound and keeps the countdown.
-- **Four‑step first run:** city and method, the features you want, only the permissions they need, and a summary with *Advanced customization*.
-- **Easier settings:** Quick settings at the top, collapsible alert sections and test buttons for adhan and iqama — every existing option is still there.
+- **A smarter prayer log:** mark each prayer *in congregation*, *on time* or *late*, plus the sunnah rawatib, duha, witr and qiyam, with a five-week map, each prayer's rate and milestones at 7, 30, 40 and 100 days. It never leaves your phone.
+- **Today's prayers widget:** tap once for prayed, twice for congregation, three times to clear — plus an optional **“Have you prayed?”** check-in before the time ends.
+- **Living tasbeeh & adhkar:** the after-prayer sequence (33·33·34) moves on by itself, volume-key counting, a tasbeeh widget, and sleep, waking and mosque adhkar with a counter on every dhikr and adjustable text.
+- **Quran tracker & dua of the day:** follow your khatma day by day, with a short dua on the home screen that changes daily.
+- **Organised settings:** an alert readiness card, three quick switches and six coloured sections — every option lives in one place.
+- **Also since 1.3.0:** two built-in adhans and a separate Fajr adhan, a live iqama countdown on the lock screen, mosques with iqama times shared by QR code, Ramadan mode, a Qibla compass and a printable month. [Full notes](docs/releases/1.6.0.md).
 
 ## معاينة التطبيق · App preview
 
-| الرئيسية الداكنة · Dark | الرئيسية الفاتحة · Light | English | الإعدادات السريعة · Quick settings |
+| الرئيسية الداكنة · Dark | الرئيسية الفاتحة · Light | English | الإعدادات · Settings |
 | :---: | :---: | :---: | :---: |
-| <img src="docs/assets/home.png" width="200" alt="واجهة نجوى الداكنة"> | <img src="docs/assets/home-light.png" width="200" alt="واجهة نجوى الفاتحة"> | <img src="docs/assets/home-en.png" width="200" alt="Najwa English home screen"> | <img src="docs/assets/settings.png" width="200" alt="الإعدادات السريعة في نجوى"> |
+| <img src="docs/assets/home.png" width="200" alt="واجهة نجوى الداكنة"> | <img src="docs/assets/home-light.png" width="200" alt="واجهة نجوى الفاتحة"> | <img src="docs/assets/home-en.png" width="200" alt="Najwa English home screen"> | <img src="docs/assets/settings.png" width="200" alt="إعدادات نجوى"> |
+
+### سجل صلواتي · Prayer log
+
+<div dir="rtl">
+
+سجّل من الويدجت أو من الإشعار أو من التطبيق. لمسة واحدة على الويدجت تعني صلّيت، ولمستان في جماعة.
+
+</div>
+
+Log from the widget, the notification or the app. One tap on the widget means prayed, two mean congregation.
+
+![سجل صلوات نجوى وويدجتاته · Najwa prayer log and widgets](docs/assets/najwa-log-studio.png)
+
+### المسبحة والأذكار والقرآن · Tasbeeh, adhkar & Quran
+
+![المسبحة والأذكار ووِرد القرآن · Tasbeeh, adhkar and Quran tracker](docs/assets/najwa-worship-studio.png)
 
 ### الويدجت · Widgets
 
@@ -79,13 +99,16 @@ A native, complete notification: the prayer, adhan and iqama times, your city, a
 
 | <div dir="rtl">الميزة</div> | Feature |
 | :--- | :--- |
-| <div dir="rtl">حساب المواقيت على جهازك دون إنترنت، مع 5 طرق حساب وزوايا مخصصة، وحساب العصر الحنفي وخطوط العرض العالية</div> | Offline calculation with 5 methods plus custom angles, Hanafi Asr and high‑latitude rules |
+| <div dir="rtl">حساب المواقيت على جهازك دون إنترنت، مع 12 طريقة حساب وزوايا مخصصة، وتعديل بالدقائق لكل صلاة، والعصر الحنفي وخطوط العرض العالية</div> | Offline calculation with 12 methods plus custom angles, per‑prayer minute adjustments, Hanafi Asr and high‑latitude rules |
 | <div dir="rtl">أكثر من 459 ألف مكان في 246 دولة وإقليم، أو موقع مخصص بالإحداثيات</div> | 459,000+ places in 246 countries and territories, or custom coordinates |
-| <div dir="rtl">تنبيه أذان بالصوت الذي تختاره من ملفاتك، وتذكير إقامة صامت، وتذكير الجمعة</div> | Adhan with your own sound file, silent iqama reminder, Friday reminder |
-| <div dir="rtl">اختيار الصلوات لكل تنبيه، ومدة الإقامة والصمت لكل صلاة</div> | Per‑prayer selection, iqama and silence durations for each prayer |
-| <div dir="rtl">صمت تلقائي بعد الأذان بـ20 ثانية واستعادة وضع الرنين السابق بأمان</div> | Auto‑silence 20 s after adhan, safely restoring your previous ringer |
+| <div dir="rtl">أذانان مدمجان أو ملفك الخاص، وأذان مستقل للفجر، وتذكير الإقامة، وتذكير قبل الأذان، وتذكير الجمعة</div> | Two built‑in adhans or your own file, a separate Fajr adhan, iqama reminder, a reminder before adhan and a Friday reminder |
+| <div dir="rtl">عدّاد الإقامة الحي على شاشة القفل، ومساجد بأوقات إقامة خاصة تُشارك برمز QR</div> | A live iqama countdown on the lock screen, and mosques with their own iqama times shared by QR code |
+| <div dir="rtl">سجل صلوات خاص بك مع السنن وخريطة الأسابيع، وويدجت للتسجيل بلمسة</div> | A private prayer log with sunnah prayers and a weekly map, and a one‑tap logging widget |
+| <div dir="rtl">مسبحة بتسبيح ما بعد الصلاة وويدجت، وأذكار الصباح والمساء والنوم والاستيقاظ والمسجد، ووِرد القرآن</div> | Tasbeeh with the after‑prayer sequence and a widget, morning, evening, sleep, waking and mosque adhkar, and a Quran tracker |
+| <div dir="rtl">صمت تلقائي أثناء الصلاة يعيد الرنين بعدها، و«صمت نجوى» من الإعدادات السريعة</div> | Auto‑silence during prayer that restores your ringer, plus “Silence now” in Quick Settings |
+| <div dir="rtl">بوصلة القبلة، والتاريخ الهجري مع التصحيح، ووضع رمضان، وجدول شهري للطباعة</div> | Qibla compass, Hijri date with correction, Ramadan mode and a printable month |
 | <div dir="rtl">مظهر فاتح وداكن، و7 لغات: العربية والإنجليزية والإندونيسية والأردية والبنغالية والهندية والتركية</div> | Light and dark themes; 7 languages: Arabic, English, Indonesian, Urdu, Bengali, Hindi, Turkish |
-| <div dir="rtl">بلا إعلانات ولا حسابات ولا تتبّع؛ بياناتك تبقى على جهازك</div> | No ads, no accounts, no tracking — your data stays on your device |
+| <div dir="rtl">بلا إعلانات ولا حسابات ولا تتبّع ولا إذن إنترنت؛ بياناتك تبقى على جهازك</div> | No ads, no accounts, no tracking, no internet permission — your data stays on your device |
 
 ## التثبيت · Install
 
@@ -111,19 +134,19 @@ For automatic updates without a store, install [Obtainium](https://github.com/Im
 
 ## الإصدار والتحقق · Release verification
 
-**1.3.0 · Build 114** — SHA-256 · `Najwa.apk`:
+**1.6.0 · Build 117** — SHA-256 · `Najwa.apk`:
 
 ```text
-9b9b88b59a71154b9a549ab389bc5c2556b98346c523f776065c821600ffd2ab
+{{SHA256}}
 ```
 
 <div dir="rtl">
 
-نجح 182 اختبارًا محليًا (الحساب، والجدولة، والإشعارات، والويدجت في كل المقاسات والمراحل) وفحص الخصوصية وlint الإصدار، وجُرّبت الواجهات والإشعارات على Samsung Galaxy S23 Ultra بنظام Android 17. [تفاصيل الإصدار](https://github.com/taroq4-2/Najwa/releases/tag/v1.3.0).
+نجح 238 اختبارًا محليًا (الحساب، والجدولة، والتذكيرات، والسجل، والويدجت) وفحص الخصوصية وlint الإصدار، وجُرّبت الترقية من 1.3.0 وكل الشاشات والويدجتات الجديدة على محاكي Android 15. [تفاصيل الإصدار](https://github.com/taroq4-2/Najwa/releases/tag/v1.6.0).
 
 </div>
 
-All 182 local tests (calculation, scheduling, notifications, widgets in every size and stage), the privacy audit and release lint passed; screens and notifications were exercised on a Samsung Galaxy S23 Ultra running Android 17. See [release verification](docs/release-verification.md).
+All 238 local tests (calculation, scheduling, reminders, the prayer log and widgets), the privacy audit and release lint passed; the upgrade from 1.3.0 and every new screen and widget were exercised on an Android 15 emulator. [Release notes](https://github.com/taroq4-2/Najwa/releases/tag/v1.6.0).
 
 ## البناء والمساهمة · Build and contribute
 
