@@ -20,7 +20,5 @@
     <string name="sound_unavailable_title">Kayıtlı sesi yeniden seçin</string>
     <string name="sound_unavailable_detail">Kayıtlı ses seçimi okunamadı. Dosyayı yeniden seçin veya varsayılan alarm sesini geri yükleyin. Siz seçim yapana kadar ezan sesi kapalı kalır.</string>
     <string name="sound_phone_silent">Telefon ayarlarına göre sessiz</string>
-    <string name="sound_phone_changed">Ses telefon ayarlarından değiştirildi</string>
-    <string name="sound_phone_default">Telefonda seçilen ezan sesi</string>
     <string name="sound_alarm_default">Varsayılan alarm sesi</string>
 </resources>

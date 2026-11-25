@@ -13,6 +13,9 @@ import org.najwa.core.*
 import org.najwa.app.MainActivity
 import java.time.Instant
 
+/** Delivery window for notifications when exact alarms are not allowed (stays within the dispatch grace). */
+private const val INEXACT_WINDOW_MS=10*60_000L
+
 class AndroidAlarms(private val context: Context): RestoreAlarm {
     private val manager=context.getSystemService(AlarmManager::class.java)
     private val plan=JsonFile(context,"alarm-plan.json")
@@ -65,20 +68,35 @@ class AndroidAlarms(private val context: Context): RestoreAlarm {
             return listOf(ScheduledPrayer(PrayerEvent(prayer,Instant.ofEpochMilli(at)),PrayerAction.SILENCE,Instant.ofEpochMilli(at)))
         }
         return (0 until a.length()).map {index->a.getJSONObject(index).let {
-            ScheduledPrayer(PrayerEvent(Prayer.valueOf(it.getString("prayer")),Instant.ofEpochMilli(it.getLong("eventAt"))),PrayerAction.valueOf(it.getString("action")),Instant.ofEpochMilli(it.getLong("at")))
+            // Reminders keep their kind, or the saved task would never match the current schedule.
+            ScheduledPrayer(PrayerEvent(Prayer.valueOf(it.getString("prayer")),Instant.ofEpochMilli(it.getLong("eventAt"))),PrayerAction.valueOf(it.getString("action")),Instant.ofEpochMilli(it.getLong("at")),
+                it.optString("reminder").takeIf {r->r.isNotEmpty()}?.let {r->org.najwa.core.Reminder.valueOf(r)})
         }}
+    }
+    /** Silence (which changes the ringer) uses an alarm clock: the most reliable delivery,
+     * at the cost of the alarm icon in the status bar. Notifications use exact idle alarms
+     * on Android 12+ (no icon), and approximate alarms when exact access is not granted. */
+    private fun arm(at: Long,intent: PendingIntent,critical: Boolean) {
+        when {
+            // Without exact access Android may defer a plain inexact alarm by up to an hour.
+            // A 10-minute window is the narrowest allowed without the permission.
+            !exactAccess -> manager.setWindow(AlarmManager.RTC_WAKEUP,at,INEXACT_WINDOW_MS,intent)
+            critical || Build.VERSION.SDK_INT<31 -> clock(at,intent)
+            else -> manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,at,intent)
+        }
     }
     fun prayers(tasks: List<ScheduledPrayer>, refresh: Boolean=false) {
         val previous=saved()
         val old=previous.map {it.at.toEpochMilli()}.toSet()
-        val times=tasks.map {it.at.toEpochMilli()}.toSet()
+        val batches=tasks.groupBy {it.at.toEpochMilli()}
+        val times=batches.keys
         val added=mutableListOf<Long>()
         try {
             times.filter {refresh || it !in registered}.sorted().forEach {at->
-                clock(at,pending("prayer","batch:$at",at,true))
+                arm(at,pending("prayer","batch:$at",at,true),batches.getValue(at).any {it.action==PrayerAction.SILENCE})
                 if(at !in old)added.add(at)
             }
-            if(previous!=tasks)plan.write(JSONObject().put("tasks",JSONArray(tasks.map {t->JSONObject().put("prayer",t.event.prayer.name).put("eventAt",t.event.time.toEpochMilli()).put("action",t.action.name).put("at",t.at.toEpochMilli())})))
+            if(previous!=tasks)plan.write(JSONObject().put("tasks",JSONArray(tasks.map {t->JSONObject().put("prayer",t.event.prayer.name).put("eventAt",t.event.time.toEpochMilli()).put("action",t.action.name).put("at",t.at.toEpochMilli()).apply {t.reminder?.let {put("reminder",it.name)}}})))
         } catch(e: Exception) {
             added.forEach {at->runCatching {manager.cancel(pending("prayer",at=at,independent=true))}}
             throw e

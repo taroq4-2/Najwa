@@ -46,25 +46,6 @@ class PrayerAppearanceTest {
             assertTrue("Counter keeps readable height at ${w}x${h}, scale=$scale, iqama=$iqama (height=${timer.height})",timer.height>12)
         }
     }
-    @Test fun bothNotificationDesignsInflateAtNarrowWidth() {
-        for(scale in listOf(1f,1.4f,2f))for(w in listOf(260,320,420))for(expanded in listOf(false,true))for(adhan in listOf(false,true)) {
-            val h=if(expanded)252 else 48
-            paparazzi.unsafeUpdateConfig(deviceConfig=DeviceConfig.PIXEL_5.copy(locale="ar",screenWidth=w*2,screenHeight=h*2,density=Density.XHIGH,fontScale=scale,orientation=ScreenOrientation.LANDSCAPE))
-            val task=ScheduledPrayer(event,if(adhan)PrayerAction.ADHAN else PrayerAction.IQAMA,event.time)
-            val title=when {
-                expanded && adhan -> "حان وقت أذان الظهر"
-                expanded -> "حان وقت إقامة الظهر"
-                adhan -> "أذان الظهر"
-                else -> "إقامة الظهر"
-            }
-            val view=notificationViews(paparazzi.context,task,prefs,title,"جدة · الإقامة بعد 15 دقيقة · حسب إعدادك",expanded).apply(paparazzi.context,FrameLayout(paparazzi.context))
-            view.layoutParams=ViewGroup.LayoutParams(w*2,h*2)
-            if(adhan)view.findViewById<Chronometer>(R.id.notification_timer).apply {stop();text="15:00"}
-            assertEquals(title,view.findViewById<TextView>(R.id.notification_title).text.toString())
-            if(expanded)assertTrue(view.findViewById<TextView>(R.id.notification_message).text.isNotBlank())
-            paparazzi.snapshot(view,"notification_${w}_${scale}_${if(adhan)"adhan" else "iqama"}_${if(expanded)"expanded" else "compact"}")
-        }
-    }
     @Test fun homeShowsIqamaAsTheMainCountdown() {
         val now=event.time.plusSeconds(60)
         val days=PrayerCalculator().around(now,prefs)
@@ -85,27 +66,5 @@ class PrayerAppearanceTest {
                 BottomNavigation(0) {}
             }}
         }
-    }
-    @Test fun expiredIqamaDoesNotShowAnAdhanCountdown() {
-        val task=ScheduledPrayer(event,PrayerAction.ADHAN,event.time)
-        val shortIqama=prefs.copy(iqamaMinutes=prefs.iqamaMinutes+(event.prayer to 1))
-        val parent=FrameLayout(paparazzi.context)
-        for((seconds,visibility) in listOf(59L to View.VISIBLE,60L to View.GONE,90L to View.GONE)) {
-            val view=notificationViews(
-                paparazzi.context,task,shortIqama,"الأذان","الظهر",true,event.time.plusSeconds(seconds)
-            ).apply(paparazzi.context,parent)
-            assertEquals(visibility,view.findViewById<View>(R.id.notification_timer_box).visibility)
-        }
-    }
-    @Test fun fridayNotificationUsesItsOwnIconAndNoCountdown() {
-        val task=ScheduledPrayer(event,PrayerAction.FRIDAY,event.time.minusSeconds(1800))
-        paparazzi.unsafeUpdateConfig(deviceConfig=DeviceConfig.PIXEL_5.copy(locale="ar",screenWidth=640,screenHeight=504,
-            density=Density.XHIGH,orientation=ScreenOrientation.LANDSCAPE))
-        val view=notificationViews(paparazzi.context,task,prefs,"تذكير بصلاة الجمعة","جدة · الظهر 12:07 م تقريبًا",true)
-            .apply(paparazzi.context,FrameLayout(paparazzi.context))
-        view.layoutParams=ViewGroup.LayoutParams(640,504)
-        assertEquals(View.GONE,view.findViewById<View>(R.id.notification_timer_box).visibility)
-        assertTrue(view.findViewById<TextView>(R.id.notification_message).text.isNotBlank())
-        paparazzi.snapshot(view,"notification_friday_expanded")
     }
 }

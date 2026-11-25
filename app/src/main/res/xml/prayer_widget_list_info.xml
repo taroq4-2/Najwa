@@ -1,0 +1,6 @@
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="180dp" android:minHeight="200dp" android:minResizeWidth="110dp" android:minResizeHeight="80dp"
+    android:targetCellWidth="2" android:targetCellHeight="3" android:updatePeriodMillis="1800000"
+    android:initialLayout="@layout/prayer_widget_list" android:previewLayout="@layout/prayer_widget_list"
+    android:resizeMode="horizontal|vertical" android:widgetCategory="home_screen|keyguard"
+    android:description="@string/widget_list_description" />

@@ -92,7 +92,7 @@ import org.najwa.core.Screen
             PageHeading("سياسة الخصوصية","بياناتك تبقى على جهازك أثناء استخدام نجوى")
             SettingsCard("ما نحفظه محليًا") {
                 Text(uiText("نحفظ المدينة أو الإحداثيات التي تدخلها، وطريقة حساب المواقيت، والمظهر، وخيارات الصمت والإشعارات والإقامة. يُحفظ أيضًا سجل محدود لاستعادة الرنين ومنع تكرار التنبيهات وآخر تنفيذ للجدولة."),color=c.text)
-                Text(uiText("لا يطلب التطبيق موقع GPS، ولا يقرأ جهات الاتصال أو الرسائل أو إشعارات التطبيقات الأخرى."),color=c.secondary)
+                Text(androidx.compose.ui.res.stringResource(org.najwa.app.R.string.privacy_location),color=c.secondary)
                 Text(uiText("إذا اخترت ملف أذان، نحفظ نسخة خاصة منه داخل نجوى. نشارك هذا الصوت فقط مع مشغّل إشعارات Android لتشغيل التنبيه. لا نطلب الوصول العام إلى ملفات الهاتف."),color=c.secondary)
             }
             SettingsCard("الاتصال والمشاركة") {

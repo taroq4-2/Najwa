@@ -20,7 +20,5 @@
     <string name="sound_unavailable_title">الصوت المحفوظ يحتاج إلى إعادة اختيار</string>
     <string name="sound_unavailable_detail">تعذّر قراءة اختيار الصوت المحفوظ. اختر الملف مجددًا أو استعد نغمة المنبّه الافتراضية. يبقى صوت الأذان متوقفًا حتى تختار.</string>
     <string name="sound_phone_silent">بدون صوت حسب إعدادات الهاتف</string>
-    <string name="sound_phone_changed">صوت معدّل من إعدادات الهاتف</string>
-    <string name="sound_phone_default">صوت الأذان المحدد في الهاتف</string>
     <string name="sound_alarm_default">نغمة المنبّه الافتراضية</string>
 </resources>

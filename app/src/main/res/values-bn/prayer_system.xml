@@ -16,16 +16,13 @@
     <string name="system_unavailable">পাওয়া যাচ্ছে না</string>
     <string name="system_check_calculation">গণনার সেটিংস দেখুন</string>
     <string name="system_brand">নাজওয়া</string>
-    <string name="system_signature">নামাজ আগে, শব্দ পরে।</string>
     <string name="system_private_alert">আপনার নামাজের একটি অনুস্মারক আছে</string>
     <string name="system_friday_detail">জুমার নামাজের প্রস্তুতি নিন। খুতবা ও নামাজের সময় মসজিদে জেনে নিন।</string>
     <string name="system_iqama_detail">আপনার ইকামতের সেটিংস অনুযায়ী</string>
     <string name="system_refresh">রিফ্রেশ করুন</string>
     <string name="system_execution">নামাজ মোড</string>
     <string name="system_execution_detail">নীরব মোড চালু হচ্ছে বা রিং মোড ফেরানো হচ্ছে</string>
-    <string name="system_minutes_after">ইকামত %1$d মিনিট পর</string>
     <string name="system_hijri_format">%1$s হিজরি</string>
-    <string name="system_clock_required">নামাজের অনুস্মারক ও স্বয়ংক্রিয় নীরব মোডের জন্য নির্দিষ্ট সময়ের অ্যালার্মের অনুমতি দিন।</string>
     <string name="system_background_unavailable">অ্যান্ড্রয়েড শেষ নির্ধারিত সময়ে রিং পরিষেবা আটকে দিয়েছে। নাজওয়ায় রিংয়ের অবস্থা দেখুন।</string>
     <string name="trial_title">আজান ও নীরব মোড পরীক্ষা</string>
     <string name="trial_description">৩০ সেকেন্ড পর আজান হবে। আজানের ২০ সেকেন্ড পর নীরব মোড বা কম্পন চালু হবে, এক মিনিট পর ইকামত এবং পাঁচ মিনিট পর রিং মোড ফিরবে।</string>

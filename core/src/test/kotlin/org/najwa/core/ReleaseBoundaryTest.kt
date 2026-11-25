@@ -37,7 +37,7 @@ class ReleaseBoundaryTest {
             }
             checked++
         }
-        assertEquals(6048,checked)
+        assertEquals(cities.size*12*Method.entries.size*HighLatitude.entries.size,checked)
     }
 
     @Test fun lateAndFutureDeliveryNeverEscapesNotificationOrSilenceWindows() {

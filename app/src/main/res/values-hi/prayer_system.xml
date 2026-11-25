@@ -16,16 +16,13 @@
     <string name="system_unavailable">उपलब्ध नहीं</string>
     <string name="system_check_calculation">गणना की सेटिंग देखें</string>
     <string name="system_brand">नजवा</string>
-    <string name="system_signature">नमाज़ पहले, शोर बाद में।</string>
     <string name="system_private_alert">आपके लिए नमाज़ की याद है</string>
     <string name="system_friday_detail">जुमे की नमाज़ की तैयारी करें। ख़ुत्बे और नमाज़ का समय अपनी मस्जिद से पता करें।</string>
     <string name="system_iqama_detail">आपकी इक़ामत की सेटिंग के अनुसार</string>
     <string name="system_refresh">रीफ़्रेश करें</string>
     <string name="system_execution">नमाज़ मोड</string>
     <string name="system_execution_detail">साइलेंट मोड लगाया जा रहा है या रिंगर बहाल हो रहा है</string>
-    <string name="system_minutes_after">इक़ामत %1$d मिनट बाद</string>
     <string name="system_hijri_format">%1$s हिजरी</string>
-    <string name="system_clock_required">नमाज़ की याद और स्वचालित साइलेंट मोड के लिए सटीक अलार्म की अनुमति दें।</string>
     <string name="system_background_unavailable">Android ने पिछले तय समय पर रिंगर सेवा रोक दी। नजवा में रिंगर की स्थिति देखें।</string>
     <string name="trial_title">अज़ान और साइलेंट मोड की जाँच</string>
     <string name="trial_description">30 सेकंड बाद अज़ान होगी। अज़ान के 20 सेकंड बाद साइलेंट या वाइब्रेशन, एक मिनट बाद इक़ामत और पाँच मिनट बाद रिंगर बहाल होगा।</string>

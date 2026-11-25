@@ -46,7 +46,26 @@ class PrayerCalculator {
         }
         return n
     }
-    private fun solar(date: LocalDate, city: City) = SolarDay(transit(date,city),crossing(date,city,true){-0.833},crossing(date,city,false){-0.833})
+    private fun solar(date: LocalDate, city: City, horizon: Double = -0.833) = SolarDay(transit(date,city),crossing(date,city,true){horizon},crossing(date,city,false){horizon})
+    /** Standard refraction plus the dip of the horizon seen from [elevation] metres. */
+    private fun horizon(elevation: Int) = -0.833 - 0.0347*sqrt(elevation.coerceAtLeast(0).toDouble())
+    /** Moonsighting Committee (Khalid Shaukat) seasonal twilight, minutes before sunrise / after sunset. */
+    private fun seasonal(latitude: Double, date: LocalDate, morning: Boolean): Double {
+        val l=abs(latitude)/55.0
+        val (a,b,c,d)=if(morning) listOf(75+28.65*l,75+19.44*l,75+32.74*l,75+48.10*l) else listOf(75+25.60*l,75+2.050*l,75-9.21*l,75+6.14*l)
+        val days=date.lengthOfYear()
+        var dyy=if(latitude>=0) date.dayOfYear-1+10 else date.dayOfYear-1-(if(date.isLeapYear)173 else 172)
+        if(dyy>=days)dyy-=days
+        if(dyy<0)dyy+=days
+        return when {
+            dyy<91 -> a+(b-a)/91.0*dyy
+            dyy<137 -> b+(c-b)/46.0*(dyy-91)
+            dyy<183 -> c+(d-c)/46.0*(dyy-137)
+            dyy<229 -> d+(c-d)/46.0*(dyy-183)
+            dyy<275 -> c+(b-c)/46.0*(dyy-229)
+            else -> b+(a-b)/91.0*(dyy-275)
+        }
+    }
     private fun portion(rule: HighLatitude, angle: Double) = when(rule) { HighLatitude.MIDDLE->0.5; HighLatitude.SEVENTH->1.0/7; HighLatitude.ANGLE->angle/60 }
     fun calculate(date: LocalDate, prefs: Preferences): PrayerDay {
         val city = prefs.city
@@ -63,30 +82,39 @@ class PrayerCalculator {
         }
         val base = solarDate.atStartOfDay(ZoneOffset.UTC).toInstant()
         fun instant(minutes: Double) = base.plusSeconds((minutes*60/60).roundToLong()*60)
-        val s = solar(solarDate,city)
+        val horizon = horizon(prefs.elevation)
+        val s = solar(solarDate,city,horizon)
         if(instant(s.noon).atZone(city.zoneId).toLocalDate()!=date)
-            return PrayerDay(date,emptyList(),"هذا التاريخ غير متاح في المنطقة الزمنية المختارة؛ راجع إعدادات الموقع.")
-        if(s.rise == null || s.set == null) return PrayerDay(date,emptyList(),"لا شروق أو غروب في هذا التاريخ؛ يلزم اعتماد تقدير محلي. الصمت التلقائي متوقف.")
-        val prevSet = solar(solarDate.minusDays(1),city).set
-        val nextRise = solar(solarDate.plusDays(1),city).rise
-        if(prevSet == null || nextRise == null) return PrayerDay(date,emptyList(),"تعذّر تحديد طول الليل؛ راجع تقويمًا محليًا.")
+            return PrayerDay(date,emptyList(),DayIssue.ZONE_DATE)
+        if(s.rise == null || s.set == null) return PrayerDay(date,emptyList(),DayIssue.NO_SUN)
+        val prevSet = solar(solarDate.minusDays(1),city,horizon).set
+        val nextRise = solar(solarDate.plusDays(1),city,horizon).rise
+        if(prevSet == null || nextRise == null) return PrayerDay(date,emptyList(),DayIssue.NIGHT_LENGTH)
         val fajrAngle = if(prefs.method == Method.CUSTOM) prefs.customFajr else prefs.method.fajr
         val ishaAngle = if(prefs.method == Method.CUSTOM) prefs.customIsha else prefs.method.isha
-        val fajrLimit = s.rise - (s.rise + 1440 - prevSet)*portion(prefs.highLatitude,fajrAngle)
+        val fajrLimit = if(prefs.method.seasonal && abs(city.latitude)<55) s.rise - seasonal(city.latitude,solarDate,true)
+            else s.rise - (s.rise + 1440 - prevSet)*portion(prefs.highLatitude,fajrAngle)
         val fajr = (crossing(solarDate,city,true){-fajrAngle} ?: fajrLimit).coerceAtLeast(fajrLimit)
         val isha = if(prefs.method == Method.UMM_AL_QURA) {
-            val ramadan = try { HijrahDate.from(date).get(ChronoField.MONTH_OF_YEAR)==9 } catch(_: java.time.DateTimeException) {
-                return PrayerDay(date,emptyList(),"التاريخ خارج نطاق التقويم الهجري المدعوم.")
+            val ramadan = try { HijrahDate.from(date).plus(prefs.hijriOffset.toLong(),ChronoUnit.DAYS).get(ChronoField.MONTH_OF_YEAR)==9 } catch(_: java.time.DateTimeException) {
+                return PrayerDay(date,emptyList(),DayIssue.HIJRI_RANGE)
             }
             s.set + if(ramadan) 120.0 else 90.0
+        } else if(prefs.method.ishaInterval>0) {
+            s.set + prefs.method.ishaInterval
         } else {
-            val limit = s.set + (nextRise+1440-s.set)*portion(prefs.highLatitude,ishaAngle)
+            val limit = if(prefs.method.seasonal && abs(city.latitude)<55) s.set + seasonal(city.latitude,solarDate,false)
+                else s.set + (nextRise+1440-s.set)*portion(prefs.highLatitude,ishaAngle)
             (crossing(solarDate,city,false){-ishaAngle} ?: limit).coerceAtMost(limit)
         }
         val asr = crossing(solarDate,city,false) { decl -> deg(atan(1.0/((if(prefs.hanafi) 2 else 1)+tan(abs(rad(city.latitude)-decl))))) }
-            ?: return PrayerDay(date,emptyList(),"تعذّر حساب العصر لهذا الموقع.")
-        val events = listOf(Prayer.FAJR to fajr,Prayer.SUNRISE to s.rise,Prayer.DHUHR to s.noon,Prayer.ASR to asr,Prayer.MAGHRIB to s.set,Prayer.ISHA to isha).map { PrayerEvent(it.first,instant(it.second)) }
-        if(events.zipWithNext().any { it.first.time >= it.second.time }) return PrayerDay(date,emptyList(),"تداخلت المواقيت؛ راجع إعدادات الحساب.")
+            ?: return PrayerDay(date,emptyList(),DayIssue.ASR)
+        // Authority corrections (e.g. Diyanet) and the person's own minute offsets.
+        fun adjusted(prayer: Prayer,minutes: Double)=minutes+(prefs.method.adjustments[prayer] ?: 0)+prefs.offset(prayer)
+        // Shia methods: maghrib once the sun is a few degrees below the horizon (never before sunset).
+        val maghrib = if(prefs.method.maghribAngle>0) (crossing(solarDate,city,false){-prefs.method.maghribAngle} ?: s.set).coerceAtLeast(s.set) else s.set
+        val events = listOf(Prayer.FAJR to fajr,Prayer.SUNRISE to s.rise,Prayer.DHUHR to s.noon,Prayer.ASR to asr,Prayer.MAGHRIB to maghrib,Prayer.ISHA to isha).map { PrayerEvent(it.first,instant(adjusted(it.first,it.second))) }
+        if(events.zipWithNext().any { it.first.time >= it.second.time }) return PrayerDay(date,emptyList(),DayIssue.ORDER)
         return PrayerDay(date,events)
     }
     fun around(now: Instant,prefs: Preferences): List<PrayerDay> {

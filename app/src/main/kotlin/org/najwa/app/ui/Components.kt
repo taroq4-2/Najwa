@@ -3,6 +3,8 @@ package org.najwa.app.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.draw.clip
 import androidx.compose.animation.animateContentSize
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.rememberScrollState
@@ -94,9 +96,11 @@ import androidx.compose.ui.unit.*
 @Composable fun PreferenceSwitch(title: String,subtitle: String,checked: Boolean,onChange: (Boolean)->Unit) {
     val c=LocalPalette.current
     val label=uiText(title)
-    Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+    // The whole row toggles (not only the small switch), and reads as one switch to TalkBack.
+    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).toggleable(checked,role=Role.Switch,onValueChange=onChange).padding(vertical=4.dp),
+        verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(8.dp)) {
         Column(Modifier.weight(1f)) {Text(label,color=c.text,fontSize=15.sp,fontWeight=FontWeight.Bold);Text(uiText(subtitle),color=c.secondary,fontSize=12.sp)}
-        Switch(checked,onChange,modifier=Modifier.semantics {contentDescription=label})
+        Switch(checked,null,modifier=Modifier.clearAndSetSemantics {})
     }
 }
 @Composable fun ExpandableSettings(title: String,subtitle: String,initiallyExpanded: Boolean=false,content: @Composable ColumnScope.()->Unit) {

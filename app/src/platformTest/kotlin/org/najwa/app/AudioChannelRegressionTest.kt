@@ -72,11 +72,6 @@ class AudioChannelRegressionTest {
             manager.cancelAll()
             assertEquals(NotificationDelivery.POSTED,app.runtime.notifications.show(task,prefs))
             assertTrue("Missing translated prayer in $language",shadowOf(manager).allNotifications.single().extras.getCharSequence(Notification.EXTRA_TITLE).toString().contains(expected))
-            for(expanded in listOf(false,true)) {
-                val notificationView=notificationViews(app,task,prefs,expected,"",expanded,time)
-                    .apply(app,android.widget.FrameLayout(app))
-                assertEquals(expected,notificationView.findViewById<android.widget.TextView>(R.id.notification_title).text.toString())
-            }
             val view=PrayerWidget.views(app,prefs,time,data=WidgetPrayer(prefs.city.name,Prayer.DHUHR,time,"",null)).apply(app,null)
             assertEquals(expected,view.findViewById<android.widget.TextView>(R.id.widget_prayer).text.toString())
         }

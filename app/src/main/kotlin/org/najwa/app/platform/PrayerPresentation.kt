@@ -4,9 +4,13 @@ import android.content.Context
 import android.content.res.Configuration
 import org.najwa.app.appLanguage
 import org.najwa.app.R
+import org.najwa.core.DayIssue
 import org.najwa.core.Prayer
+import org.najwa.core.PrayerEvent
 import org.najwa.core.Preferences
 import org.najwa.core.displayTime
+import org.najwa.core.isJumuah
+import java.time.temporal.ChronoUnit
 import java.time.Instant
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
@@ -39,6 +43,19 @@ internal fun prayerNameResource(prayer: Prayer): Int = when(prayer) {
 }
 
 internal fun Context.prayerName(prayer: Prayer): String = getString(prayerNameResource(prayer))
+/** Dhuhr on a Friday reads "Jumu'ah" when that mode is on. */
+internal fun Context.prayerName(event: PrayerEvent,preferences: Preferences): String =
+    if(preferences.isJumuah(event))getString(R.string.prayer_jumuah) else prayerName(event.prayer)
+
+internal fun dayIssueResource(issue: DayIssue?): Int = when(issue) {
+    DayIssue.ZONE_DATE -> R.string.issue_zone_date
+    DayIssue.NO_SUN -> R.string.issue_no_sun
+    DayIssue.NIGHT_LENGTH -> R.string.issue_night_length
+    DayIssue.HIJRI_RANGE -> R.string.issue_hijri_range
+    DayIssue.ASR -> R.string.issue_asr
+    DayIssue.ORDER -> R.string.issue_order
+    null -> R.string.en_home_next_unavailable
+}
 
 internal fun Context.prayerTime(date: Instant, preferences: Preferences): String {
     return prayerTime(date,preferences,resources.configuration.locales[0])
@@ -51,8 +68,8 @@ internal fun prayerTime(date: Instant, preferences: Preferences, locale: Locale)
 private val hijriMonths=listOf("محرم","صفر","ربيع الأول","ربيع الآخر","جمادى الأولى","جمادى الآخرة",
     "رجب","شعبان","رمضان","شوال","ذو القعدة","ذو الحجة")
 
-private fun arabicHijriLabel(date: LocalDate): String = try {
-    val hijri=HijrahDate.from(date)
+private fun arabicHijriLabel(date: LocalDate,offset: Int): String = try {
+    val hijri=HijrahDate.from(date).plus(offset.toLong(),ChronoUnit.DAYS)
     val day=hijri.get(ChronoField.DAY_OF_MONTH)
     val month=hijri.get(ChronoField.MONTH_OF_YEAR)
     val year=hijri.get(ChronoField.YEAR)
@@ -60,11 +77,12 @@ private fun arabicHijriLabel(date: LocalDate): String = try {
     text.map {if(it in '0'..'9') '٠'+(it-'0') else it}.joinToString("")
 } catch(_: java.time.DateTimeException) { "التاريخ الهجري غير متاح" }
 
-internal fun Context.hijriLabel(date: LocalDate): String {
-    if(usesArabic)return arabicHijriLabel(date)
+/** [offset] days are added to the Umm al-Qura date (local moon-sighting correction). */
+internal fun Context.hijriLabel(date: LocalDate,offset: Int=0): String {
+    if(usesArabic)return arabicHijriLabel(date,offset)
     return try {
         val dateText=DateTimeFormatter.ofPattern("d/M/yyyy",resources.configuration.locales[0])
-            .withChronology(HijrahChronology.INSTANCE).format(date)
+            .format(HijrahDate.from(date).plus(offset.toLong(),ChronoUnit.DAYS))
         getString(R.string.system_hijri_format,dateText)
     } catch(_: java.time.DateTimeException) { getString(R.string.en_home_hijri_unavailable) }
 }

@@ -20,7 +20,5 @@
     <string name="sound_unavailable_title">Pilih kembali suara yang tersimpan</string>
     <string name="sound_unavailable_detail">Pilihan suara tersimpan tidak dapat dibaca. Pilih ulang berkas atau pulihkan suara alarm bawaan. Audio azan tetap nonaktif hingga Anda memilih.</string>
     <string name="sound_phone_silent">Senyap sesuai pengaturan ponsel</string>
-    <string name="sound_phone_changed">Suara diubah di pengaturan ponsel</string>
-    <string name="sound_phone_default">Suara azan yang dipilih di ponsel</string>
     <string name="sound_alarm_default">Suara alarm bawaan</string>
 </resources>

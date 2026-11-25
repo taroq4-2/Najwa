@@ -16,16 +16,13 @@
     <string name="system_unavailable">Kullanılamıyor</string>
     <string name="system_check_calculation">Hesaplama ayarlarını kontrol edin</string>
     <string name="system_brand">Najwa</string>
-    <string name="system_signature">Önce namaz, sonra ses.</string>
     <string name="system_private_alert">Bir namaz hatırlatıcınız var</string>
     <string name="system_friday_detail">Cuma namazına hazırlanın. Hutbe ve namaz saatini caminizden öğrenin.</string>
     <string name="system_iqama_detail">Kamet ayarınıza göre</string>
     <string name="system_refresh">Yenile</string>
     <string name="system_execution">Namaz modu</string>
     <string name="system_execution_detail">Sessiz mod açılıyor veya zil sesi geri yükleniyor</string>
-    <string name="system_minutes_after">Kamete %1$d dk.</string>
     <string name="system_hijri_format">%1$s Hicrî</string>
-    <string name="system_clock_required">Namaz uyarıları ve otomatik sessizlik için kesin zamanlı alarmlara izin verin.</string>
     <string name="system_background_unavailable">Android son planlanan saatte zil sesi hizmetini engelledi. Najwa’dan zil durumunu kontrol edin.</string>
     <string name="trial_title">Ezan ve sessiz mod testi</string>
     <string name="trial_description">Ezan 30 saniye sonra okunur. Ezandan 20 saniye sonra sessiz veya titreşim modu, 1 dakika sonra kamet ve 5 dakika sonra önceki zil ayarı devreye girer.</string>

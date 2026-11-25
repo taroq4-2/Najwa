@@ -20,7 +20,5 @@
     <string name="sound_unavailable_title">Select the saved sound again</string>
     <string name="sound_unavailable_detail">The saved sound selection could not be read. Choose the file again or restore the default alarm sound. Adhan audio stays off until you choose.</string>
     <string name="sound_phone_silent">Silent according to phone settings</string>
-    <string name="sound_phone_changed">Sound changed in phone settings</string>
-    <string name="sound_phone_default">Adhan sound selected on your phone</string>
     <string name="sound_alarm_default">Default alarm sound</string>
 </resources>

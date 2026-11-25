@@ -20,7 +20,5 @@
     <string name="sound_unavailable_title">सहेजी गई ध्वनि फिर चुनें</string>
     <string name="sound_unavailable_detail">सहेजी गई ध्वनि का चयन पढ़ा नहीं जा सका। फ़ाइल फिर चुनें या डिफ़ॉल्ट अलार्म ध्वनि बहाल करें। चयन करने तक अज़ान की ध्वनि बंद रहेगी।</string>
     <string name="sound_phone_silent">फ़ोन की सेटिंग के अनुसार मौन</string>
-    <string name="sound_phone_changed">फ़ोन की सेटिंग में ध्वनि बदली गई</string>
-    <string name="sound_phone_default">फ़ोन पर चुनी गई अज़ान की ध्वनि</string>
     <string name="sound_alarm_default">डिफ़ॉल्ट अलार्म ध्वनि</string>
 </resources>

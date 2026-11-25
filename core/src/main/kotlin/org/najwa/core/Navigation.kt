@@ -2,12 +2,13 @@ package org.najwa.core
 
 enum class Screen(val tab: Int) {
     HOME(0), SILENCE(1), SETTINGS(2), PERMISSIONS(1), NOTIFICATIONS(2),
-    WIDGET(2), INFORMATION(2), ABOUT(2), CONTACT(2), PRIVACY(2), CALCULATION(2), APPEARANCE(2);
+    WIDGET(2), INFORMATION(2), ABOUT(2), CONTACT(2), PRIVACY(2), CALCULATION(2), APPEARANCE(2), QIBLA(0), BACKUP(2),
+    MOSQUES(2), SOUND(2), SUNNAH(2), ADVANCED(2), TASBEEH(0), ADHKAR(0), TIMETABLE(0), PRAYER_LOG(0), QURAN(0);
     val parent: Screen? get() = when(this) {
         HOME -> null
-        SILENCE, SETTINGS -> HOME
+        SILENCE, SETTINGS, QIBLA, TASBEEH, ADHKAR, TIMETABLE, PRAYER_LOG, QURAN -> HOME
         PERMISSIONS -> SILENCE
-        NOTIFICATIONS, WIDGET, INFORMATION, CALCULATION, APPEARANCE -> SETTINGS
+        NOTIFICATIONS, WIDGET, INFORMATION, CALCULATION, APPEARANCE, BACKUP, MOSQUES, SOUND, SUNNAH, ADVANCED -> SETTINGS
         ABOUT, CONTACT, PRIVACY -> INFORMATION
     }
     companion object {
@@ -41,7 +42,7 @@ fun prayerCountdown(events: List<PrayerEvent>,now: java.time.Instant,p: Preferen
         val iqama=previous.time.plusSeconds(p.iqamaMinutes.getValue(previous.prayer)*60L)
         if(now<iqama)return WidgetPrayer(p.city.name,previous.prayer,iqama,displayTime(iqama,p),displayTime(iqama,p),CountdownPhase.IQAMA,previous.time)
         // The prayer lasts until the silence window chosen for it (counted from adhan) ends.
-        val end=previous.time.plusSeconds(p.silenceMinutes.getValue(previous.prayer)*60L)
+        val end=previous.time.plusSeconds(p.silenceFor(previous)*60L)
         if(includePrayer && now<end)return WidgetPrayer(p.city.name,previous.prayer,end,displayTime(end,p),displayTime(iqama,p),CountdownPhase.PRAYER,iqama)
     }
     val event=prayers.firstOrNull {it.time>now} ?: return null

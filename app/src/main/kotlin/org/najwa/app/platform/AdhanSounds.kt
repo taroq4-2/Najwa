@@ -18,16 +18,36 @@ data class AdhanSound(val channelId: String,val name: String,val uri: String?=nu
 
 /** Imported audio is private and survives renaming/deleting the original document.
  * Only the dedicated audio directory can be shared with Android's notification player. */
-class AdhanSounds(private val context: Context,private val validate: (File)->Unit=::validateAudio) {
-    companion object { const val UNAVAILABLE_CHANNEL="adhan_selection_unavailable" }
-    private val store=JsonFile(context,"adhan-sound.json")
+/** [slot] "" is the adhan for every prayer; "fajr" is an optional separate adhan for Fajr. */
+class AdhanSounds(private val context: Context,private val validate: (File)->Unit=::validateAudio,val slot: String="") {
+    companion object {
+        const val UNAVAILABLE_CHANNEL="adhan_selection_unavailable"
+        /** Recordings bundled in res/raw (adhan_1, adhan_2). */
+        val BUILT_IN=listOf(1,2)
+        private val builtInPattern=Regex("""^android\.resource://[^/]+/raw/adhan_(\d+)$""")
+        fun builtInUri(context: Context,index: Int): Uri=Uri.parse("android.resource://${context.packageName}/raw/adhan_$index")
+        /** The bundled recording a channel sound points to, if any. */
+        fun builtInIndex(uri: String?): Int? = uri?.let {builtInPattern.find(it)?.groupValues?.get(1)?.toIntOrNull()}?.takeIf {it in BUILT_IN}
+    }
+    private val store=JsonFile(context,if(slot.isEmpty())"adhan-sound.json" else "adhan-sound-$slot.json")
+    private val prefix=if(slot.isEmpty())"adhan_selected_" else "adhan_${slot}_"
+    /** False for the Fajr slot until a separate Fajr adhan is chosen. */
+    fun hasOwn(): Boolean = slot.isEmpty() || runCatching {store.read()!=null}.getOrDefault(false)
+    /** Fajr goes back to using the main adhan. */
+    fun clear() {
+        if(slot.isEmpty())return
+        val previous=selected()
+        runCatching {if(previous.channelId.startsWith(prefix))manager.deleteNotificationChannel(previous.channelId)}
+        runCatching {previous.fileName?.let {File(context.filesDir,"adhan/$it").delete()}}
+        runCatching {File(context.filesDir,"adhan-sound-$slot.json").delete()}
+    }
     private val manager=context.getSystemService(NotificationManager::class.java)
     fun selected(): AdhanSound {
         return try {
             val j=store.read() ?: return AdhanSound(PrayerNotifications.ADHAN,"صوت الأذان المحدد في الهاتف")
             val channel=j.getString("channel")
             val name=j.getString("name")
-            require(channel==PrayerNotifications.ADHAN || channel.matches(Regex("adhan_selected_[a-f0-9-]+")))
+            require(channel==PrayerNotifications.ADHAN || channel.matches(Regex("adhan_(selected|fajr)_[a-f0-9-]+")))
             require(name.isNotBlank())
             val uri=j.optString("uri").takeIf {it.isNotEmpty()}
             val file=j.optString("file").takeIf {it.isNotEmpty()}
@@ -62,16 +82,21 @@ class AdhanSounds(private val context: Context,private val validate: (File)->Uni
             return activate(name,soundUri,file.name)
         } catch(e: Exception) {file.delete();throw e}
     }
-    fun reset(): AdhanSound = activate("نغمة المنبّه الافتراضية",RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),null)
+    fun reset(): AdhanSound = activate("alarm",RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),null)
+    /** Selects one of the adhan recordings shipped with Najwa. */
+    fun builtIn(index: Int): AdhanSound {
+        require(index in BUILT_IN)
+        return activate("builtin:$index",builtInUri(context,index),null)
+    }
     private fun activate(name: String,uri: Uri,fileName: String?): AdhanSound {
         val previous=selected()
         val old=manager.getNotificationChannel(previous.channelId)
         check(old?.importance!=NotificationManager.IMPORTANCE_NONE) {"قناة الأذان متوقفة في الهاتف. فعّلها من إعدادات إشعارات الأذان ثم اختر الصوت."}
         // Android freezes a channel's sound after creation. A user's explicit new
         // selection gets a new channel while keeping the current visibility settings.
-        val id="adhan_selected_${UUID.randomUUID()}"
+        val id="$prefix${UUID.randomUUID()}"
         val channel=NotificationChannel(id,context.prayerLanguage().getString(org.najwa.app.R.string.system_adhan),old?.importance ?: NotificationManager.IMPORTANCE_HIGH).apply {
-            description="صوت الأذان: $name"
+            description=context.prayerLanguage().getString(org.najwa.app.R.string.channel_adhan_description)
             setSound(uri,AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build())
             enableVibration(old?.shouldVibrate() ?: false)
             old?.let {
@@ -84,7 +109,7 @@ class AdhanSounds(private val context: Context,private val validate: (File)->Uni
         try {store.write(JSONObject().put("channel",id).put("name",name).put("uri",uri.toString()).put("file",fileName ?: ""))}
         catch(e: Exception) {manager.deleteNotificationChannel(id);throw e}
         // Keep the legacy channel so upgrades never reset a user's old channel controls.
-        runCatching {if(previous.channelId.startsWith("adhan_selected_"))manager.deleteNotificationChannel(previous.channelId)}
+        runCatching {if(previous.channelId.startsWith(prefix))manager.deleteNotificationChannel(previous.channelId)}
         runCatching {previous.fileName?.takeIf {it.matches(Regex("[a-f0-9-]+\\.(audio|mp3|m4a|wav|ogg|aac|flac|opus|amr|3gp|mp4)"))}?.let {File(context.filesDir,"adhan/$it").delete()}}
         return choice
     }

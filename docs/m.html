@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>نجوى · أوقات الإقامة</title>
+<style>
+  :root{--bg:#071715;--card:#112521;--text:#f6f4ec;--muted:#a9c0b6;--mint:#a5e8c4;--green:#3eb28c;--line:#2d4840}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:"Noto Sans Arabic",system-ui,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+  main{width:100%;max-width:420px;background:var(--card);border:1px solid var(--line);border-radius:28px;padding:28px 22px}
+  h1{margin:0 0 4px;font-size:26px}
+  p{color:var(--muted);margin:0 0 18px;line-height:1.7}
+  table{width:100%;border-collapse:collapse;margin:8px 0 22px}
+  td{padding:12px 4px;border-bottom:1px solid var(--line);font-size:17px}
+  td:last-child{text-align:left;color:var(--mint);font-weight:700}
+  a.button{display:block;text-align:center;text-decoration:none;font-weight:700;border-radius:18px;padding:15px;margin-top:10px}
+  .primary{background:var(--green);color:var(--bg)}
+  .secondary{border:1px solid var(--line);color:var(--text)}
+  .en{direction:ltr;text-align:left;font-size:13px;color:var(--muted);margin-top:20px}
+  .error{color:#f0c787}
+</style>
+</head>
+<body>
+<main>
+  <h1 id="name">نجوى</h1>
+  <p>أوقات الإقامة بعد الأذان في هذا المسجد. افتحها في نجوى لتضبط تنبيهاتك عليها.</p>
+  <table id="times"></table>
+  <a class="button primary" id="open" href="#">فتح في نجوى</a>
+  <a class="button secondary" href="https://github.com/taroq4-2/Najwa/releases/latest/download/Najwa.apk">تنزيل نجوى لأندرويد</a>
+  <p class="en">Iqama times for this mosque. Open them in Najwa to set your alerts. The times travel only in this link; nothing is sent to a server.</p>
+</main>
+<script>
+  // The mosque data lives in the URL fragment, which browsers never send to the server.
+  (function () {
+    var code = location.hash.slice(1);
+    var names = ["الفجر", "الظهر", "العصر", "المغرب", "العشاء"];
+    try {
+      var b64 = code.replace(/-/g, "+").replace(/_/g, "/");
+      while (b64.length % 4) b64 += "=";
+      var raw = decodeURIComponent(escape(atob(b64))).split("|");
+      if (raw[0] !== "N1") throw 0;
+      document.getElementById("name").textContent = raw[1];
+      var mins = raw[2].split(",");
+      var rows = "";
+      for (var i = 0; i < 5; i++) {
+        var m = parseInt(mins[i], 10);
+        if (!(m >= 1 && m <= 120)) throw 0;
+        rows += "<tr><td>" + names[i] + "</td><td>" + m + " دقيقة</td></tr>";
+      }
+      document.getElementById("times").innerHTML = rows;
+      document.getElementById("open").href = "najwa://mosque#" + code;
+    } catch (e) {
+      document.getElementById("times").innerHTML = "<tr><td class='error'>الرابط غير صالح · Invalid link</td></tr>";
+      document.getElementById("open").style.display = "none";
+    }
+  })();
+</script>
+</body>
+</html>

@@ -28,7 +28,7 @@ import org.najwa.app.R
 import org.najwa.app.prayerDispatcher
 import java.time.Instant
 
-@Composable fun NotificationScreen(runtime: NajwaRuntime,p: Preferences,onSave: (Preferences)->Unit,onBack: ()->Unit,resumed: Int=0) {
+@Composable fun NotificationScreen(runtime: NajwaRuntime,p: Preferences,onSave: (Preferences)->Unit,onBack: ()->Unit,resumed: Int=0,onSound: ()->Unit={}) {
     val context=LocalContext.current
     val c=LocalPalette.current
     var error by remember {mutableStateOf<String?>(null)}
@@ -50,15 +50,19 @@ import java.time.Instant
         onNotifications={open(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE,context.packageName))},
         onAlarms={open(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,Uri.parse("package:${context.packageName}")))}
     )
-    val next=scheduled?.takeIf {it.at>Instant.now() && notificationsAllowed && exactAlarmsAllowed}
+    BackgroundReadiness(resumed)
+    val next=scheduled?.takeIf {it.at>Instant.now() && notificationsAllowed}
     val nextLabel=next?.let {
         val label=when(it.action) {
             PrayerAction.ADHAN -> uiText("تنبيه الأذان")
             PrayerAction.IQAMA -> uiText("تذكير الإقامة")
             PrayerAction.FRIDAY -> uiText("تذكير يوم الجمعة")
+            PrayerAction.PRE_ADHAN -> stringResource(R.string.pre_adhan_title)
+            PrayerAction.LIVE -> stringResource(R.string.live_setting)
+            PrayerAction.REMINDER -> stringResource(R.string.diag_reminder)
             PrayerAction.SILENCE -> uiText("الصمت التلقائي")
         }
-        "$label · ${localizedPrayerName(it.event.prayer)} · ${localizedUiTime(it.at,p)}"
+        "$label · ${localizedPrayerName(it.event.prayer,it.event.time,p)} · ${localizedUiTime(it.at,p)}"
     }
     val scope=rememberCoroutineScope()
     var testResult by remember {mutableStateOf<Int?>(null)}
@@ -86,7 +90,8 @@ import java.time.Instant
         listOfNotNull(
             if(p.adhanNotifications && p.adhanPrayers.isNotEmpty()) Triple(PrayerNotifications.ADHAN,"تنبيه الأذان",runtime.notifications.adhanChannel) else null,
             if(p.iqamaNotifications && p.iqamaPrayers.isNotEmpty()) Triple(PrayerNotifications.IQAMA,"تذكير الإقامة",PrayerNotifications.IQAMA) else null,
-            if(p.fridayReminder) Triple(PrayerNotifications.FRIDAY,"تذكير يوم الجمعة",PrayerNotifications.FRIDAY) else null
+            if(p.fridayReminder) Triple(PrayerNotifications.FRIDAY,"تذكير يوم الجمعة",PrayerNotifications.FRIDAY) else null,
+            if(p.preAdhanReminder && p.adhanPrayers.isNotEmpty()) Triple(PrayerNotifications.PRE_ADHAN,context.getString(R.string.pre_adhan_title),PrayerNotifications.PRE_ADHAN) else null
         ).filterNot {runtime.notifications.enabled(it.first)}
     }
     if(notificationsAllowed && channels.isNotEmpty())SettingsCard("قنوات محجوبة في الهاتف") {
@@ -96,7 +101,8 @@ import java.time.Instant
         }
     }
     NotificationPreferences(p,onSave)
-    AdhanSoundSettings(runtime,::open)
+    Panel(Modifier.fillMaxWidth()) {SettingsDestination(stringResource(R.string.section_adhan),stringResource(R.string.section_adhan_summary),"speaker",onSound)}
+    Spacer(Modifier.height(14.dp))
     ExpandableSettings("ظهور الإشعارات","الإقامة والجمعة وشاشة القفل") {
         PreferenceSwitch("تفاصيل شاشة القفل","يتيح عرض اسم المدينة وتفاصيل الصلاة عند سماح الهاتف",p.showLockScreenDetails) {
             onSave(p.copy(showLockScreenDetails=it))
@@ -137,7 +143,7 @@ internal fun NotificationReadiness(notificationsAllowed: Boolean,exactAlarmsAllo
             Action("فتح إعدادات إشعارات نجوى",Modifier.fillMaxWidth(),onClick=onNotifications)
         }
         if(!exactAlarmsAllowed) {
-            Text(androidx.compose.ui.res.stringResource(org.najwa.app.R.string.system_clock_required),color=c.text)
+            Text(stringResource(R.string.exact_alarm_approximate),color=c.text)
             Action("فتح إعدادات المنبّهات الدقيقة",Modifier.fillMaxWidth(),onClick=onAlarms)
         }
     }
@@ -155,6 +161,15 @@ internal fun NotificationReadiness(notificationsAllowed: Boolean,exactAlarmsAllo
         AlertSwitch(iqamaLabel,uiText("إشعار مرئي دون صوت أو اهتزاز"),p.iqamaNotifications) {onSave(p.copy(iqamaNotifications=it))}
         HorizontalDivider(color=c.border)
         AlertSwitch(fridayLabel,stringResource(R.string.alerts_friday_subtitle),p.fridayReminder) {onSave(p.copy(fridayReminder=it))}
+        HorizontalDivider(color=c.border)
+        AlertSwitch(stringResource(R.string.pre_adhan_title),stringResource(R.string.pre_adhan_subtitle),p.preAdhanReminder) {onSave(p.copy(preAdhanReminder=it))}
+        if(p.preAdhanReminder) {
+            val choices=(listOf(5,DEFAULT_PRE_ADHAN_MINUTES,15,20,30)+p.preAdhanMinutes).distinct().sorted()
+            val ctx=LocalContext.current
+            OptionGrid(choices,p.preAdhanMinutes,{ctx.getString(R.string.minutes_short,it)},3) {onSave(p.copy(preAdhanMinutes=it))}
+        }
+        HorizontalDivider(color=c.border)
+        AlertSwitch(stringResource(R.string.jumuah_title),stringResource(R.string.jumuah_subtitle),p.jumuah) {onSave(p.copy(jumuah=it))}
         if(p.fridayReminder) {
             Text(uiText("وقت التذكير قبل الظهر"),color=c.text,fontSize=14.sp)
             val leads=(listOf(5,15,DEFAULT_FRIDAY_LEAD_MINUTES,45,60)+p.fridayLeadMinutes).distinct().sorted()
@@ -185,10 +200,6 @@ internal fun NotificationReadiness(notificationsAllowed: Boolean,exactAlarmsAllo
             }
         }
     }
-    // 3) Iqama minutes (also used by the home countdown and the widget).
-    ExpandableSettings(stringResource(R.string.alerts_iqama_times_title),stringResource(R.string.alerts_iqama_times_summary)) {
-        PrayerDurations("الإقامة بعد الأذان","حدّد المدة لكل صلاة حسب مسجدك. هذه تذكيرات حسب إعدادك وليست مواقيت إقامة معتمدة.",p.iqamaMinutes,defaultIqamaMinutes(),1,framed=false) {onSave(p.copy(iqamaMinutes=it))}
-    }
 }
 
 @Composable
@@ -205,5 +216,19 @@ private fun AlertSwitch(title: String,subtitle: String,checked: Boolean,onChange
 private fun AlertPrayerCheck(label: String,selected: Boolean,active: Boolean,onChange: (Boolean)->Unit) {
     Box(Modifier.width(72.dp).alpha(if(active)1f else .5f),contentAlignment=Alignment.Center) {
         Checkbox(selected,onChange,modifier=Modifier.semantics {contentDescription=label})
+    }
+}
+
+/** Iqama: minutes after each adhan, the countdown and the live card. Shown under the mosques. */
+@Composable fun IqamaSettings(p: Preferences,onSave: (Preferences)->Unit) {
+    val c=LocalPalette.current
+    Spacer(Modifier.height(18.dp))
+    SettingsCard(stringResource(R.string.iqama_section_title),stringResource(R.string.iqama_section_help)) {
+        PreferenceSwitch(uiText("عداد الإقامة"),uiText("بعد الأذان، يعرض المتبقي على الإقامة في الرئيسية والويدجت"),p.showIqamaCountdown) {onSave(p.copy(showIqamaCountdown=it))}
+        PreferenceSwitch(stringResource(R.string.live_setting),stringResource(R.string.live_setting_switch_help),p.liveIqama) {onSave(p.copy(liveIqama=it))}
+        Text(uiText("أخضر حتى الأذان، وذهبي أثناء انتظار الإقامة."),color=c.secondary,fontSize=12.sp)
+    }
+    ExpandableSettings(stringResource(R.string.alerts_iqama_times_title),stringResource(R.string.alerts_iqama_times_summary),initiallyExpanded=p.activeMosque==null) {
+        PrayerDurations("الإقامة بعد الأذان","حدّد المدة لكل صلاة حسب مسجدك. هذه تذكيرات حسب إعدادك وليست مواقيت إقامة معتمدة.",p.iqamaMinutes,defaultIqamaMinutes(),1,framed=false) {onSave(p.copy(iqamaMinutes=it))}
     }
 }

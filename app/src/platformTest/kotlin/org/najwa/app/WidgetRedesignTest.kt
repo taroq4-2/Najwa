@@ -104,7 +104,12 @@ class WidgetRedesignTest {
         // The runtime uses the real clock, so the countdown must target the future.
         val now=Instant.ofEpochMilli(System.currentTimeMillis()/1000*1000)
         app.runtime.notifications.show(ScheduledPrayer(PrayerEvent(Prayer.DHUHR,now),PrayerAction.ADHAN,now),prefs,true)
-        val posted=shadowOf(manager).allNotifications.single()
+        val all=shadowOf(manager).allNotifications
+        val posted=all.single {it.channelId!=PrayerNotifications.LIVE}
+        // The live iqama card accompanies the adhan: ongoing, silent, counting down to iqama.
+        val live=all.single {it.channelId==PrayerNotifications.LIVE}
+        assertTrue(live.flags and Notification.FLAG_ONGOING_EVENT!=0)
+        assertEquals(now.toEpochMilli()+prefs.iqamaMinutes.getValue(Prayer.DHUHR)*60_000L,live.`when`)
         assertNull("no custom card",posted.contentView)
         assertTrue(posted.extras.getBoolean(Notification.EXTRA_SHOW_CHRONOMETER))
         assertEquals(now.toEpochMilli()+prefs.iqamaMinutes.getValue(Prayer.DHUHR)*60_000L,posted.`when`)

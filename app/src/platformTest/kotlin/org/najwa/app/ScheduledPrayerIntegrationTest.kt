@@ -56,6 +56,27 @@ class ScheduledPrayerIntegrationTest {
         prayerExecutor.submit {}.get(10,java.util.concurrent.TimeUnit.SECONDS)
         assertNull(app.runtime.error)
     }
+    /** Regression: the saved plan used to drop the reminder kind, so no reminder ever matched when its alarm rang. */
+    @Test fun remindersArriveFromTheirOwnAlarm() {
+        val p=prefs.copy(prayerLog=true,logCheckIn=true,adhkarReminders=true)
+        coldStart().update(p)
+        val upcoming=upcomingPrayerSchedule(PrayerCalculator(),now,p).filter {it.at>now && it.at<now.plusSeconds(86_400)}
+        val adhkar=upcoming.first {it.reminder==Reminder.MORNING_ADHKAR}
+        val check=upcoming.first {it.reminder==Reminder.LOG_CHECK && it.event.prayer==Prayer.DHUHR}
+        for(task in listOf(adhkar,check).sortedBy {it.at}) fire(task.at,"org.najwa.prayer")
+        val posted=notifications.activeNotifications.map {it.id}
+        assertTrue("adhkar reminder in $posted",540+Reminder.MORNING_ADHKAR.ordinal in posted)
+        assertTrue("check-in in $posted",560+Prayer.DHUHR.ordinal in posted)
+    }
+    @Test fun checkInStaysQuietOnceThePrayerIsMarked() {
+        val p=prefs.copy(prayerLog=true,logCheckIn=true)
+        val runtime=coldStart()
+        runtime.update(p)
+        val check=upcomingPrayerSchedule(PrayerCalculator(),now,p).first {it.at>now && it.reminder==Reminder.LOG_CHECK}
+        runtime.setStatus(check.event.time.atZone(p.city.zoneId).toLocalDate(),check.event.prayer,PrayerStatus.JAMAAH)
+        fire(check.at,"org.najwa.prayer")
+        assertFalse(notifications.activeNotifications.any {it.id==560+check.event.prayer.ordinal})
+    }
     @Test fun corruptPlanIsRebuiltAndIncomingAlarmStillDelivers() {
         val event=PrayerCalculator().calculate(LocalDate.of(2026,11,7),prefs).events.first {it.prayer.isPrayer}
         now=event.time.minusSeconds(60)

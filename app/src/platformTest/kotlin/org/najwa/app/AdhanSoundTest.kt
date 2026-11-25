@@ -24,7 +24,7 @@ class AdhanSoundTest {
     private lateinit var manager: NotificationManager
     private lateinit var notices: PrayerNotifications
     private val bytes="RIFF-test-audio".toByteArray()
-    private fun sounds()=AdhanSounds(app) {file->require(file.readBytes().contentEquals(bytes)) {"invalid audio"}}
+    private fun sounds()=AdhanSounds(app,validate={file->require(file.readBytes().contentEquals(bytes)) {"invalid audio"}})
     private fun source(name: String="picked.wav",data: ByteArray=bytes): Pair<File,android.net.Uri> {
         val file=File(app.filesDir,"adhan/$name").apply {parentFile!!.mkdirs();writeBytes(data)}
         return file to FileProvider.getUriForFile(app,"${app.packageName}.adhan.files",file)

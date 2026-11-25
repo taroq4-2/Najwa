@@ -14,8 +14,10 @@ import org.najwa.app.NajwaRuntime
 import org.najwa.core.*
 import java.time.Instant
 
-@Composable fun SilenceScreen(runtime: NajwaRuntime,p: Preferences,s: Session?,now: Instant,onSave: (Preferences)->Unit,onAccess: ()->Unit,onRestore: ()->Unit) {
-    SilenceContent(p,s,now,runtime.audio.capable() && runtime.alarms.exactAccess,runtime.audio.fixed,onSave,onAccess,onRestore)
+@Composable fun SilenceScreen(runtime: NajwaRuntime,p: Preferences,s: Session?,now: Instant,onSave: (Preferences)->Unit,onAccess: ()->Unit,onRestore: ()->Unit,
+    onSilenceNow: ()->Unit={},resumed: Int=0) {
+    SilenceContent(p,s,now,runtime.audio.capable() && runtime.alarms.exactAccess,runtime.audio.fixed,onSave,onAccess,onRestore,onSilenceNow)
+    if(p.autoSilent)BackgroundReadiness(resumed)
     if(org.najwa.app.BuildConfig.TRIAL_BUILD) {
         SettingsCard(stringResource(R.string.trial_title),stringResource(R.string.trial_description)) {
             Action(stringResource(R.string.trial_start),Modifier.fillMaxWidth(),onClick={
@@ -25,7 +27,7 @@ import java.time.Instant
     }
 }
 
-@Composable fun SilenceContent(p: Preferences,s: Session?,now: Instant,ready: Boolean,fixed: Boolean,onSave: (Preferences)->Unit,onAccess: ()->Unit,onRestore: ()->Unit) {
+@Composable fun SilenceContent(p: Preferences,s: Session?,now: Instant,ready: Boolean,fixed: Boolean,onSave: (Preferences)->Unit,onAccess: ()->Unit,onRestore: ()->Unit,onSilenceNow: ()->Unit={}) {
     val c=LocalPalette.current
     val activationLabel=stringResource(R.string.en_silent_enable)
     PageHeading(stringResource(R.string.en_silent_title),stringResource(R.string.en_silent_intro))
@@ -48,8 +50,19 @@ import java.time.Instant
             Action(stringResource(R.string.en_silent_restore_now),Modifier.fillMaxWidth(),true,onRestore)
         }
     }
+    val sessionActive=s?.state==SessionState.ACTIVE && s.deadline>now.toEpochMilli()
+    if(!sessionActive && !fixed)SettingsCard(stringResource(R.string.silence_now_title),stringResource(R.string.silence_now_help,org.najwa.app.MANUAL_SILENCE_MINUTES)) {
+        Action(stringResource(R.string.silence_now_action,org.najwa.app.MANUAL_SILENCE_MINUTES),Modifier.fillMaxWidth(),ready) {if(ready)onSilenceNow() else onAccess()}
+        Text(stringResource(R.string.silence_now_tile_hint),color=c.secondary,fontSize=12.sp)
+    }
     PrayerDurations(stringResource(R.string.en_silent_prayers_title),stringResource(R.string.en_silent_prayers_help),p.silenceMinutes,defaultSilenceMinutes(),5,
-        enabledPrayers=p.enabled,onEnabled={prayer,enabled->onSave(p.copy(enabled=if(enabled)p.enabled+prayer else p.enabled-prayer))}) {onSave(p.copy(silenceMinutes=it))}
+        enabledPrayers=p.enabled,onEnabled={prayer,enabled->onSave(p.copy(enabled=if(enabled)p.enabled+prayer else p.enabled-prayer))},
+        minimumFor={p.minimumSilence(it)}) {onSave(p.copy(silenceMinutes=it))}
+    if(p.jumuah)SettingsCard(stringResource(R.string.jumuah_silence_title),stringResource(R.string.jumuah_silence_help)) {
+        val options=(listOf(45,DEFAULT_FRIDAY_SILENCE_MINUTES,75,90)+p.fridaySilenceMinutes).filter {it>=p.minimumSilence(Prayer.DHUHR)}.distinct().sorted()
+        val ctx=androidx.compose.ui.platform.LocalContext.current
+        OptionGrid(options,p.fridaySilenceMinutes,{ctx.getString(R.string.minutes_short,it)},3) {onSave(p.copy(fridaySilenceMinutes=it))}
+    }
     SettingsCard(stringResource(R.string.en_silent_phone_mode)) {
         val modes=listOf(Ringer.SILENT,Ringer.VIBRATE)
         val modeLabels=mapOf(Ringer.SILENT to modeName(Ringer.SILENT),Ringer.VIBRATE to modeName(Ringer.VIBRATE))

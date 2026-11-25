@@ -1,0 +1,8 @@
+Najwa 1.4.0
+• Two built-in adhan recordings (Adhan 1, Adhan 2) with preview; your own file still works
+• Per-prayer minute adjustments, Hijri date correction and six new calculation methods
+• Reminder before adhan, Jumu'ah mode with its own silence time
+• Qibla compass, “Silence now” Quick Settings tile and launcher shortcuts
+• Settings backup and restore, optional one-time location to find your city, travel hint
+• Alerts still arrive (approximately) without exact-alarm access; silence never ends before iqama
+• Light hero card, 1×1 widget, adaptive and themed icon, optional Material You accent

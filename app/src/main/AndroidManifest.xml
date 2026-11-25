@@ -6,12 +6,40 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-    <application android:name=".NajwaApplication" android:allowBackup="false" android:fullBackupContent="false" android:dataExtractionRules="@xml/data_extraction_rules" android:label="${najwaLabel}" android:icon="@drawable/ic_najwa" android:supportsRtl="true" android:theme="@style/Theme.Najwa">
+    <!-- Optional "enhanced adhan": Najwa plays the adhan itself (fade-in, flip or volume key to stop). -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Android 16+: the iqama countdown can appear as a Live Update (Samsung Now Bar, lock screen). -->
+    <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
+    <!-- Optional and one-time: only when the person taps "Use my location" to find the nearest city. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <application android:name=".NajwaApplication" android:allowBackup="false" android:fullBackupContent="false" android:dataExtractionRules="@xml/data_extraction_rules" android:label="${najwaLabel}" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:localeConfig="@xml/locales_config" android:supportsRtl="true" android:theme="@style/Theme.Najwa">
         <activity android:name=".MainActivity" android:exported="true" android:windowSoftInputMode="adjustResize">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
+            <!-- Mosque profiles shared from another phone (najwa://mosque#code). -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="najwa" android:host="mosque" />
+            </intent-filter>
         </activity>
         <receiver android:name=".platform.AlarmReceiver" android:exported="false" />
         <receiver android:name=".platform.NotificationActionReceiver" android:exported="false" />
+        <service android:name=".platform.AdhanPlayer" android:exported="false" android:foregroundServiceType="mediaPlayback" />
+        <receiver android:name=".platform.PrayerListWidget" android:exported="false" android:label="@string/widget_list_label">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/prayer_widget_list_info" />
+        </receiver>
+        <receiver android:name=".platform.MinimalWidget" android:exported="false" android:label="@string/widget_minimal_label">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/prayer_widget_minimal_info" />
+        </receiver>
+        <service android:name=".platform.SilenceTileService" android:exported="true" android:label="@string/tile_label"
+            android:icon="@drawable/ic_tile_silence" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>
+            <meta-data android:name="android.service.quicksettings.TOGGLEABLE_TILE" android:value="true" />
+        </service>
         <service android:name=".platform.PrayerExecutionService" android:exported="false" android:foregroundServiceType="specialUse">
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="Execute user-scheduled prayer ringer-mode changes and restore the previous ringer mode at exact alarm delivery on Android 17; stops immediately after execution." />
         </service>
@@ -22,13 +50,20 @@
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/prayer_widget_info" />
         </receiver>
+        <receiver android:name=".platform.PrayerLogWidget" android:exported="false" android:label="@string/widget_log_label">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/prayer_log_widget_info" />
+        </receiver>
+        <receiver android:name=".platform.TasbeehWidget" android:exported="false" android:label="@string/widget_tasbeeh_label">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/tasbeeh_widget_info" />
+        </receiver>
         <receiver android:name=".platform.SystemReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
                 <action android:name="android.intent.action.TIME_SET" />
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
-                <action android:name="android.intent.action.WALLPAPER_CHANGED" />
                 <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
                 <action android:name="android.app.action.NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED" />
             </intent-filter>

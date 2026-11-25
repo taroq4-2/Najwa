@@ -16,16 +16,13 @@
     <string name="system_unavailable">غير متاح</string>
     <string name="system_check_calculation">راجع إعدادات الحساب</string>
     <string name="system_brand">نجوى</string>
-    <string name="system_signature">صلاتك أولاً، وضجيجك لاحقاً</string>
     <string name="system_private_alert">لديك تنبيه للصلاة</string>
     <string name="system_friday_detail">استعد لصلاة الجمعة. يُحدّد كل مسجد موعد الخطبة والصلاة.</string>
     <string name="system_iqama_detail">حسب موعد الإقامة المحدد</string>
     <string name="system_refresh">تحديث</string>
     <string name="system_execution">تنفيذ وضع الصلاة</string>
     <string name="system_execution_detail">تنفيذ موعد الصمت أو استعادة الرنين الذي اخترته</string>
-    <string name="system_minutes_after">الإقامة بعد %1$d دقيقة</string>
     <string name="system_hijri_format">%1$s هـ</string>
-    <string name="system_clock_required">التنبيهات والصمت التلقائي معلّقان حتى تسمح للمنبّهات الدقيقة.</string>
     <string name="system_background_unavailable">لم يسمح أندرويد بتشغيل خدمة تغيير الرنين في الموعد الأخير. راجع حالة الرنين في التطبيق.</string>
     <string name="trial_title">اختبار الأذان والصمت</string>
     <string name="trial_description">أذان بعد 30 ثانية، صمت أو اهتزاز بعده بـ20 ثانية، إقامة بعد دقيقة، ثم عودة الرنين بعد 5 دقائق من الأذان.</string>

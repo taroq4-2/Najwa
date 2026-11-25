@@ -1,6 +1,10 @@
 """Refresh the offline Arab League place catalog from the GeoNames country dumps."""
 
 from concurrent.futures import ThreadPoolExecutor
+import sys
+from pathlib import Path as _P
+sys.path.insert(0, str(_P(__file__).resolve().parent))
+from city_terms import supported_terms
 import io
 from pathlib import Path
 import re
@@ -42,7 +46,7 @@ def fetch(code):
             if row[6] != "P" or row[7] in {"PPLH", "PPLQ", "PPLW"} or not row[17]:
                 continue
             aliases = [name for name in row[3].split(",") if ARABIC.search(name)]
-            terms = "|".join(dict.fromkeys([row[1], row[2], *names, *aliases]))
+            terms = supported_terms(name, "|".join(dict.fromkeys([row[1], row[2], *names, *aliases])))
             # This Saudi record's source time zone is erroneously Budapest.
             zone = "Asia/Riyadh" if row[0] == "12547268" else row[17]
             value = (row[0], name, terms, row[4], row[5], zone, row[10])

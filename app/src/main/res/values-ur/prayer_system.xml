@@ -16,16 +16,13 @@
     <string name="system_unavailable">دستیاب نہیں</string>
     <string name="system_check_calculation">حساب کی ترتیبات دیکھیں</string>
     <string name="system_brand">نجویٰ</string>
-    <string name="system_signature">نماز پہلے، شور بعد میں۔</string>
     <string name="system_private_alert">نماز کی ایک یاد دہانی ہے</string>
     <string name="system_friday_detail">نمازِ جمعہ کی تیاری کریں۔ خطبے اور نماز کا وقت اپنی مسجد سے معلوم کریں۔</string>
     <string name="system_iqama_detail">آپ کی اقامت کی ترتیب کے مطابق</string>
     <string name="system_refresh">تازہ کریں</string>
     <string name="system_execution">نماز کا موڈ</string>
     <string name="system_execution_detail">خاموش موڈ لگایا جا رہا ہے یا رنگر بحال ہو رہا ہے</string>
-    <string name="system_minutes_after">اقامت %1$d منٹ بعد</string>
     <string name="system_hijri_format">%1$s ھ</string>
-    <string name="system_clock_required">نماز کی یاد دہانی اور خودکار خاموشی کے لیے مقررہ وقت کے الارم کی اجازت دیں۔</string>
     <string name="system_background_unavailable">اینڈرائیڈ نے آخری مقررہ وقت پر رنگر کی سروس روک دی۔ نجویٰ میں رنگر کی حالت دیکھیں۔</string>
     <string name="trial_title">اذان اور خاموش موڈ کی آزمائش</string>
     <string name="trial_description">اذان 30 سیکنڈ بعد ہوگی۔ اذان کے 20 سیکنڈ بعد خاموشی یا وائبریشن، ایک منٹ بعد اقامت اور پانچ منٹ بعد رنگر بحال ہوگا۔</string>

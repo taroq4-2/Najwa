@@ -20,7 +20,5 @@
     <string name="sound_unavailable_title">সংরক্ষিত শব্দ আবার বেছে নিন</string>
     <string name="sound_unavailable_detail">সংরক্ষিত শব্দের নির্বাচন পড়া যায়নি। ফাইল আবার বেছে নিন বা ডিফল্ট অ্যালার্মের শব্দ পুনরুদ্ধার করুন। বেছে না নেওয়া পর্যন্ত আজানের শব্দ বন্ধ থাকবে।</string>
     <string name="sound_phone_silent">ফোনের সেটিংস অনুযায়ী নীরব</string>
-    <string name="sound_phone_changed">ফোনের সেটিংসে শব্দ পরিবর্তিত হয়েছে</string>
-    <string name="sound_phone_default">ফোনে নির্বাচিত আজানের শব্দ</string>
     <string name="sound_alarm_default">ডিফল্ট অ্যালার্মের শব্দ</string>
 </resources>

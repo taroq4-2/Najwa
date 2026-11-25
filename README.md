@@ -11,6 +11,7 @@
 Accurate prayer times, refined adhan and iqama alerts, a widget that follows every stage of prayer, and auto‑silence that gives your ringer back afterwards.
 
 <a href="https://github.com/taroq4-2/Najwa/releases/latest/download/Najwa.apk"><img alt="تنزيل نجوى · Download Najwa" src="https://img.shields.io/badge/%D8%AA%D9%86%D8%B2%D9%8A%D9%84%20%D9%86%D8%AC%D9%88%D9%89%20%C2%B7%20Download-Android%20APK-0F5A43?style=for-the-badge&logo=android&logoColor=white"></a>
+<a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/taroq4-2/Najwa"><img alt="تحديثات تلقائية عبر Obtainium · Auto-updates with Obtainium" src="https://img.shields.io/badge/Obtainium-%D8%AA%D8%AD%D8%AF%D9%8A%D8%AB%D8%A7%D8%AA%20%D8%AA%D9%84%D9%82%D8%A7%D8%A6%D9%8A%D8%A9%20%C2%B7%20Auto--updates-1F9E74?style=for-the-badge"></a>
 
 [الموقع العربي](https://taroq4-2.github.io/Najwa/) · [English website](https://taroq4-2.github.io/Najwa/en.html) · [الإصدارات · Releases](https://github.com/taroq4-2/Najwa/releases)
 
@@ -96,6 +97,8 @@ A native, complete notification: the prayer, adhan and iqama times, your city, a
 
 الملف موقّع بالمفتاح الرسمي نفسه، فيُحدَّث فوق الإصدار السابق مع الحفاظ على إعداداتك.
 
+للتحديث التلقائي دون متجر: ثبّت [Obtainium](https://github.com/ImranR98/Obtainium) ثم أضف رابط المستودع `https://github.com/taroq4-2/Najwa`، وسيُعلمك بكل إصدار جديد.
+
 </div>
 
 1. Download [Najwa.apk](https://github.com/taroq4-2/Najwa/releases/latest/download/Najwa.apk), open it and allow installs from your browser if Android asks.
@@ -103,6 +106,8 @@ A native, complete notification: the prayer, adhan and iqama times, your city, a
 3. Add the widget from *Settings → Home screen widget*.
 
 The APK is signed with the same official key, so it updates the previous version and keeps your settings.
+
+For automatic updates without a store, install [Obtainium](https://github.com/ImranR98/Obtainium) and add `https://github.com/taroq4-2/Najwa`; it tells you about every new release.
 
 ## الإصدار والتحقق · Release verification
 

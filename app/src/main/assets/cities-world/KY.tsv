@@ -1,6 +1,6 @@
-3580661	George Town	George Town|جارج ٹاؤن، جزائر کیمین|جرج‌تاون، جزایر کیمن|جورج تاون|जॉर्जटाउन|Džordžtaunas|Georĝurbo|gwrg tʼwn|Τζωρτζ Τάουν|Џорџ Таун|Џорџтаун|Джордж Таун|Джорджтаун|Джорджтаўн|גורג טאון|Corctaun|Dzhordzh Taun|Dzhordzhtaun|Dzordz Taun|Dzordztaun|Dzordztaunas|GCM|George Town pa Caymanoyane|George Town på Caymanøyane|Georgetown|Georgurbo|Tzortz Taoun|cxrc thawn	19.2866	-81.37436	America/Cayman	George Town
-3580477	West Bay	West Bay|wysٹ bے|wysټ bے|خليج الغرب|خلیج غرب|ويسټ بے|ویسٹ بے|वेस्ट बे|ওয়েস্ট বে|Batys Bөligi|Батыс Бөлігі|Западный залив|Халичи Ғарб|Чыгыш Чокусу|Chygysh Chokusu|Khalichi Garb|West End|Zapadnyj zaliv|khlyj alghrb|khlyj ghrb|oyesta be|uesutobei|vaisata be|vesta be	19.38197	-81.39281	America/Cayman	West Bay
-3580733	Bodden Town	Bodden Town|bwdn ټawn|bwڈn ٹawn|بادن تاون|بودن تاون|بودن ټاون|بوڈن ٹاؤن|बोडेन टाउन|বোডেন টাউন|Боддентаун|Шахри Боддан|ਬੋਡਨ ਟਾਉਨ|ቦደን ከተማ|Bodden|Boddentaun|Shakhri Boddan|badn tawn|bodana ta'una|boddentaun|bodena ta'una|bodeni ketema|bwdn tawn	19.27647	-81.2542	America/Cayman	Bodden Town
+3580661	George Town	George Town|جارج ٹاؤن، جزائر کیمین|جرج‌تاون، جزایر کیمن|جورج تاون|जॉर्जटाउन|Džordžtaunas|Georĝurbo|gwrg tʼwn|Corctaun|Dzhordzh Taun|Dzhordzhtaun|Dzordz Taun|Dzordztaun|Dzordztaunas|GCM|George Town pa Caymanoyane|George Town på Caymanøyane|Georgetown|Georgurbo|Tzortz Taoun|cxrc thawn	19.2866	-81.37436	America/Cayman	George Town
+3580477	West Bay	West Bay|wysٹ bے|wysټ bے|خليج الغرب|خلیج غرب|ويسټ بے|ویسٹ بے|वेस्ट बे|ওয়েস্ট বে|Chygysh Chokusu|Khalichi Garb|West End|Zapadnyj zaliv|khlyj alghrb|khlyj ghrb|oyesta be|uesutobei|vaisata be|vesta be	19.38197	-81.39281	America/Cayman	West Bay
+3580733	Bodden Town	Bodden Town|bwdn ټawn|bwڈn ٹawn|بادن تاون|بودن تاون|بودن ټاون|بوڈن ٹاؤن|बोडेन टाउन|বোডেন টাউন|Bodden|Boddentaun|Shakhri Boddan|badn tawn|bodana ta'una|boddentaun|bodena ta'una|bodeni ketema|bwdn tawn	19.27647	-81.2542	America/Cayman	Bodden Town
 3580713	Channel Land	Channel Land	19.34365	-81.21762	America/Cayman	
 3580590	Midland Acres	Midland Acres	19.29862	-81.22061	America/Cayman	
 3580495	The Mountain	The Mountain	19.3309	-81.19905	America/Cayman	
@@ -55,8 +55,8 @@
 3580563	Old Stores	Old Stores	19.39273	-81.39358	America/Cayman	
 11205015	Seven Miles	Seven Miles	19.33366	-81.38062	America/Cayman	
 3580639	Hell	Hell	19.3801	-81.40694	America/Cayman	
-3580575	North Side	North Side|الجانب الشمالي|سمت شمالی|شمالی جانب|شمالی طرف|नॉर्थ साइड|নর্থ সাইড|Tүndik Zhakˌ|Tүndүk Zhagy|Северная сторона|Түндік Жақ|Түндүк Жагы|Ҷanbi Shimol|Ҷанби Шимол|North Side Village|Severnaja storona|Shimol Tomoni|aljanb alshmaly|nartha sa'ida|northa sa'ida|nosusaido|semeni goni|shmaly janb|shmaly trf|smt shmaly|utari pase	19.35143	-81.20851	America/Cayman	North Side
-3580678	East End	East End|khtyځ pay|mshrqy srے|الطرف الشرقي|ختيځ پای|سمت شرقی|مشرقی سرے|ईस्ट एंड|ইস্ট এন্ড|Восточный конец|Чыгыш Учу|Шығыс Шеті|Ҷanbi Sharkˌ|Ҷанби Шарқ|Chygysh Uchu|Old Isaacs|Sharq Uchi|Shygys Sheti|Vostochnyj konec|altrf alshrqy|ista enda|isutoendo|purabi sira|smt shrqy	19.3	-81.11667	America/Cayman	East End
+3580575	North Side	North Side|الجانب الشمالي|سمت شمالی|شمالی جانب|شمالی طرف|नॉर्थ साइड|নর্থ সাইড|North Side Village|Severnaja storona|Shimol Tomoni|aljanb alshmaly|nartha sa'ida|northa sa'ida|nosusaido|semeni goni|shmaly janb|shmaly trf|smt shmaly|utari pase	19.35143	-81.20851	America/Cayman	North Side
+3580678	East End	East End|khtyځ pay|mshrqy srے|الطرف الشرقي|ختيځ پای|سمت شرقی|مشرقی سرے|ईस्ट एंड|ইস্ট এন্ড|Chygysh Uchu|Old Isaacs|Sharq Uchi|Shygys Sheti|Vostochnyj konec|altrf alshrqy|ista enda|isutoendo|purabi sira|smt shrqy	19.3	-81.11667	America/Cayman	East End
 3580494	Tibbetts Turn	Tibbetts Turn	19.73345	-79.78374	America/Cayman	
 3580497	The Moorings	The Moorings	19.73333	-79.78333	America/Cayman	Sister Island
 3580587	Molusca Heights	Molusca Heights	19.73232	-79.78745	America/Cayman	
@@ -68,5 +68,5 @@
 3580510	Spot Bay	Spot Bay	19.75433	-79.74592	America/Cayman	
 3580758	Banksville	Banksville	19.70113	-79.84826	America/Cayman	Sister Island
 3580667	Foster Land	Foster Land	19.74403	-79.73595	America/Cayman	
-3580663	Frenchman’s Fort	Frenchman's Fort	19.69395	-79.87906	America/Cayman	Sister Island
-9294258	Little Cayman	Little Cayman|chھwٹa kymn|كايمان الصغرى|چھوٹا کیمن|کایمن کوچک|کوچنی کیمن|लिटिल केमैन|লিটেল কেম্যান|Kichүүchүk Kajman|Каймани Хурд|Кичүүчүк Кайман|Кіші Кайман|Малый Кайман|Kajmani Khurd|Kichik Kayman|Kishi Kajman|Malyj Kajman|kayman alsghry|kaymn kwchk|kwchny kymn|litala kemaina|litela kemyana|litila kemaina|ritorukeiman|tinishi kayimani	19.66114	-80.10984	America/Cayman	Sister Island
+3580663	Frenchman’s Fort	Frenchman’s Fort|Frenchman's Fort	19.69395	-79.87906	America/Cayman	Sister Island
+9294258	Little Cayman	Little Cayman|chھwٹa kymn|كايمان الصغرى|چھوٹا کیمن|کایمن کوچک|کوچنی کیمن|लिटिल केमैन|লিটেল কেম্যান|Kajmani Khurd|Kichik Kayman|Kishi Kajman|Malyj Kajman|kayman alsghry|kaymn kwchk|kwchny kymn|litala kemaina|litela kemyana|litila kemaina|ritorukeiman|tinishi kayimani	19.66114	-80.10984	America/Cayman	Sister Island

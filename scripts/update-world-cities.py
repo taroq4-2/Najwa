@@ -1,5 +1,9 @@
 """Generate the offline world city catalog from GeoNames cities500.zip."""
 
+import sys
+from pathlib import Path as _P
+sys.path.insert(0, str(_P(__file__).resolve().parent))
+from city_terms import supported_terms
 import argparse
 from collections import defaultdict
 from io import TextIOWrapper
@@ -39,7 +43,7 @@ def main():
             alternates = [name for name in row[3].split(",") if 1 < len(name) <= 80]
             alternate_scripts = [name for name in alternates if any(ord(ch) > 255 for ch in name)]
             priority_aliases = [name for name in alternates if PRIORITY_SCRIPTS.search(name)]
-            terms = "|".join(dict.fromkeys([row[2], *priority_aliases, *alternate_scripts[:12], *alternates[:16]]))
+            terms = supported_terms(row[1], "|".join(dict.fromkeys([row[2], *priority_aliases, *alternate_scripts[:12], *alternates[:16]])))
             region = regions.get(f"{country}.{row[10]}", "")
             entry = (row[0], row[1], terms, row[4], row[5], zone, region)
             cities[country].append((row[7] != "PPLC", -population, entry))

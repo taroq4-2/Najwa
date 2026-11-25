@@ -10,8 +10,8 @@ android {
         applicationId = "org.najwa.app"
         minSdk = 26
         targetSdk = if (providers.gradleProperty("previewSdk").orNull == "35") 35 else 36
-        versionCode = 114
-        versionName = "1.3.0"
+        versionCode = 117
+        versionName = "1.6.0"
         buildConfigField("boolean","TRIAL_BUILD","false")
         manifestPlaceholders["najwaLabel"] = "@string/system_brand"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -65,13 +65,15 @@ tasks.register("releaseDependencyInventory") {
 }
 dependencies {
     implementation(project(":core"))
-    implementation("androidx.activity:activity-compose:1.9.3")
-    implementation("androidx.core:core-ktx:1.15.0")
+    implementation("androidx.activity:activity-compose:1.10.1")
+    implementation("androidx.core:core-ktx:1.16.0")
     implementation(platform("androidx.compose:compose-bom:2024.10.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
+    // QR codes for sharing mosque profiles and the app, generated on the device (Apache-2.0).
+    implementation("com.google.zxing:core:3.5.3")
     testImplementation("junit:junit:4.13.2")
     if (platformTests) testImplementation("org.robolectric:robolectric:4.16.1")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")

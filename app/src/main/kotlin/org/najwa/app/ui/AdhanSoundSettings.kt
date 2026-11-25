@@ -2,86 +2,138 @@ package org.najwa.app.ui
 
 import android.app.NotificationManager
 import android.content.Intent
+import android.media.AudioAttributes
+import android.media.MediaPlayer
+import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.najwa.app.NajwaRuntime
 import org.najwa.app.R
+import org.najwa.app.platform.AdhanSounds
 
-@Composable fun AdhanSoundSettings(runtime: NajwaRuntime,open: (Intent)->Unit) {
+/** Which adhan sound the phone will actually play. */
+private sealed interface SoundChoice {
+    data class BuiltIn(val index: Int): SoundChoice
+    data object Alarm: SoundChoice
+    data object Custom: SoundChoice
+    data object Silent: SoundChoice
+    data object Unavailable: SoundChoice
+}
+
+@Composable fun AdhanSoundSettings(runtime: NajwaRuntime,open: (Intent)->Unit,fajr: Boolean=false) {
     val context=LocalContext.current
+    val c=LocalPalette.current
     val scope=rememberCoroutineScope()
     var busy by remember {mutableStateOf(false)}
     var message by remember {mutableStateOf<String?>(null)}
     var refresh by remember {mutableIntStateOf(0)}
-    val choice=remember(refresh) {runtime.notifications.sounds.selected()}
-    val channel=context.getSystemService(NotificationManager::class.java).getNotificationChannel(choice.channelId)
-    val name=when {
-        choice.error!=null->context.getString(R.string.sound_unavailable_title)
-        channel!=null && channel.sound==null->context.getString(R.string.sound_phone_silent)
-        choice.uri!=null && channel?.sound!=null && channel.sound.toString()!=choice.uri->context.getString(R.string.sound_phone_changed)
-        choice.fileName==null->context.getString(if(choice.uri==null)R.string.sound_phone_default else R.string.sound_alarm_default)
-        else->choice.name
+    val sounds=if(fajr)runtime.notifications.fajrSounds else runtime.notifications.sounds
+    val choice=remember(refresh) {sounds.selected()}
+    val channel=remember(refresh) {context.getSystemService(NotificationManager::class.java).getNotificationChannel(choice.channelId)}
+    val current: SoundChoice=when {
+        choice.error!=null -> SoundChoice.Unavailable
+        channel!=null && channel.sound==null -> SoundChoice.Silent
+        else -> AdhanSounds.builtInIndex(channel?.sound?.toString() ?: choice.uri)?.let {SoundChoice.BuiltIn(it)}
+            ?: if(choice.fileName!=null)SoundChoice.Custom else SoundChoice.Alarm
     }
-    val picker=rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {uri->
+    val adhanNames=AdhanSounds.BUILT_IN.associateWith {stringResource(if(it==1)R.string.sound_adhan_1 else R.string.sound_adhan_2)}
+    val name=when(current) {
+        is SoundChoice.BuiltIn -> adhanNames.getValue(current.index)
+        SoundChoice.Custom -> choice.name
+        SoundChoice.Silent -> stringResource(R.string.sound_phone_silent)
+        SoundChoice.Unavailable -> stringResource(R.string.sound_unavailable_title)
+        SoundChoice.Alarm -> stringResource(R.string.sound_alarm_default)
+    }
+    // Preview plays through the media volume and stops when the screen closes.
+    var previewing by remember {mutableStateOf<Int?>(null)}
+    val player=remember {arrayOfNulls<MediaPlayer>(1)}
+    fun stopPreview() {player[0]?.runCatching {stop();release()};player[0]=null;previewing=null}
+    DisposableEffect(Unit) {onDispose {stopPreview()}}
+    fun preview(index: Int) {
+        if(previewing==index) {stopPreview();return}
+        stopPreview()
+        runCatching {
+            MediaPlayer().apply {
+                setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build())
+                setDataSource(context,AdhanSounds.builtInUri(context,index))
+                setOnCompletionListener {stopPreview()}
+                prepare();start()
+            }
+        }.onSuccess {player[0]=it;previewing=index}.onFailure {message=context.getString(R.string.sound_preview_failed)}
+    }
+    fun change(done: Int,failed: Int,action: ()->Unit) {
+        busy=true;message=null;stopPreview()
+        scope.launch {
+            try {withContext(Dispatchers.IO) {action()};refresh++;message=context.getString(done)}
+            catch(_: Exception) {message=context.getString(failed)}
+            finally {busy=false}
+        }
+    }
+    val picker=rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {uri: Uri?->
         if(uri!=null) {
-            busy=true;message=null
+            busy=true;message=null;stopPreview()
             scope.launch {
                 try {
-                    val imported=withContext(Dispatchers.IO) {runtime.notifications.sounds.importAudio(uri)}
+                    val imported=withContext(Dispatchers.IO) {sounds.importAudio(uri)}
                     refresh++;message=context.getString(R.string.sound_saved,imported.name)
-                } catch(e: Exception) {message=context.getString(R.string.sound_import_failed)}
+                } catch(_: Exception) {message=context.getString(R.string.sound_import_failed)}
                 finally {busy=false}
             }
         }
     }
-    // Collapsed by default: the current sound is visible in the header, details on demand.
-    ExpandableSettings("صوت الأذان",name,initiallyExpanded=choice.error!=null) {
-    AdhanSoundContent(name,choice.fileName!=null || choice.error!=null,busy,message ?: choice.error?.let {context.getString(R.string.sound_unavailable_detail)},framed=false,
-        onChoose={try {picker.launch(arrayOf("audio/*","application/ogg"))} catch(_: Exception) {message=context.getString(R.string.sound_picker_failed)}},
-        onReset={
-            busy=true
-            scope.launch {
-                try {withContext(Dispatchers.IO) {runtime.notifications.sounds.reset()};refresh++;message=context.getString(R.string.sound_reset_done)}
-                catch(e: Exception) {message=context.getString(R.string.sound_reset_failed)}
-                finally {busy=false}
-            }
-        },
-        onSystem={open(Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE,context.packageName).putExtra(Settings.EXTRA_CHANNEL_ID,runtime.notifications.adhanChannel))})
+    ExpandableSettings(stringResource(if(fajr)R.string.fajr_adhan_title else R.string.sound_title),name,initiallyExpanded=choice.error!=null || fajr) {
+        Text(stringResource(R.string.sound_choose_help),color=c.secondary,fontSize=13.sp)
+        AdhanSounds.BUILT_IN.forEach {index->
+            SoundRow(adhanNames.getValue(index),stringResource(if(index==1)R.string.sound_adhan_1_detail else R.string.sound_adhan_2_detail),
+                current==SoundChoice.BuiltIn(index),!busy,
+                preview=if(previewing==index)stringResource(R.string.sound_preview_stop) else stringResource(R.string.sound_preview),
+                onPreview={preview(index)}) {change(R.string.sound_selected,R.string.sound_reset_failed) {sounds.builtIn(index)}}
+        }
+        SoundRow(stringResource(R.string.sound_alarm_default),stringResource(R.string.sound_alarm_detail),current==SoundChoice.Alarm,!busy) {
+            change(R.string.sound_reset_done,R.string.sound_reset_failed) {sounds.reset()}
+        }
+        SoundRow(if(current==SoundChoice.Custom)choice.name else stringResource(R.string.sound_from_phone),stringResource(R.string.sound_from_phone_detail),
+            current==SoundChoice.Custom,!busy) {
+            try {picker.launch(arrayOf("audio/*","application/ogg"))} catch(_: Exception) {message=context.getString(R.string.sound_picker_failed)}
+        }
+        if(busy)LinearProgressIndicator(Modifier.fillMaxWidth())
+        message?.let {Text(it,color=c.mint,fontSize=13.sp)}
+        if(current==SoundChoice.Unavailable)Text(stringResource(R.string.sound_unavailable_detail),color=c.amber,fontSize=13.sp)
+        TextButton(onClick={open(Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE,context.packageName)
+            .putExtra(Settings.EXTRA_CHANNEL_ID,choice.channelId))}) {Text(stringResource(R.string.sound_system_settings))}
+        Text(stringResource(R.string.sound_volume_note),color=c.secondary,fontSize=12.sp)
     }
 }
 
-@Composable fun AdhanSoundContent(name: String,custom: Boolean,busy: Boolean,message: String?,onChoose: ()->Unit,onReset: ()->Unit,onSystem: ()->Unit) =
-    AdhanSoundContent(name,custom,busy,message,true,onChoose,onReset,onSystem)
-
-@Composable fun AdhanSoundContent(name: String,custom: Boolean,busy: Boolean,message: String?,framed: Boolean,onChoose: ()->Unit,onReset: ()->Unit,onSystem: ()->Unit) {
+@Composable private fun SoundRow(title: String,detail: String,selected: Boolean,enabled: Boolean,preview: String?=null,onPreview: ()->Unit={},onSelect: ()->Unit) {
     val c=LocalPalette.current
-    val frame: @Composable (@Composable ColumnScope.()->Unit)->Unit = {body->
-        if(framed)SettingsCard("صوت الأذان","اختر تسجيلًا من ملفات هاتفك",body)
-        else Column(verticalArrangement=Arrangement.spacedBy(12.dp),content=body)
-    }
-    frame {
-        if(framed)Text(name,color=c.mint,fontSize=15.sp)
-        else Text(uiText("اختر تسجيلًا من ملفات هاتفك"),color=c.secondary,fontSize=13.sp)
-        if(busy) {LinearProgressIndicator(Modifier.fillMaxWidth());Text(uiText("جارٍ فحص الملف وحفظه…"),color=c.secondary)}
-        else {
-            Action("اختيار ملف أذان من الهاتف",Modifier.fillMaxWidth(),true,onChoose)
-            if(custom)TextButton(onClick=onReset) {Text(uiText("العودة إلى نغمة المنبّه الافتراضية"))}
-            TextButton(onClick=onSystem) {Text(uiText("إعدادات صوت الأذان في الهاتف"))}
+    Surface(onClick=onSelect,enabled=enabled,modifier=Modifier.fillMaxWidth().semantics {this.selected=selected},shape=RoundedCornerShape(16.dp),
+        color=if(selected)c.selected else c.surface,border=BorderStroke(1.dp,if(selected)c.green else c.border)) {
+        Row(Modifier.padding(horizontal=12.dp,vertical=10.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(10.dp)) {
+            RadioButton(selected=selected,onClick=onSelect,enabled=enabled)
+            Column(Modifier.weight(1f)) {
+                Text(title,color=if(selected)c.mint else c.text,fontWeight=if(selected)FontWeight.Bold else FontWeight.Normal,fontSize=15.sp)
+                Text(detail,color=c.secondary,fontSize=12.sp)
+            }
+            if(preview!=null)TextButton(onClick=onPreview,enabled=enabled) {Text(preview,fontSize=13.sp)}
         }
-        Text(uiText("MP3 أو M4A أو WAV وغيرها من الصيغ التي يدعمها هاتفك، بحد أقصى 32 ميغابايت. تُحفظ نسخة داخل نجوى لتبقى متاحة بعد نقل الملف الأصلي."),color=c.secondary,fontSize=12.sp)
-        Text(uiText("يستخدم التنبيه مستوى صوت المنبّه. مدة تشغيل الصوت وعدم الإزعاج تخضع لإعدادات Android."),color=c.secondary,fontSize=12.sp)
-        Text(uiText("اختيار الصوت لا يفعّل التنبيهات تلقائيًا؛ تأكد من تشغيل «تنبيه الأذان» أعلى الصفحة."),color=c.secondary,fontSize=12.sp)
-        message?.let {Text(it,color=c.amber,fontSize=13.sp)}
     }
 }

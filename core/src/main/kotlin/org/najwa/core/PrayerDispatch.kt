@@ -7,7 +7,7 @@ class PrayerDispatch(private val sessions: SilenceSessionManager,private val not
     fun deliver(tasks: List<ScheduledPrayer>,p: Preferences,onFailure: (ScheduledPrayer,Exception)->Unit = {_,e->throw e}) {
         tasks.sortedBy {if(it.action==PrayerAction.SILENCE)1 else 0}.forEach {task->
             try {
-                if(task.action==PrayerAction.SILENCE)sessions.start(task.event.id,task.event.time.toEpochMilli(),p.silenceMinutes.getValue(task.event.prayer),p.mode)
+                if(task.action==PrayerAction.SILENCE)sessions.start(task.event.id,task.event.time.toEpochMilli(),p.silenceFor(task.event),p.mode)
                 else notify(task,p)
             } catch(e: Exception) {onFailure(task,e)}
         }
@@ -16,7 +16,7 @@ class PrayerDispatch(private val sessions: SilenceSessionManager,private val not
 
 /** Recover an interrupted plan and validate the incoming timestamp independently
  * of which future alarm was last registered. Stale broadcasts cannot run new settings. */
-fun dispatchablePrayers(saved: List<ScheduledPrayer>,current: List<ScheduledPrayer>,now: Instant,p: Preferences,incomingAt: Long?=null): List<ScheduledPrayer> {
+fun dispatchablePrayers(saved: List<ScheduledPrayer>,current: List<ScheduledPrayer>,now: Instant,p: Preferences,incomingAt: Long?=null,exact: Boolean=true): List<ScheduledPrayer> {
     val candidates=if(saved.isEmpty() && incomingAt!=null)current.filter {it.at.toEpochMilli()==incomingAt} else saved
-    return duePrayers(candidates,current,now) {p.silenceMinutes.getValue(it)}
+    return duePrayers(candidates,current,now,if(exact)NOTIFICATION_GRACE_MS else INEXACT_GRACE_MS) {p.silenceFor(it)}
 }

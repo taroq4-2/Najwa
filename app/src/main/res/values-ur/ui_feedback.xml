@@ -20,7 +20,5 @@
     <string name="sound_unavailable_title">محفوظ آواز دوبارہ منتخب کریں</string>
     <string name="sound_unavailable_detail">محفوظ آواز کا انتخاب پڑھا نہیں جاسکا۔ فائل دوبارہ منتخب کریں یا الارم کی طے شدہ آواز بحال کریں۔ انتخاب تک اذان کی آواز بند رہے گی۔</string>
     <string name="sound_phone_silent">فون کی ترتیبات کے مطابق خاموش</string>
-    <string name="sound_phone_changed">فون کی ترتیبات میں آواز تبدیل کی گئی</string>
-    <string name="sound_phone_default">فون پر منتخب کردہ اذان کی آواز</string>
     <string name="sound_alarm_default">الارم کی طے شدہ آواز</string>
 </resources>

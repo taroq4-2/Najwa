@@ -16,16 +16,13 @@
     <string name="system_unavailable">Unavailable</string>
     <string name="system_check_calculation">Check calculation settings</string>
     <string name="system_brand">Najwa</string>
-    <string name="system_signature">Prayer first. Noise can wait.</string>
     <string name="system_private_alert">You have a prayer reminder</string>
     <string name="system_friday_detail">Get ready for Friday prayer. Check your mosque for the sermon and prayer times.</string>
     <string name="system_iqama_detail">Based on your iqama settings</string>
     <string name="system_refresh">Refresh</string>
     <string name="system_execution">Prayer mode</string>
     <string name="system_execution_detail">Applying your quiet period or restoring the ringer</string>
-    <string name="system_minutes_after">Iqama in %1$d minutes</string>
     <string name="system_hijri_format">%1$s AH</string>
-    <string name="system_clock_required">Prayer alerts and automatic silence are paused until you allow exact alarms.</string>
     <string name="system_background_unavailable">Android blocked the ringer service at the last scheduled time. Check the ringer status in Najwa.</string>
     <string name="trial_title">Adhan and silence test</string>
     <string name="trial_description">Adhan in 30 seconds, silence or vibration 20 seconds later, iqama after a minute, and ringer restoration five minutes after adhan.</string>

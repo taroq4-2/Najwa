@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.*
 import org.najwa.core.*
 import org.najwa.app.R
 
-@Composable fun PrayerDurations(title: String,subtitle: String,values: Map<Prayer,Int>,defaults: Map<Prayer,Int>,minimum: Int,enabledPrayers: Set<Prayer>?=null,onEnabled: ((Prayer,Boolean)->Unit)?=null,framed: Boolean=true,onChange: (Map<Prayer,Int>)->Unit) {
+@Composable fun PrayerDurations(title: String,subtitle: String,values: Map<Prayer,Int>,defaults: Map<Prayer,Int>,minimum: Int,enabledPrayers: Set<Prayer>?=null,onEnabled: ((Prayer,Boolean)->Unit)?=null,minimumFor: ((Prayer)->Int)?=null,framed: Boolean=true,onChange: (Map<Prayer,Int>)->Unit) {
     val c=LocalPalette.current
     var editing by rememberSaveable {mutableStateOf<Prayer?>(null)}
     // framed=false renders inside an existing panel (e.g. a collapsible section).
@@ -40,9 +40,10 @@ import org.najwa.app.R
     editing?.let {prayer->
         var input by rememberSaveable(prayer) {mutableStateOf(values.getValue(prayer).toString())}
         val minutes=normalizedNumber(input).toIntOrNull()
-        val valid=minutes!=null && minutes in minimum..120
+        val lowest=minimumFor?.invoke(prayer) ?: minimum
+        val valid=minutes!=null && minutes in lowest..120
         AlertDialog(onDismissRequest={editing=null},title={Text("$title · ${localizedPrayerName(prayer)}")},text={
-            OutlinedTextField(input,{input=it},label={Text(stringResource(R.string.en_duration_since_adhan))},supportingText={Text(stringResource(R.string.en_duration_range,minimum))},isError=!valid,singleLine=true,keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Number))
+            OutlinedTextField(input,{input=it},label={Text(stringResource(R.string.en_duration_since_adhan))},supportingText={Text(stringResource(R.string.en_duration_range,lowest))},isError=!valid,singleLine=true,keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Number))
         },confirmButton={TextButton(enabled=valid,onClick={onChange(values+(prayer to minutes!!));editing=null}) {Text(stringResource(R.string.en_duration_save))}},dismissButton={TextButton(onClick={editing=null}) {Text(stringResource(R.string.en_duration_cancel))}})
     }
 }
