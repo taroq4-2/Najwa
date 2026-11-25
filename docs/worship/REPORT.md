@@ -26,6 +26,7 @@ The requested structure was 100 development experts, 50 critics and 10 auditors.
 | Daily summary on home | **Implemented and verified on emulator** |
 | Optional "My day" widget preserving the large prayer block | **Implemented and verified on emulator** (preview and release states) |
 | Quran letter counting method | **Implemented and verified on fixtures** (basmalah 19, Al-Ikhlas 47, hamza on tatweel); **pending qualified review** of the method choices |
+| In-app mushaf reader (604 pages, surah and juz index, page confirmation feeding the tracker, Tanzil text unchanged) | **Implemented and verified on emulator** and by tests |
 | Quran per-page letter table | **Implemented and verified**: built from Tanzil Uthmani 1.1 with the owner's permission. Page 1 = 139, page 604 = 198 (Al-Ikhlas and An-Nas match the app's texts). |
 | Feature switch restoring the 1.6 experience, with data kept | **Implemented and verified on emulator** |
 | Separate deletion of companion records | **Implemented and verified** (test) |
@@ -35,11 +36,11 @@ The requested structure was 100 development experts, 50 critics and 10 auditors.
 
 | Item | Baseline 1.6.0 | 1.7.0 | Change |
 | :--- | ---: | ---: | ---: |
-| Release APK, unsigned, R8 | 19,283,591 B | 19,429,910 B | +146,319 B (+143 KiB; budget 1 MiB) |
+| Release APK, unsigned, R8 | 19,283,591 B | 19,786,390 B | +502,799 B (+491 KiB, of which the bundled mushaf text is most; budget 1 MiB) |
 | Merged release permissions | 12 | 12 | none added or removed |
 | Runtime dependencies | 56 | 56 | none added |
 | Core tests | 119 | 134 | +15, all pass |
-| App tests | 119 | 133 | +14, all pass |
+| App tests | 119 | 135 | +16, all pass |
 | Release lint errors | 0 | 0 | — |
 | Privacy audit | PASS | PASS | — |
 

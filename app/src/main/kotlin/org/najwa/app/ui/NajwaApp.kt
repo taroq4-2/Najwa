@@ -41,6 +41,9 @@ import java.time.Instant
     var cityDialog by rememberSaveable {mutableStateOf(false)}
     var secondCityDialog by rememberSaveable {mutableStateOf(false)}
     var adhkarTab by rememberSaveable {mutableIntStateOf(0)}
+    // The mushaf reader opens at a chosen page (0 = where you left off), or on its index.
+    var mushafPage by rememberSaveable {mutableIntStateOf(0)}
+    var mushafIndex by rememberSaveable {mutableStateOf(false)}
     var mosqueImport by rememberSaveable {mutableStateOf<String?>(null)}
     var mosques by remember {mutableStateOf(runtime.mosqueList())}
     var log by remember {mutableStateOf(runtime.log())}
@@ -166,7 +169,8 @@ import java.time.Instant
                         Screen.ADHKAR -> AdhkarScreen(adhkarTab,::back)
                         Screen.TIMETABLE -> TimetableScreen(prefs,::back)
                         Screen.PRAYER_LOG -> PrayerLogScreen(runtime,prefs,{save(it)},{adhkarTab=2;navigate(Screen.ADHKAR)}) {log=runtime.log();back()}
-                        Screen.QURAN -> QuranScreen(::back)
+                        Screen.QURAN -> QuranScreen({page,openIndex->mushafPage=page ?: 0;mushafIndex=openIndex;navigate(Screen.MUSHAF)},::back)
+                        Screen.MUSHAF -> MushafScreen(mushafPage.takeIf {it>0},mushafIndex,::back)
                         Screen.HOME -> {
                             if(!cityConfirmed) {
                                 Text(stringResource(R.string.city_unconfirmed),color=colors.amber,modifier=Modifier.padding(vertical=8.dp))

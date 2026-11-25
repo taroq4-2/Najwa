@@ -131,16 +131,46 @@ object QuranStore {
         val result=s.copy(page=page.coerceIn(0,PAGES-1),khatmas=khatmas)
         write(context,result)
         addToday(context,today,pages)
-        if(WorshipSettingsStore.read(context).enabled)WorshipRecorder.onQuranRead(context,s.page+1,pages,today)
+        if(WorshipSettingsStore.read(context).enabled)remember(context,WorshipRecorder.onQuranRead(context,s.page+1,pages,today),s)
         return result
     }
+    /**
+     * One page confirmed in the mushaf reader. Reaching further moves your position; re-reading an earlier page
+     * counts for today without moving it back. Finishing page 604 completes a khatma.
+     */
+    @Synchronized fun readPage(context: Context,page: Int,today: LocalDate=LocalDate.now()): State {
+        val s=read(context)
+        val p=page.coerceIn(1,PAGES)
+        val result=when {
+            p==PAGES -> s.copy(page=0,khatmas=s.khatmas+1)
+            p>s.page -> s.copy(page=p.coerceAtMost(PAGES-1))
+            else -> s
+        }
+        write(context,result)
+        addToday(context,today,1)
+        if(WorshipSettingsStore.read(context).enabled)remember(context,WorshipRecorder.onQuranRead(context,p,1,today),s)
+        return result
+    }
+    /** Pages confirmed today in the reader, so a page is not recorded twice by accident. */
+    fun readToday(context: Context,today: LocalDate=LocalDate.now()): Set<Int> =
+        WorshipStore.entries(context,today).filter {it.action==WorshipStore.QURAN_RANGE && it.count==1L}.map {it.from}.toSet()
+    // The position before the last recorded reading, so an undo restores it exactly.
+    private fun remember(context: Context,id: String,before: State) =
+        prefs(context).edit().putString("undoId",id).putInt("undoPage",before.page).putInt("undoKhatmas",before.khatmas).apply()
+    /** Where the reader was last opened, and its text size. */
+    fun lastViewed(context: Context)=prefs(context).getInt("viewed",0).let {if(it in 1..PAGES) it else read(context).page.plus(1).coerceIn(1,PAGES)}
+    fun setLastViewed(context: Context,page: Int)=prefs(context).edit().putInt("viewed",page.coerceIn(1,PAGES)).apply()
+    fun readerScale(context: Context)=prefs(context).getFloat("readerScale",1f).coerceIn(.8f,1.8f)
+    fun setReaderScale(context: Context,scale: Float)=prefs(context).edit().putFloat("readerScale",scale.coerceIn(.8f,1.8f)).apply()
     /** Takes back the last reading recorded today: the page, the day's count and its worship record. */
     @Synchronized fun undoLast(context: Context,today: LocalDate=LocalDate.now()): State? {
         val last=WorshipRecorder.lastQuranRange(context,today) ?: return null
         val s=read(context)
         val pages=last.count.toInt()
         val wrapped=last.from-1+pages>=PAGES
-        val result=s.copy(page=(last.from-1).coerceIn(0,PAGES-1),khatmas=if(wrapped)(s.khatmas-1).coerceAtLeast(0) else s.khatmas)
+        val saved=prefs(context).getString("undoId",null)==last.id
+        val result=if(saved) s.copy(page=prefs(context).getInt("undoPage",s.page),khatmas=prefs(context).getInt("undoKhatmas",s.khatmas))
+            else s.copy(page=(last.from-1).coerceIn(0,PAGES-1),khatmas=if(wrapped)(s.khatmas-1).coerceAtLeast(0) else s.khatmas)
         write(context,result)
         addToday(context,today,-pages)
         WorshipStore.remove(context,today,last.id)

@@ -157,6 +157,42 @@ class WorshipPlatformTest {
         assertEquals(1390L,preview.hasanat)
     }
 
+    @Test fun mushafPagesSurahsAndJuzLineUp() {
+        val d=Mushaf.load(app)
+        assertEquals(6236,d.verses.size)
+        assertEquals(114,d.surahs.size)
+        assertEquals((1..7).map {1 to it},d.page(1).map {it.sura to it.aya})
+        assertEquals(setOf(112,113,114),d.page(604).map {it.sura}.toSet())
+        assertEquals(293,d.surahs[17].page)
+        assertEquals(22,d.pageOfJuz(2))
+        assertEquals(2,d.juzOf(22))
+        // Every verse is on exactly one page.
+        assertEquals(6236,(1..Mushaf.PAGES).sumOf {d.page(it).size})
+        // The basmalah heads a surah instead of opening its first verse; Al-Fatiha keeps it as verse 1.
+        val kahf=d.verses[d.surahs[17].start]
+        assertFalse(d.displayText(kahf).contains("بِسْمِ"))
+        assertEquals(d.verses[0].text,d.displayText(d.verses[0]))
+        assertEquals("١١٠",Mushaf.arabicDigits(110))
+    }
+
+    @Test fun confirmingAPageRecordsItAndUndoRestoresThePosition() {
+        app.getSharedPreferences("quran",0).edit().clear().commit()
+        QuranStore.readPage(app,10,today)
+        assertEquals(10,QuranStore.read(app).page)
+        // Re-reading an earlier page counts for today without moving you back.
+        QuranStore.readPage(app,3,today)
+        assertEquals(10,QuranStore.read(app).page)
+        assertEquals(2,QuranStore.today(app,today))
+        assertEquals(setOf(10,3),QuranStore.readToday(app,today))
+        QuranStore.undoLast(app,today)
+        assertEquals(10,QuranStore.read(app).page)
+        assertEquals(1,QuranStore.today(app,today))
+        // Finishing the last page completes a khatma.
+        QuranStore.readPage(app,604,today)
+        assertEquals(1,QuranStore.read(app).khatmas)
+        assertEquals(0,QuranStore.read(app).page)
+    }
+
     @Test fun catalogTextsExistForEveryRule() {
         val ids=WorshipCatalog.rules.map {"virtue_"+it.id.replace('.','_')}
         ids.forEach {assertNotEquals(it,0,app.resources.getIdentifier(it,"string",app.packageName))}

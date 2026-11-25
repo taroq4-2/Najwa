@@ -430,7 +430,7 @@ enum class AdhkarCategory(val key: String,val title: Int,val glyph: String,val t
 
 // ───────────────────────────── Quran reading ─────────────────────────────
 
-@Composable fun QuranScreen(onBack: ()->Unit) {
+@Composable fun QuranScreen(onMushaf: (Int?,Boolean)->Unit,onBack: ()->Unit) {
     val c=LocalPalette.current
     val context=LocalContext.current
     var q by remember {mutableStateOf(QuranStore.read(context))}
@@ -453,7 +453,25 @@ enum class AdhkarCategory(val key: String,val title: Int,val glyph: String,val t
     }
     val a=accent("teal")
     BackLink(stringResource(R.string.tools_back),onBack)
-    PageHeading(stringResource(R.string.quran_title),stringResource(R.string.quran_intro))
+    PageHeading(stringResource(R.string.quran_title),stringResource(R.string.mushaf_intro))
+    // The mushaf itself: continue where you stopped, or choose a surah or juz.
+    val last=remember {QuranStore.lastViewed(context)}
+    Panel(Modifier.fillMaxWidth().padding(bottom=14.dp),radius=24,selected=true) {
+        Column(Modifier.padding(18.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+                IconBadge("mushaf",accent("amber"),46)
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.mushaf_title),color=c.text,fontSize=18.sp,fontWeight=FontWeight.Bold)
+                    Text(stringResource(R.string.mushaf_continue_hint,n(last),n(juzOfPage(last))),color=c.secondary,fontSize=13.sp)
+                }
+            }
+            Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                Button(onClick={onMushaf(null,false)},modifier=Modifier.weight(1f).heightIn(min=48.dp),shape=RoundedCornerShape(16.dp),
+                    colors=ButtonDefaults.buttonColors(containerColor=c.green,contentColor=c.bg)) {Text(stringResource(R.string.mushaf_continue),fontWeight=FontWeight.Bold)}
+                OptionButton(stringResource(R.string.mushaf_index),false,Modifier.weight(1f)) {onMushaf(null,true)}
+            }
+        }
+    }
     Panel(Modifier.fillMaxWidth(),radius=24) {
         Row(Modifier.padding(18.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(16.dp)) {
             val progress by animateFloatAsState(q.page/QuranStore.PAGES.toFloat(),tween(400),label="khatma")

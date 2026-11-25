@@ -64,7 +64,7 @@ Source: https://www.geonames.org/export/ · https://creativecommons.org/licenses
 
 ## Tanzil Quran Text
 
-The Quran reading tracker's letter counts (`assets/quran/page_letters.txt`) are derived from the [Tanzil Quran Text](https://tanzil.net) (Uthmani, version 1.1), Copyright (C) 2007-2026 Tanzil Project, under [Creative Commons Attribution 3.0](https://creativecommons.org/licenses/by/3.0/), and its page metadata. Only one number per page is included; no Quran text is redistributed or changed. Built 2026-11-25 with `scripts/build_quran_page_letters.py`.
+The in-app mushaf shows the Tanzil Quran Text exactly as published (`assets/quran/quran-uthmani.txt`, copyright block included), and the reading tracker's letter counts (`assets/quran/page_letters.txt`) and page index (`assets/quran/index.txt`) are derived from the [Tanzil Quran Text](https://tanzil.net) (Uthmani, version 1.1), Copyright (C) 2007-2026 Tanzil Project, under [Creative Commons Attribution 3.0](https://creativecommons.org/licenses/by/3.0/), and its page metadata. The text is redistributed unchanged, as Tanzil's terms require; the derived files hold only numbers and surah names. Built 2026-11-25 with `scripts/build_quran_page_letters.py`.
 
 ## Resolved external runtime artifacts
 
