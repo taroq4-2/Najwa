@@ -136,6 +136,27 @@ class WorshipPlatformTest {
         assertTrue(QuranStore.today(app,today)>0)
     }
 
+    @Test fun pageLetterTableIsCompleteAndMatchesKnownPages() {
+        val t=QuranPageLetters.table(app)!!
+        assertEquals(QuranStore.PAGES,t.size)
+        // Page 1 is Al-Fatiha with its basmalah: 139 letters. Page 604 is Al-Ikhlas 47 + Al-Falaq 71 + An-Nas 80 (Uthmani spelling).
+        assertEquals(139,t[0])
+        assertEquals(47+71+80,t[603])
+        assertEquals(326_159L,t.sumOf {it.toLong()})
+        // Ranges wrap after the last page.
+        assertEquals((t[603]+t[0]).toLong(),QuranPageLetters.letters(app,604,2))
+    }
+
+    @Test fun confirmedReadingBecomesLettersInTheSummary() {
+        app.getSharedPreferences("quran",0).edit().clear().commit()
+        QuranStore.addPages(app,1,today)
+        val s=WorshipSummary.build(app,WorshipSettings(),today)
+        assertEquals(139L,s.letters)
+        assertNull("no approved rule, so no hasanat",s.virtues.hasanat)
+        val preview=WorshipEngine.evaluate(listOf(WorshipRecord("q",WorshipActions.QURAN_LETTER,139,TimeWindow.ANY_TIME,today)),WorshipCatalog.rules,RulePolicy.REVIEW)
+        assertEquals(1390L,preview.hasanat)
+    }
+
     @Test fun catalogTextsExistForEveryRule() {
         val ids=WorshipCatalog.rules.map {"virtue_"+it.id.replace('.','_')}
         ids.forEach {assertNotEquals(it,0,app.resources.getIdentifier(it,"string",app.packageName))}

@@ -25,8 +25,8 @@ The requested structure was 100 development experts, 50 critics and 10 auditors.
 | Personal daily goal (pages, adhkar, or hasanat when approved) | **Implemented and verified** (tests + settings on emulator) |
 | Daily summary on home | **Implemented and verified on emulator** |
 | Optional "My day" widget preserving the large prayer block | **Implemented and verified on emulator** (preview and release states) |
-| Quran letter counting method | **Implemented and verified on fixtures** (basmalah 19, Al-Ikhlas 47) |
-| Quran per-page letter table | **Blocked**: needs permission to download a verified Uthmani text and page map. The app shows pages only until then. |
+| Quran letter counting method | **Implemented and verified on fixtures** (basmalah 19, Al-Ikhlas 47, hamza on tatweel); **pending qualified review** of the method choices |
+| Quran per-page letter table | **Implemented and verified**: built from Tanzil Uthmani 1.1 with the owner's permission. Page 1 = 139, page 604 = 198 (Al-Ikhlas and An-Nas match the app's texts). |
 | Feature switch restoring the 1.6 experience, with data kept | **Implemented and verified on emulator** |
 | Separate deletion of companion records | **Implemented and verified** (test) |
 | Localization (7 languages) | **Implemented**. Arabic and English seen on the emulator; other languages not reviewed by native speakers. |
@@ -35,11 +35,11 @@ The requested structure was 100 development experts, 50 critics and 10 auditors.
 
 | Item | Baseline 1.6.0 | 1.7.0 | Change |
 | :--- | ---: | ---: | ---: |
-| Release APK, unsigned, R8 | 19,283,591 B | 19,428,199 B | +144,608 B (+141 KiB; budget 1 MiB) |
+| Release APK, unsigned, R8 | 19,283,591 B | 19,429,910 B | +146,319 B (+143 KiB; budget 1 MiB) |
 | Merged release permissions | 12 | 12 | none added or removed |
 | Runtime dependencies | 56 | 56 | none added |
 | Core tests | 119 | 134 | +15, all pass |
-| App tests | 119 | 131 | +12, all pass |
+| App tests | 119 | 133 | +14, all pass |
 | Release lint errors | 0 | 0 | — |
 | Privacy audit | PASS | PASS | — |
 
@@ -72,6 +72,8 @@ No background service, alarm or polling was added for the companion. The widget 
 | F15 | C031 performance | P2 | Runtime performance not measured | — | **Open** |
 | F16 | C044 data | P3 | The tasbeeh after-prayer sequence (33·33·34) is not mapped to a rule | Different narration; left unmapped on purpose | Accepted |
 | F17 | C018 wording | P3 | English plurals in a few strings use "label: N" instead of plural resources | Acceptable | Accepted |
+| F18 | C054 Quran text | P2 | The adhkar Al-Falaq text writes «النَّفَّاثَاتِ» in standard spelling, although `AdhkarData.kt` says it follows the Uthmani spelling | Dhikr text not changed (protected content); reported for the content reviewer | **Open: needs review** |
+| F19 | C052 data | P2 | A hamza written above a tatweel (U+0654) was not counted as a letter | Counted, with a test | Fixed |
 
 ## Release gates
 
@@ -90,14 +92,14 @@ No background service, alarm or polling was added for the companion. The widget 
 | :--- | ---: | ---: | :--- |
 | Preservation of existing features | 20 | 17 | All 238 old tests pass; upgrade over 1.6 data on emulator; no pixel-diff suite |
 | Religious evidence and calculation integrity | 15 | 11 | Gating, AND/OR and thresholds tested; no rule approved yet |
-| Innovation and integration | 15 | 12 | One record source feeds path, summary, goal and widget; letter table blocked |
+| Innovation and integration | 15 | 13 | One record source feeds path, summary, goal and widget; per-page letters from a verified text |
 | UX and accessibility | 10 | 7 | RTL checked; TalkBack and large fonts not checked on device |
 | Visual design and identity | 10 | 8 | Existing tokens, glyphs and backgrounds |
-| Performance and APK | 10 | 7 | +141 KiB measured; runtime not measured |
+| Performance and APK | 10 | 7 | +143 KiB measured; runtime not measured |
 | Security and privacy | 10 | 9 | Audit pass, no new permissions or network, separate deletion |
 | Widget compatibility | 5 | 4 | Legacy block reused as is; one launcher tested |
-| Testing and documentation | 5 | 4 | 27 new tests; no UI instrumentation |
-| **Total** | 100 | **79** | Target 95 not reached; the gaps are listed above |
+| Testing and documentation | 5 | 4 | 29 new tests; no UI instrumentation |
+| **Total** | 100 | **80** | Target 95 not reached; the gaps are listed above |
 
 ## Verdict
 

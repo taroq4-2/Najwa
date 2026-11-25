@@ -132,6 +132,8 @@ class WorshipTest {
         assertEquals(QuranLetters.count("ذَٰلِكَ ٱلْكِتَٰبُ لَا رَيْبَ ۛ فِيهِ ۛ"), QuranLetters.count("ذلك الكتب لا ريب فيه"))
         // Disjoined letters count as written.
         assertEquals(3, QuranLetters.count("الٓمٓ"))
+        // A hamza written above a tatweel is a written letter: ي س ء ل و ن ك.
+        assertEquals(7, QuranLetters.count("يَسْـَٔلُونَكَ"))
         assertEquals(0, QuranLetters.count("﴿١٢٣﴾ ۚ ۖ ـ 123"))
     }
 }

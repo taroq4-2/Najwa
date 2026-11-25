@@ -62,6 +62,10 @@ The world extension uses the GeoNames [cities500 export and first-level administ
 
 Source: https://www.geonames.org/export/ · https://creativecommons.org/licenses/by/4.0/
 
+## Tanzil Quran Text
+
+The Quran reading tracker's letter counts (`assets/quran/page_letters.txt`) are derived from the [Tanzil Quran Text](https://tanzil.net) (Uthmani, version 1.1), Copyright (C) 2007-2026 Tanzil Project, under [Creative Commons Attribution 3.0](https://creativecommons.org/licenses/by/3.0/), and its page metadata. Only one number per page is included; no Quran text is redistributed or changed. Built 2026-11-25 with `scripts/build_quran_page_letters.py`.
+
 ## Resolved external runtime artifacts
 
 All coordinates below declare Apache-2.0 directly or through the Guava parent POM. Kotlin's embedded Boost attribution is additionally covered above.

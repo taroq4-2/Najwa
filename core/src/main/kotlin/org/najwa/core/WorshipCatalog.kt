@@ -71,8 +71,8 @@ object WorshipCatalog {
 
 /**
  * Quran letter counting, method version [METHOD_VERSION] (docs/worship/QURAN_LETTERS.md). Pending qualified review.
- * Counts the letters written in the Uthmani text: every Arabic letter code point, each hamza form as one letter,
- * alif wasla as alif. Not counted: harakat, shadda (the doubled letter is written once), sukun, tanwin,
+ * Counts the letters written in the Uthmani text: every Arabic letter code point, each hamza form as one letter
+ * (including a hamza written above a tatweel, U+0654), alif wasla as alif. Not counted: harakat, shadda (the doubled letter is written once), sukun, tanwin,
  * the dagger alif and other small superscript letters, tatweel, Quranic pause and annotation marks,
  * verse-end ornaments and numbers, spaces. Disjoined letters (الم) count as written (three letters).
  * Whether a surah's opening basmalah is part of a page total is decided by the page table, not here.
@@ -80,7 +80,7 @@ object WorshipCatalog {
 object QuranLetters {
     const val METHOD_VERSION = 1
 
-    fun isLetter(c: Char) = c in 'ء'..'غ' || c in 'ف'..'ي' || c == 'ٱ'
+    fun isLetter(c: Char) = c in 'ء'..'غ' || c in 'ف'..'ي' || c == 'ٱ' || c == 'ٔ'
 
     fun count(text: String): Int = text.count(::isLetter)
 }
