@@ -1,5 +1,0 @@
-<!-- The race ribbon: a solid dawn-gold band with a deeper edge. -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <gradient android:startColor="#E9C27A" android:endColor="#C99A4C" android:angle="0" />
-    <corners android:radius="14dp" />
-</shape>

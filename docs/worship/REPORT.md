@@ -24,7 +24,7 @@ The requested structure was 100 development experts, 50 critics and 10 auditors.
 | Protection and expiation from the same records (no duplicates, morning/evening separate) | **Implemented and verified** (tests); shown only in preview until approved |
 | Personal daily goal (pages, adhkar, or hasanat when approved) | **Implemented and verified** (tests + settings on emulator) |
 | Daily summary on home | **Implemented and verified on emulator** |
-| "My day" widget: the Najwa widget modernised (same card, orbit art, mark, city pill, stage colours) with both dates, adhan and iqama countdowns, five prayers with iqama times and prayed marks, the day's orbit, hoped-for reward and goal, forgiveness, adhkar, and the race with yourself | **Implemented and verified on emulator** (Arabic and English) |
+| Optional "My day" widget preserving the large prayer block | **Implemented and verified on emulator** (preview and release states) |
 | Quran letter counting method | **Implemented and verified on fixtures** (basmalah 19, Al-Ikhlas 47, hamza on tatweel); **pending qualified review** of the method choices |
 | Quran per-page letter table | **Implemented and verified**: built from Tanzil Uthmani 1.1 with the owner's permission. Page 1 = 139, page 604 = 198 (Al-Ikhlas and An-Nas match the app's texts). |
 | Feature switch restoring the 1.6 experience, with data kept | **Implemented and verified on emulator** |
@@ -35,11 +35,11 @@ The requested structure was 100 development experts, 50 critics and 10 auditors.
 
 | Item | Baseline 1.6.0 | 1.7.0 | Change |
 | :--- | ---: | ---: | ---: |
-| Release APK, unsigned, R8 | 19,283,591 B | 19,442,498 B | +158,907 B (+155 KiB; budget 1 MiB) |
+| Release APK, unsigned, R8 | 19,283,591 B | 19,429,910 B | +146,319 B (+143 KiB; budget 1 MiB) |
 | Merged release permissions | 12 | 12 | none added or removed |
 | Runtime dependencies | 56 | 56 | none added |
 | Core tests | 119 | 134 | +15, all pass |
-| App tests | 119 | 135 | +16, all pass |
+| App tests | 119 | 133 | +14, all pass |
 | Release lint errors | 0 | 0 | — |
 | Privacy audit | PASS | PASS | — |
 

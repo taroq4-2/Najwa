@@ -162,28 +162,6 @@ class WorshipPlatformTest {
         ids.forEach {assertNotEquals(it,0,app.resources.getIdentifier(it,"string",app.packageName))}
     }
 
-    @Test fun dayWidgetRendersEverything() {
-        val v=DayWidget.views(app,java.time.Instant.now())
-        assertEquals(R.layout.day_widget,v.layoutId)
-        val parent=android.widget.FrameLayout(app)
-        val view=v.apply(app,parent)
-        fun text(id: Int)=(view.findViewById<android.widget.TextView>(id)).text.toString()
-        assertTrue(text(R.id.dw_date).contains("·"))
-        assertTrue(text(R.id.dw_p0_time).isNotBlank())
-        assertTrue(text(R.id.dw_p0_iqama).isNotBlank())
-        assertTrue(text(R.id.dw_race).isNotBlank())
-    }
-
-    @Test fun dayOrbitDrawsForBothDirections() {
-        val now=java.time.Instant.now()
-        val times=(0..4).map {now.minusSeconds(3600L*(3-it))}
-        val colors=widgetColors(app,PreferencesStore(app).read())
-        listOf(true,false).forEach {rtl->
-            val bmp=DayWidget.orbit(times,listOf(true,true,false,false,false),3,now,colors,colors.adhan,rtl)
-            assertEquals(720,bmp.width)
-        }
-    }
-
     @Test fun dayWidgetRendersWithThePrayerBlockIntact() {
         val p=PreferencesStore(app).read()
         val views=PrayerWidget.views(app,p,java.time.Instant.now(),360,240)
