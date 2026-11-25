@@ -35,7 +35,8 @@ object WorshipSettingsStore {
     fun read(context: Context)=prefs(context).let {s->
         WorshipSettings(s.getBoolean("enabled",true),s.getBoolean("summary",true),s.getBoolean("focus",false),
             runCatching {GoalKind.valueOf(s.getString("goalKind",null) ?: "")}.getOrDefault(GoalKind.QURAN_PAGES),
-            s.getLong("goal",0).coerceAtLeast(0),s.getBoolean("preview",false),
+            // Trial builds open with the preview on, so testers see every figure (marked as not approved).
+            s.getLong("goal",0).coerceAtLeast(0),s.getBoolean("preview",previewAvailable && BuildConfig.TRIAL_BUILD),
             s.getBoolean("widgetReward",true),s.getBoolean("widgetExpiation",true),s.getBoolean("widgetAdhkar",true))
     }
     fun write(context: Context,w: WorshipSettings) {

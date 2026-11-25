@@ -16,7 +16,7 @@
     <string name="quran_letters_today">Letters today: %1$s</string>
     <string name="quran_undo">Undo the last entry</string>
     <string name="day_title">My day</string>
-    <string name="worship_preview_badge">Preview · not approved</string>
+    <string name="worship_preview_badge">Not approved</string>
     <string name="day_goal_title">Today\'s goal</string>
     <string name="day_goal_reached">You reached your personal goal. May Allah accept it from you</string>
     <string name="day_goal_left">%1$s to go of %2$s</string>
@@ -91,6 +91,18 @@
     <string name="virtue_dhikr_kalimat_evening">A\'udhu bi kalimatillahit-tammat in the evening: nothing would harm him</string>
     <string name="virtue_dhikr_sayyid_istighfar_morning">Sayyid al-istighfar in the morning with conviction: of the people of Paradise if he dies that day</string>
     <string name="virtue_dhikr_sayyid_istighfar_evening">Sayyid al-istighfar in the evening with conviction: of the people of Paradise if he dies that night</string>
+    <string name="dw_race_start">Start your streak today</string>
+    <string name="dw_race_record">New record: %1$d days</string>
+    <string name="dw_race_streak">Streak %1$d · best %2$d</string>
+    <string name="dw_race_up">+%1$d on last week</string>
+    <string name="dw_race_week">This week %1$d of 35</string>
+    <string name="dw_goal_line">%1$d%% · %2$s to go of %3$s</string>
+    <string name="dw_goal_reached">%1$s reached</string>
+    <string name="dw_reward_title">Hoped-for today</string>
+    <string name="dw_hasanat">%1$s hasanat</string>
+    <string name="dw_forgiveness_title">Forgiveness</string>
+    <string name="dw_morning_done">Morning adhkar complete</string>
+    <string name="dw_evening_left">Evening: %1$d left</string>
     <string name="new17_1">The luminous dhikr path, undo and a focus mode for adhkar</string>
     <string name="new17_2">My day: your prayers, reading and adhkar at a glance, with an optional personal goal</string>
     <string name="new17_3">My day widget: the prayer widget as it is, with a strip for your day</string>
