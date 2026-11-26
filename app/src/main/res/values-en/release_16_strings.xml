@@ -3,7 +3,7 @@
 <resources>
     <string name="action_cancel">Cancel</string>
     <string name="action_save">Save</string>
-    <string name="streak_days">%1$s days in a row</string>
+    <string name="streak_days">Streak: %1$s</string>
     <string name="settings_title">Settings</string>
     <string name="settings_subtitle">Everything in its place, every detail one tap away</string>
     <string name="quick_silence">Silence</string>

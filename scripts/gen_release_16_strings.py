@@ -13,7 +13,7 @@ S = {
 # ── General ──
 "action_cancel": ["إلغاء","Cancel","Batal","منسوخ کریں","বাতিল","रद्द करें","İptal"],
 "action_save": ["حفظ","Save","Simpan","محفوظ کریں","সংরক্ষণ","सहेजें","Kaydet"],
-"streak_days": ["أيام متتالية: %1$s","%1$s days in a row","%1$s hari berturut-turut","مسلسل %1$s دن","টানা %1$s দিন","लगातार %1$s दिन","Üst üste %1$s gün"],
+"streak_days": ["أيام متتالية: %1$s","Streak: %1$s","%1$s hari berturut-turut","مسلسل %1$s دن","টানা %1$s দিন","लगातार %1$s दिन","Üst üste %1$s gün"],
 # ── Settings home and sections ──
 "settings_title": ["الإعدادات","Settings","Pengaturan","ترتیبات","সেটিংস","सेटिंग्स","Ayarlar"],
 "settings_subtitle": ["كل شيء في مكانه، وكل تفصيل على بُعد لمسة","Everything in its place, every detail one tap away","Semua di tempatnya, setiap detail sekali ketuk","ہر چیز اپنی جگہ، ہر تفصیل ایک ٹیپ پر","সবকিছু নিজের জায়গায়, প্রতিটি খুঁটিনাটি এক চাপে","सब कुछ अपनी जगह, हर बारीकी एक टैप पर","Her şey yerli yerinde, her ayrıntı bir dokunuşta"],

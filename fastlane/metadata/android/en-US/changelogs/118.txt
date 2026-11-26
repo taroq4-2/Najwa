@@ -1,0 +1,6 @@
+Najwa 1.7.0
+• King Fahd Complex mushaf with matching pages and zoom that reflows the text
+• Mushaf and adhkar in the bottom bar; silence moved to Settings
+• Adhkar on cards with a large counter that moves on by itself
+• New "My day" widget with 0-100% transparency
+• Tidier home and settings, and a detailed privacy policy

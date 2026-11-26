@@ -7,7 +7,7 @@
   const ar = document.documentElement.lang === "ar";
   const url = document.querySelector('link[rel="canonical"]').href;
   const title = document.querySelector('meta[property="og:title"]').content;
-  const text = ar ? "مواقيت الصلاة والأذان والإقامة، في تجربة هادئة." : "Prayer times, adhan and iqama, in a calmer daily rhythm.";
+  const text = ar ? "صلاتك وذكرك وقرآنك في يوم واحد: مواقيت وأذان، ومصحف مجمع الملك فهد، وأذكار، دون إنترنت." : "Your prayer, adhkar and Quran in one calm day: prayer times, adhan, the King Fahd Complex mushaf and adhkar, offline.";
   async function copyLink() {
     try {
       if (!navigator.clipboard || !window.isSecureContext) throw new Error("Clipboard unavailable");
