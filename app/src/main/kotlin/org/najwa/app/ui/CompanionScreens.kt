@@ -364,7 +364,7 @@ private fun printTimetable(context: Context,p: Preferences,days: List<PrayerDay>
     SettingsCard(stringResource(R.string.log_qada_title),stringResource(R.string.log_qada_help)) {
         Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(12.dp)) {
             OutlinedButton(onClick={scope.launch {withContext(prayerDispatcher) {runtime.setQada(log.qada-1)};refresh()}},enabled=log.qada>0) {Text("−",fontSize=18.sp)}
-            Text("${log.qada}",Modifier.weight(1f),color=c.mint,fontSize=30.sp,fontWeight=FontWeight.Bold,textAlign=TextAlign.Center)
+            Text(org.najwa.app.platform.Counts.format(androidx.compose.ui.platform.LocalContext.current,log.qada.toLong()),Modifier.weight(1f),color=c.mint,fontSize=30.sp,fontWeight=FontWeight.Bold,textAlign=TextAlign.Center)
             OutlinedButton(onClick={scope.launch {withContext(prayerDispatcher) {runtime.setQada(log.qada+1)};refresh()}}) {Text("+",fontSize=18.sp)}
         }
     }

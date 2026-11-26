@@ -159,7 +159,7 @@
         <item>Penampilan dan transparansi</item>
         <item>Latar belakang halus dengan hitungan mundur yang dapat dibaca</item>
         <item>Otomatis menyesuaikan dengan wallpaper ketika tersedia dan sebaliknya mengikuti tema sistem.</item>
-        <item>Hanya latar belakang yang transparan sehingga teks tetap dapat dibaca pada kertas dinding terang dan gelap.</item>
+        <item>Dari latar penuh hingga transparan sepenuhnya. Saat sangat transparan, pilih tampilan yang cocok dengan wallpaper agar teks tetap jelas.</item>
         <item>Pratinjau Widget</item>
         <item>Malam</item>
         <item>Cahaya</item>
@@ -223,5 +223,6 @@
         <item>Di tengah malam</item>
         <item>Satu ketujuh malam</item>
         <item>Braksi sudut kegelapan</item>
+        <item>Hariku</item>
     </string-array>
 </resources>

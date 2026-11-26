@@ -47,6 +47,8 @@ object MushafLayout {
             }
         }
         carry?.let {out+=it}
+        // The verse ends with the Complex font's own end-of-verse ornament: U+06DD followed by the number.
+        if(out.isNotEmpty())out[out.lastIndex]=out.last()+VERSE_MARK_GAP+verseMark(aya)
         return out.mapIndexed {i,w->Token(w,if(i==out.lastIndex) aya else null)}
     }
 
@@ -149,6 +151,10 @@ object MushafLayout {
         return ranges.reversed()
     }
 
+    const val VERSE_MARK_GAP=" "
+    /** The end-of-verse ornament with its number, drawn by the KFGQPC font. */
+    fun verseMark(aya: Int)="۝"+aya.toString().map {'٠'+(it-'0')}.joinToString("")
+
     /** Arabic ordinal of a juz for the page margin: "الجزء الخامس عشر". */
     fun juzName(juz: Int): String = "الجزء "+juzOrdinals[(juz-1).coerceIn(0,29)]
     private val juzOrdinals=listOf("الأول","الثاني","الثالث","الرابع","الخامس","السادس","السابع","الثامن","التاسع","العاشر",
@@ -164,7 +170,9 @@ object MushafLayout {
     /** A line ready to draw: each token's text (with any tatweel added), its width, and the space between tokens. */
     data class Justified(val texts: List<String>,val widths: List<Float>,val gap: Float)
 
-    private fun isMark(c: Char)=c in 'ً'..'ٟ' || c=='ٰ' || c in 'ۖ'..'ۭ'
+    // Marks: harakat and small letters (U+064B–065F, U+0670), Quranic annotation (U+06D6–06ED), and the open tanween
+    // the Complex's text uses (U+08F0–08F2).
+    private fun isMark(c: Char)=c in 'ً'..'ٟ' || c=='ٰ' || c in 'ۖ'..'ۭ' || c in 'ࣰ'..'ࣲ'
     private fun dualJoining(c: Char)=c=='ئ' || c=='ب' || c in 'ت'..'خ' || c in 'س'..'غ' ||
         c=='ـ' || c in 'ف'..'ه' || c=='ى' || c=='ي'
     private fun joinsBefore(c: Char)=c in 'آ'..'غ' || c in 'ـ'..'ي' || c=='ٱ'

@@ -43,14 +43,14 @@ import java.time.Instant
         val transparencyLabel=stringResource(R.string.widget_transparency_label)
         val transparencyState=stringResource(R.string.widget_transparency_value,100-opacity.toInt())
         Text(stringResource(R.string.widget_transparency_display,100-opacity.toInt()),color=c.text,fontSize=14.sp)
-        Slider(value=opacity,onValueChange={opacity=it},onValueChangeFinished={onSave(p.copy(widgetOpacity=opacity.toInt()))},valueRange=80f..100f,steps=3,modifier=Modifier.semantics {contentDescription=transparencyLabel;stateDescription=transparencyState})
-        Text(uiText("شفافية خفيفة للخلفية فقط، ضمن نطاق يحافظ على تباين النص فوق الخلفيات الفاتحة والداكنة."),color=c.secondary,fontSize=12.sp)
+        Slider(value=opacity,onValueChange={opacity=it},onValueChangeFinished={onSave(p.copy(widgetOpacity=opacity.toInt()))},valueRange=0f..100f,steps=19,modifier=Modifier.semantics {contentDescription=transparencyLabel;stateDescription=transparencyState})
+        Text(uiText("من خلفية كاملة حتى شفافة تمامًا. عند الشفافية العالية اختر المظهر الذي يناسب لون خلفية هاتفك ليبقى النص واضحًا."),color=c.secondary,fontSize=12.sp)
     }
     SectionLabel("معاينة مظهر الويدجت")
     OptionGrid(listOf(0,1,2),background,{listOf("ليلية","فاتحة","ملونة")[it]}) {background=it}
     Spacer(Modifier.height(12.dp))
-    val sizes=listOf(110 to 100,180 to 210,280 to 110,180 to 300,360 to 240,110 to 280)
-    OptionGrid(sizes.indices.toList(),previewSize.coerceIn(sizes.indices),{listOf("مصغّر","صغير","عريض","طولي","كبير","طولي نحيف")[it]},3) {previewSize=it}
+    val sizes=listOf(110 to 100,180 to 210,280 to 110,180 to 300,360 to 240,110 to 280,340 to 390)
+    OptionGrid(sizes.indices.toList(),previewSize.coerceIn(sizes.indices),{listOf("مصغّر","صغير","عريض","طولي","كبير","طولي نحيف","يومي")[it]},3) {previewSize=it}
     Spacer(Modifier.height(16.dp))
     val (width,height)=sizes[previewSize.coerceIn(sizes.indices)]
     val wallpapers=listOf(listOf(Color(0xFF081629),Color(0xFF38546C)),listOf(Color(0xFFEAD5AA),Color(0xFFF9F4E9)),listOf(Color(0xFF735DA5),Color(0xFFD3978F),Color(0xFF537E87)))
@@ -60,8 +60,10 @@ import java.time.Instant
         val previewTheme=if(p.widgetTheme!=WidgetTheme.AUTO)p.widgetTheme
             else if(background==1)WidgetTheme.LIGHT else WidgetTheme.DARK
         val preview=p.copy(widgetOpacity=opacity.toInt(),widgetTheme=previewTheme)
-        val remote=remember(preview,now.epochSecond/60,actualWidth,height) {
-            PrayerWidget.views(context,preview,now,actualWidth,height)
+        val remote=remember(preview,now.epochSecond/60,actualWidth,height,previewSize) {
+            // The last size is the "My day" card, rendered exactly as on the home screen.
+            if(previewSize==sizes.lastIndex) org.najwa.app.platform.DayWidget.render(context,preview,now,height)
+            else PrayerWidget.views(context,preview,now,actualWidth,height)
         }
         androidx.compose.ui.viewinterop.AndroidView(
             factory={android.widget.FrameLayout(it)},

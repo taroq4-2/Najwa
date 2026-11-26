@@ -1,8 +1,8 @@
 # Najwa third-party notices
 
-This notice covers the 53 external artifacts in the resolved application runtime graph reviewed on 2026-11-08, plus the two packaged Noto Sans Arabic fonts and the Amiri Quran font. Dependencies may be reduced by the release code shrinker; this notice deliberately retains their attributions. The internal `Najwa:core` module is application code and is not a third-party dependency.
+This notice covers the 53 external artifacts in the resolved application runtime graph reviewed on 2026-11-08, plus the two packaged Noto Sans Arabic fonts and the King Fahd Complex Hafs font and text. Dependencies may be reduced by the release code shrinker; this notice deliberately retains their attributions. The internal `Najwa:core` module is application code and is not a third-party dependency.
 
-License texts are packaged with the application in `assets/licenses/`: `Apache-2.0.txt`, `Boost-1.0.txt`, `Noto-OFL.txt`, and `Amiri-OFL.txt`. This notice is included there as `THIRD_PARTY_NOTICES.md`. These third-party licenses do not assign a license to Najwa's own source code, logo, or other original materials.
+License texts are packaged with the application in `assets/licenses/`: `Apache-2.0.txt`, `Boost-1.0.txt`, and `Noto-OFL.txt`. This notice is included there as `THIRD_PARTY_NOTICES.md`. These third-party licenses do not assign a license to Najwa's own source code, logo, or other original materials.
 
 ## AndroidX, Jetpack Compose, and Material components
 
@@ -54,11 +54,9 @@ Copyright 2022 The Noto Project Authors (https://github.com/notofonts/arabic)
 
 License: SIL Open Font License 1.1. The full copyright and license are in `Noto-OFL.txt`. The regular and bold TTF name tables both declare this copyright, version 2.010, and OFL 1.1. Font files: `noto_sans_arabic_regular.ttf` and `noto_sans_arabic_bold.ttf`.
 
-## Amiri Quran, version 1.003
+## King Fahd Glorious Quran Printing Complex (KFGQPC): Hafs font and Quran text
 
-Copyright 2010-2022 The Amiri Project Authors (https://github.com/aliftype/amiri)
-
-License: SIL Open Font License 1.1. The full copyright and license are in `Amiri-OFL.txt`. The mushaf reader draws the Quran text with `AmiriQuran.ttf` from the official Amiri 1.003 release (`Amiri-1.003.zip`, SHA-256 81af0aff7d2086d8af24cea7202f7546130997982534691373485cd96744d05e), unmodified and packaged as `amiri_quran.ttf`.
+The mushaf reader is set in the Complex's Hafs font (version 3.0, `KFGQPC Hafs V30.ttf`, packaged unchanged as `kfgqpc_hafs.ttf`) and shows the Complex's Hafs text from the certified document in the same package (`assets/quran/quran-hafs.txt`, text unchanged; each verse's end mark is kept in its own field). Source: https://qurancomplex.gov.sa/fonts/hafs (hafs-3.0.zip, SHA-256 DB6329E457B912E012160EC1EAA5CF15BD2116F47EA0F466A6C8951EA5F95C29). Property of the King Fahd Glorious Quran Printing Complex, all rights reserved; used in Najwa with the Complex's permission, held by the developer.
 
 ## GeoNames
 
@@ -68,9 +66,9 @@ The world extension uses the GeoNames [cities500 export and first-level administ
 
 Source: https://www.geonames.org/export/ · https://creativecommons.org/licenses/by/4.0/
 
-## Tanzil Quran Text
+## Tanzil Quran metadata
 
-The in-app mushaf shows the Tanzil Quran Text exactly as published (`assets/quran/quran-uthmani.txt`, copyright block included), and the reading tracker's letter counts (`assets/quran/page_letters.txt`) and page index (`assets/quran/index.txt`) are derived from the [Tanzil Quran Text](https://tanzil.net) (Uthmani, version 1.1), Copyright (C) 2007-2026 Tanzil Project, under [Creative Commons Attribution 3.0](https://creativecommons.org/licenses/by/3.0/), and its page metadata. The text is redistributed unchanged, as Tanzil's terms require; the derived files hold only numbers and surah names. Built 2026-11-25 with `scripts/build_quran_page_letters.py`.
+The mushaf's page, surah and juz index (`assets/quran/index.txt`) is derived from the Tanzil Quran metadata, Copyright (C) 2008-2009 Tanzil.info, under [Creative Commons Attribution 3.0](https://creativecommons.org/licenses/by/3.0/); the derived file holds only numbers and surah names. The Quran text itself is the King Fahd Complex text above. The reading tracker's letter counts (`assets/quran/page_letters.txt`) are counted from that text with `scripts/build_kfgqpc_assets.py`.
 
 ## Resolved external runtime artifacts
 

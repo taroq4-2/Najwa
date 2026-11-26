@@ -14,8 +14,10 @@ import org.najwa.app.NajwaRuntime
 import org.najwa.core.*
 import java.time.Instant
 
-@Composable fun SilenceScreen(runtime: NajwaRuntime,p: Preferences,s: Session?,now: Instant,onSave: (Preferences)->Unit,onAccess: ()->Unit,onRestore: ()->Unit,
+/** Silence during prayer: a settings page (no longer a tab of its own). */
+@Composable fun SilenceScreen(runtime: NajwaRuntime,p: Preferences,s: Session?,now: Instant,onBack: ()->Unit,onSave: (Preferences)->Unit,onAccess: ()->Unit,onRestore: ()->Unit,
     onSilenceNow: ()->Unit={},resumed: Int=0) {
+    BackLink(uiText("الرجوع إلى الإعدادات"),onBack)
     SilenceContent(p,s,now,runtime.audio.capable() && runtime.alarms.exactAccess,runtime.audio.fixed,onSave,onAccess,onRestore,onSilenceNow)
     if(p.autoSilent)BackgroundReadiness(resumed)
     if(org.najwa.app.BuildConfig.TRIAL_BUILD) {

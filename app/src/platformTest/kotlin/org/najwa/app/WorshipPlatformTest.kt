@@ -139,10 +139,11 @@ class WorshipPlatformTest {
     @Test fun pageLetterTableIsCompleteAndMatchesKnownPages() {
         val t=QuranPageLetters.table(app)!!
         assertEquals(QuranStore.PAGES,t.size)
-        // Page 1 is Al-Fatiha with its basmalah: 139 letters. Page 604 is Al-Ikhlas 47 + Al-Falaq 71 + An-Nas 80 (Uthmani spelling).
+        // Page 1 is Al-Fatiha with its basmalah: 139 letters. Page 604 is Al-Ikhlas 47 + Al-Falaq 71 + An-Nas 80.
+        // The total follows the King Fahd Complex's Hafs text (its own orthography).
         assertEquals(139,t[0])
         assertEquals(47+71+80,t[603])
-        assertEquals(326_159L,t.sumOf {it.toLong()})
+        assertEquals(325_883L,t.sumOf {it.toLong()})
         // Ranges wrap after the last page.
         assertEquals((t[603]+t[0]).toLong(),QuranPageLetters.letters(app,604,2))
     }

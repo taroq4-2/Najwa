@@ -67,6 +67,7 @@ private fun num(v: Long)=numbers.format(v)
                               ink: androidx.compose.ui.graphics.Color?=null,muted: androidx.compose.ui.graphics.Color?=null,
                               badge: androidx.compose.ui.graphics.Color?=null) {
     val c=LocalPalette.current
+    val context=LocalContext.current
     val text=ink ?: c.text
     val secondary=muted ?: c.secondary
     val reduced=reducedMotion()
@@ -78,7 +79,8 @@ private fun num(v: Long)=numbers.format(v)
     val description=stringResource(R.string.path_description,done,total)
     Column(modifier.semantics {contentDescription=description},horizontalAlignment=Alignment.CenterHorizontally) {
         if(large) {
-            Text(String.format(Locale.ROOT,"%d",done),color=text,fontSize=56.sp,fontWeight=FontWeight.Bold)
+            // Counts follow the digits chosen in Appearance.
+            Text(Counts.format(context,done.toLong()),color=text,fontSize=56.sp,fontWeight=FontWeight.Bold)
             Text(stringResource(R.string.path_of,total),color=secondary,fontSize=13.sp)
             Spacer(Modifier.height(8.dp))
         }
@@ -103,7 +105,7 @@ private fun num(v: Long)=numbers.format(v)
                 }
             }
             if(!large)Box(Modifier.size(34.dp).background(if(left==0)a.ink else badge ?: a.tint,CircleShape),contentAlignment=Alignment.Center) {
-                Text(String.format(Locale.ROOT,"%d",left),color=if(left==0)c.bg else text,fontSize=13.sp,fontWeight=FontWeight.Bold)
+                Text(Counts.format(context,left.toLong()),color=if(left==0)c.bg else text,fontSize=13.sp,fontWeight=FontWeight.Bold)
             }
         }
     }
@@ -121,7 +123,8 @@ private fun num(v: Long)=numbers.format(v)
     val s=loaded ?: return
     val scope=rememberCoroutineScope()
     var details by rememberSaveable {mutableStateOf(false)}
-    val gold=accent("amber");val teal=accent("teal");val blue=accent("blue")
+    // Two tones only: the brand green for the day's steps, gold for the hoped-for reward.
+    val gold=accent("amber");val teal=accent("teal")
     Panel(Modifier.fillMaxWidth().padding(bottom=14.dp),radius=24) {
         Column(Modifier.padding(18.dp),verticalArrangement=Arrangement.spacedBy(14.dp)) {
             Row(verticalAlignment=Alignment.CenterVertically) {
@@ -160,7 +163,7 @@ private fun num(v: Long)=numbers.format(v)
                             Box(Modifier.fillMaxWidth().height(8.dp).clip(CircleShape).background(c.track)) {
                                 Box(Modifier.fillMaxWidth(shown).fillMaxHeight().background(gold.ink,CircleShape))
                             }
-                            Text(stringResource(R.string.mushaf_hasanat_target,Counts.format(context,target)),color=c.secondary,fontSize=12.sp)
+                            Text(stringResource(R.string.day_goal_remaining,Counts.format(context,target-earned),Counts.format(context,target)),color=c.secondary,fontSize=12.sp)
                         }
                     }
                     if(s.virtues.hasanat!=null)Text(stringResource(R.string.day_reward_note),color=c.secondary,fontSize=11.sp)
@@ -168,16 +171,16 @@ private fun num(v: Long)=numbers.format(v)
             }
             Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
                 DayTile(stringResource(R.string.day_prayers_title),"${Counts.format(context,s.prayed.toLong())}/${Counts.format(context,5)}","check",teal,Modifier.weight(1f),onPrayers)
-                DayTile(stringResource(R.string.day_wird_title),"${Counts.format(context,s.pages.toLong())}/${Counts.format(context,s.pageGoal.toLong())}","mushaf",blue,Modifier.weight(1f),onMushaf)
+                DayTile(stringResource(R.string.day_wird_title),"${Counts.format(context,s.pages.toLong())}/${Counts.format(context,s.pageGoal.toLong())}","mushaf",teal,Modifier.weight(1f),onMushaf)
                 // The adhkar of this moment: morning from Fajr until Asr, evening after.
                 val morningFirst=s.adhkarNow==StepKind.MORNING_ADHKAR
                 // When the banner already shows that routine, the tile shows the day's adhkar count instead.
                 val bannerShows=s.next.kind==StepKind.MORNING_ADHKAR || s.next.kind==StepKind.EVENING_ADHKAR
                 val r=if(morningFirst)s.morning else s.evening
-                if(bannerShows)DayTile(stringResource(R.string.day_adhkar_today),Counts.adhkar(context,s.adhkarItems),"beads",accent("teal"),Modifier.weight(1f)) {onAdhkar(if(morningFirst)0 else 1)}
+                if(bannerShows)DayTile(stringResource(R.string.day_adhkar_today),Counts.adhkar(context,s.adhkarItems),"beads",teal,Modifier.weight(1f)) {onAdhkar(if(morningFirst)0 else 1)}
                 else DayTile(stringResource(if(morningFirst)R.string.adhkar_morning else R.string.adhkar_evening),
                     if(r.complete)stringResource(R.string.day_routine_done) else stringResource(R.string.next_left,Counts.adhkar(context,r.left)),
-                    if(r.complete)"shield" else if(morningFirst)"sun" else "moon",accent(if(morningFirst)"amber" else "violet"),Modifier.weight(1f)) {onAdhkar(if(morningFirst)0 else 1)}
+                    if(r.complete)"shield" else if(morningFirst)"sun" else "moon",teal,Modifier.weight(1f)) {onAdhkar(if(morningFirst)0 else 1)}
             }
             if(s.virtues.qualified.isNotEmpty()) Surface(onClick={details=true},shape=RoundedCornerShape(16.dp),color=c.surface,border=BorderStroke(1.dp,c.border)) {
                 Row(Modifier.fillMaxWidth().padding(horizontal=14.dp,vertical=10.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(10.dp)) {
@@ -199,12 +202,13 @@ private fun num(v: Long)=numbers.format(v)
     val (glyph,tone)=when(n.kind) {
         StepKind.PRAYER -> "mosque" to "teal"
         StepKind.AFTER_PRAYER_ADHKAR -> "beads" to "teal"
-        StepKind.MORNING_ADHKAR -> "sun" to "amber"
-        StepKind.EVENING_ADHKAR -> "moon" to "violet"
-        StepKind.WIRD -> "mushaf" to "blue"
-        StepKind.QADA -> "restore" to "coral"
-        StepKind.SLEEP_ADHKAR -> "bed" to "violet"
-        StepKind.LOG_PRAYERS -> "check" to "coral"
+        StepKind.MORNING_ADHKAR -> "sun" to "teal"
+        StepKind.EVENING_ADHKAR -> "moon" to "teal"
+        StepKind.WIRD -> "mushaf" to "teal"
+        // Only what needs your attention takes the warm tone.
+        StepKind.QADA -> "restore" to "amber"
+        StepKind.SLEEP_ADHKAR -> "bed" to "teal"
+        StepKind.LOG_PRAYERS -> "check" to "amber"
         StepKind.DONE -> "check" to "teal"
     }
     val a=accent(tone)

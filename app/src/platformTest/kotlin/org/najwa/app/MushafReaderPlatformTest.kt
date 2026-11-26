@@ -31,7 +31,9 @@ class MushafReaderPlatformTest {
 
     @Test fun pauseMarksAndTheHizbSignStayWithTheirWords() {
         val t=MushafLayout.tokens("۞ وَإِذْ قَالَ رَبُّكَ ۛ لِلْمَلَٰٓئِكَةِ",30)
-        assertEquals(listOf("۞ وَإِذْ","قَالَ","رَبُّكَ ۛ","لِلْمَلَٰٓئِكَةِ"),t.map {it.text})
+        // The verse's last word carries its ornament (drawn by the Complex font), joined by a no-break space.
+        assertEquals(listOf("۞ وَإِذْ","قَالَ","رَبُّكَ ۛ","لِلْمَلَٰٓئِكَةِ"+MushafLayout.VERSE_MARK_GAP+MushafLayout.verseMark(30)),t.map {it.text})
+        assertEquals("۝٣٠",MushafLayout.verseMark(30))
         assertEquals(listOf(null,null,null,30),t.map {it.aya})
     }
 

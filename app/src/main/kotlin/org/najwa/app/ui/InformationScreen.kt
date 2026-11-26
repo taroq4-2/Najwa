@@ -42,24 +42,18 @@ import org.najwa.core.Screen
             }
             Spacer(Modifier.height(16.dp))
             ExpandableSettings("دليل الاستخدام","خطوات البداية وضبط التنبيهات") {
-                Text(uiText("اختر المدينة وطريقة الحساب من إعدادات المواقيت، وراجع الأوقات مع تقويم مدينتك. خصّص الإقامة من صفحة تنبيهات الصلاة، والصمت من تبويب الصمت."),color=c.secondary)
-                Text(uiText("الخط: Noto Sans Arabic بترخيص SIL OFL. دليل المدن: GeoNames بترخيص CC BY 4.0."),color=c.secondary,fontSize=12.sp)
+                Text(stringResource(R.string.info_guide_body),color=c.secondary,lineHeight=22.sp)
             }
             Text(stringResource(R.string.brand_version,BuildConfig.VERSION_NAME),color=c.secondary,fontSize=12.sp)
         }
         Screen.ABOUT -> {
-            PageHeading("من نحن","نجوى · مواقيتك وهدوؤك في مكان واحد")
-            SettingsCard("عن نجوى") {
-                Text(uiText("نجوى — صلاتك أولاً، وضجيجك لاحقاً"),color=c.mint)
-                Text(uiText("نجوى تطبيق يساعدك على متابعة مواقيت الصلاة، وتلقي تنبيهات الأذان والإقامة، وضبط صمت الهاتف وقت الصلاة مع استعادة وضع الرنين السابق."),color=c.text)
-                Text(uiText("صُمّم بواجهة عربية واضحة، ويحسب المواقيت محليًا على جهازك حسب المدينة وطريقة الحساب التي تختارها."),color=c.secondary)
-                Text(uiText("تصميم وتطوير os73.com"),color=c.mint)
-            }
-            SettingsCard("استخدام يناسبك") {
-                Text(uiText("راجع المواقيت مع تقويم مدينتك، وحدّد مدة الإقامة حسب مسجدك. التذكيرات التي تختارها للإقامة ليست مواقيت معتمدة للمساجد."),color=c.secondary)
-                Text(stringResource(R.string.app_version_label,BuildConfig.VERSION_NAME),color=c.mint)
-                Text(uiText("الخط: Noto Sans Arabic بترخيص SIL OFL. مكونات AndroidX وKotlin بترخيص Apache-2.0."),color=c.secondary,fontSize=12.sp)
-            }
+            PageHeading(stringResource(R.string.about_title_page),stringResource(R.string.about_subtitle))
+            InfoSection(R.string.about_what_title,R.string.about_what_body)
+            InfoSection(R.string.about_features_title,R.string.about_features_body)
+            InfoSection(R.string.about_sources_title,R.string.about_sources_body)
+            InfoSection(R.string.about_note_title,R.string.about_note_body)
+            Text(stringResource(R.string.about_made_by),color=c.mint,fontWeight=androidx.compose.ui.text.font.FontWeight.Bold,modifier=Modifier.padding(top=4.dp))
+            Text(stringResource(R.string.app_version_label,BuildConfig.VERSION_NAME),color=c.secondary,fontSize=12.sp)
         }
         Screen.CONTACT -> {
             val focus=LocalFocusManager.current
@@ -89,25 +83,28 @@ import org.najwa.core.Screen
             }
         }
         Screen.PRIVACY -> {
-            PageHeading("سياسة الخصوصية","بياناتك تبقى على جهازك أثناء استخدام نجوى")
-            SettingsCard("ما نحفظه محليًا") {
-                Text(uiText("نحفظ المدينة أو الإحداثيات التي تدخلها، وطريقة حساب المواقيت، والمظهر، وخيارات الصمت والإشعارات والإقامة. يُحفظ أيضًا سجل محدود لاستعادة الرنين ومنع تكرار التنبيهات وآخر تنفيذ للجدولة."),color=c.text)
-                Text(androidx.compose.ui.res.stringResource(org.najwa.app.R.string.privacy_location),color=c.secondary)
-                Text(uiText("إذا اخترت ملف أذان، نحفظ نسخة خاصة منه داخل نجوى. نشارك هذا الصوت فقط مع مشغّل إشعارات Android لتشغيل التنبيه. لا نطلب الوصول العام إلى ملفات الهاتف."),color=c.secondary)
-            }
-            SettingsCard("الاتصال والمشاركة") {
-                Text(uiText("لا يستخدم نجوى إذن الإنترنت، ولا يحتوي على حسابات أو إعلانات أو أدوات تحليل وتتبع. لا يرسل بيانات المواقيت أو إعداداتك إلى خادم."),color=c.text)
-                Text(uiText("عند الضغط على التواصل، يفتح تطبيق البريد الذي تختاره. لا تُرسل رسالة تلقائيًا؛ أنت تختار ما ترسله، ويخضع البريد لخدمة البريد التي تستخدمها."),color=c.secondary)
-            }
-            SettingsCard("لماذا نطلب الأذونات؟") {
-                Text(uiText("سياسة الإشعارات وتعديل الصوت: لتغيير وضع الرنين واستعادته. المنبّهات الدقيقة: لتوقيت الصمت وتنبيهات الصلاة. عرض الإشعارات: لإظهار الأذان والإقامة. بدء التشغيل: لإعادة الجدولة بعد إعادة تشغيل الهاتف."),color=c.text)
-                Text(uiText("الويدجت يعرض المدينة والمواقيت على شاشة الهاتف الرئيسية. لا يضيف إذنًا للوصول إلى بياناتك."),color=c.secondary)
-            }
-            SettingsCard("التحكم والحذف") {
-                Text(uiText("يمكنك تعطيل الصمت والتنبيهات أو سحب الأذونات من إعدادات الهاتف. تُحذف البيانات المحلية عند مسح بيانات التطبيق أو إزالته. النسخ الاحتياطي للنظام معطّل."),color=c.text)
-                Text(stringResource(R.string.contact_privacy_email,CONTACT_EMAIL),color=c.mint)
-            }
+            PageHeading(stringResource(R.string.privacy_title_page),stringResource(R.string.privacy_subtitle))
+            Text(stringResource(R.string.privacy_updated,java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.LONG).withLocale(androidx.compose.ui.platform.LocalConfiguration.current.locales[0]).format(java.time.LocalDate.of(2026,11,26)),BuildConfig.VERSION_NAME),
+                color=c.secondary,fontSize=12.sp,modifier=Modifier.padding(bottom=12.dp))
+            InfoSection(R.string.privacy_short_title,R.string.privacy_short_body,highlight=true)
+            InfoSection(R.string.privacy_stored_title,R.string.privacy_stored_body)
+            InfoSection(R.string.privacy_location_title,R.string.privacy_location)
+            InfoSection(R.string.privacy_permissions_title,R.string.privacy_permissions_body)
+            InfoSection(R.string.privacy_leaves_title,R.string.privacy_leaves_body)
+            InfoSection(R.string.privacy_control_title,R.string.privacy_control_body)
+            Text(stringResource(R.string.contact_privacy_email,CONTACT_EMAIL),color=c.mint,modifier=Modifier.padding(top=4.dp))
         }
         else -> Unit
+    }
+}
+
+/** One titled section of the About and Privacy pages; bullet lines keep comfortable spacing. */
+@Composable private fun InfoSection(title: Int,body: Int,highlight: Boolean=false) {
+    val c=LocalPalette.current
+    Panel(Modifier.fillMaxWidth().padding(bottom=12.dp),radius=22,selected=highlight) {
+        Column(Modifier.padding(18.dp),verticalArrangement=Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(title),color=c.text,fontSize=16.sp,fontWeight=androidx.compose.ui.text.font.FontWeight.Bold)
+            Text(stringResource(body),color=if(highlight)c.text else c.secondary,fontSize=14.sp,lineHeight=24.sp)
+        }
     }
 }

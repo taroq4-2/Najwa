@@ -1,5 +1,14 @@
 package org.najwa.app.ui
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.key
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.pager.HorizontalPager
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.compose.animation.AnimatedVisibility
@@ -245,12 +254,20 @@ enum class AdhkarCategory(val key: String,val title: Int,val glyph: String,val t
     MOSQUE("mosque",R.string.adhkar_mosque,"mosque","mint",{Adhkar.mosque}),
 }
 
-@Composable fun AdhkarScreen(initialTab: Int,onBack: ()->Unit) {
+/**
+ * The adhkar tab (a root of the bottom bar). Each dhikr is a card of its own, turned like pages: its text in a
+ * classical naskh (Quranic passages in the Complex's font), and under it one large counter. Tapping the card or the
+ * counter counts; a finished dhikr turns to the next by itself. A list view keeps the whole category on one page.
+ */
+@Composable fun AdhkarScreen(initialTab: Int) {
     val c=LocalPalette.current
     val context=LocalContext.current
+    val scope=rememberCoroutineScope()
     val vibrator=remember {context.getSystemService(Vibrator::class.java)}
     val worship=remember {WorshipSettingsStore.read(context)}
     val companion=worship.enabled
+    val ui=remember {context.getSharedPreferences("adhkar_view",android.content.Context.MODE_PRIVATE)}
+    var listView by remember {mutableStateOf(ui.getBoolean("list",false))}
     var tab by rememberSaveable {mutableIntStateOf(initialTab.coerceIn(0,AdhkarCategory.entries.lastIndex))}
     val category=AdhkarCategory.entries[tab]
     val items=category.items()
@@ -259,15 +276,16 @@ enum class AdhkarCategory(val key: String,val title: Int,val glyph: String,val t
     var scale by remember {mutableFloatStateOf(AdhkarProgressStore.textScale(context))}
     // Taps that Undo can take back, newest last (this sitting only; every count is already saved).
     val history=remember(tab) {mutableStateListOf<Int>()}
-    var focus by rememberSaveable {mutableStateOf(worship.focus)}
+    // Focus (from the companion settings): no numbers or statistics around the dhikr.
+    val focus=companion && worship.focus
     var confirmRestart by remember {mutableStateOf(false)}
-    var finished by remember(tab) {mutableStateOf<Int?>(null)}
     var statusTick by remember {mutableIntStateOf(0)}
     // Dhikr texts use the calm reading colours (paper or night), like the mushaf.
     val appDark=LocalPalette.current.dark
     var mode by remember(appDark) {mutableStateOf(ReadingPrefs.resolve(context,appDark))}
     val r=readingColors(mode)
-    val a=accent(category.tone)
+    val a=accent("teal")
+    val pager=key(tab) {rememberPagerState(remaining.indexOfFirst {it>0}.coerceAtLeast(0)) {items.size}}
     fun save(next: List<Int>) {
         val before=remaining
         remaining=next
@@ -282,80 +300,77 @@ enum class AdhkarCategory(val key: String,val title: Int,val glyph: String,val t
         if(left<=0)return
         buzz(vibrator,left==1)
         history.add(i)
-        save(remaining.toMutableList().also {it[i]=left-1})
-        if(left==1)finished=i
+        val next=remaining.toMutableList().also {it[i]=left-1}
+        save(next)
+        // Finished: after a breath, the next open dhikr slides in.
+        if(left==1 && !listView) {
+            val open=(i+1 until items.size).firstOrNull {next[it]>0} ?: (0 until i).firstOrNull {next[it]>0}
+            if(open!=null)scope.launch {delay(520);pager.animateScrollToPage(open)}
+        }
     }
     fun undo() {
         val i=history.removeLastOrNull() ?: return
         if(remaining[i]<items[i].count)save(remaining.toMutableList().also {it[i]=it[i]+1})
-        if(finished==i)finished=null
+        if(!listView)scope.launch {pager.animateScrollToPage(i)}
     }
-    LaunchedEffect(finished) {if(finished!=null) {delay(2600);finished=null}}
 
-    BackLink(stringResource(R.string.tools_back),onBack)
-    if(!(companion && focus)) {
-        PageHeading(stringResource(R.string.adhkar_title),stringResource(R.string.adhkar_intro))
-        // Six categories as coloured tiles, three per row; with the companion on, each shows where you stand today.
-        val statuses=remember(statusTick) {AdhkarCategory.entries.associateWith {cat->
-            val list=cat.items()
-            AdhkarProgressStore.remaining(context,cat.key,list.size)?.let {r->RoutineState(r.count {it==0},list.size)}
-        }}
-        Column(verticalArrangement=Arrangement.spacedBy(8.dp)) {
-            AdhkarCategory.entries.chunked(3).forEach {row->
-                Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-                    row.forEach {cat->
-                        val ca=accent(cat.tone)
-                        val selected=cat==category
-                        Surface(onClick={tab=cat.ordinal},shape=RoundedCornerShape(18.dp),color=if(selected)ca.tint else c.surface,
-                            border=BorderStroke(if(selected)1.5.dp else 1.dp,if(selected)ca.ink else c.border),
-                            modifier=Modifier.weight(1f).fillMaxHeight().semantics {this.selected=selected}) {
-                            Column(Modifier.padding(vertical=12.dp,horizontal=6.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(6.dp)) {
-                                val st=statuses[cat]
-                                Glyph(if(companion && st?.complete==true)"shield" else cat.glyph,ca.ink,Modifier.size(24.dp))
-                                Text(stringResource(cat.title),color=if(selected)ca.ink else c.text,fontSize=13.sp,maxLines=1,
-                                    fontWeight=if(selected)FontWeight.Bold else FontWeight.Normal,overflow=TextOverflow.Ellipsis)
-                                if(companion && st!=null && st.done>0)Text(if(st.complete)stringResource(R.string.routine_complete) else stringResource(R.string.routine_left,st.left),
-                                    color=c.secondary,fontSize=11.sp,maxLines=1)
-                            }
-                        }
-                    }
+    // Title, with the switch between cards and the list.
+    Spacer(Modifier.height(22.dp))
+    Row(verticalAlignment=Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
+            Text(stringResource(R.string.adhkar_title),color=c.text,fontSize=28.sp,fontWeight=FontWeight.Bold,modifier=Modifier.semantics {heading()})
+            Text(stringResource(R.string.adhkar_intro),color=c.secondary,fontSize=13.sp)
+        }
+        Row(Modifier.clip(CircleShape).background(c.surface).border(1.dp,c.border,CircleShape).padding(3.dp)) {
+            listOf(false to stringResource(R.string.adhkar_view_cards),true to stringResource(R.string.adhkar_view_list)).forEach {(list,label)->
+                val on=listView==list
+                Text(label,Modifier.clip(CircleShape).background(if(on)c.selected else Color.Transparent)
+                    .selectable(on,role=Role.Tab) {listView=list;ui.edit().putBoolean("list",list).apply()}
+                    .padding(horizontal=12.dp,vertical=7.dp),color=if(on)c.mint else c.secondary,fontSize=12.sp,fontWeight=if(on)FontWeight.Bold else FontWeight.Normal)
+            }
+        }
+    }
+    Spacer(Modifier.height(16.dp))
+    // The six categories as one scrolling row of pills; a tick marks a category finished today.
+    val statuses=remember(statusTick) {AdhkarCategory.entries.associateWith {cat->
+        val list=cat.items()
+        AdhkarProgressStore.remaining(context,cat.key,list.size)?.let {st->RoutineState(st.count {it==0},list.size)}
+    }}
+    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+        AdhkarCategory.entries.forEach {cat->
+            val selected=cat==category
+            val complete=statuses[cat]?.complete==true
+            Row(Modifier.clip(CircleShape).background(if(selected)c.mint else c.surface).border(1.dp,if(selected)c.mint else c.border,CircleShape)
+                .selectable(selected,role=Role.Tab) {tab=cat.ordinal}.padding(horizontal=14.dp,vertical=9.dp),
+                verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(7.dp)) {
+                Glyph(if(complete)"check" else cat.glyph,if(selected)c.bg else c.mint,Modifier.size(17.dp))
+                Text(stringResource(cat.title),color=if(selected)c.bg else c.text,fontSize=13.sp,fontWeight=if(selected)FontWeight.Bold else FontWeight.Normal,maxLines=1)
+            }
+        }
+    }
+    Spacer(Modifier.height(16.dp))
+    val done=remaining.count {it==0}
+    // Where you stand: one segment per dhikr (finished, current, ahead).
+    if(!focus) {
+        Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(10.dp)) {
+            Row(Modifier.weight(1f),horizontalArrangement=Arrangement.spacedBy(3.dp)) {
+                items.indices.forEach {i->
+                    val color by androidx.compose.animation.animateColorAsState(when {
+                        remaining[i]==0 -> a.ink
+                        !listView && i==pager.currentPage -> a.ink.copy(alpha=.45f)
+                        else -> c.track
+                    },tween(250),label="segment")
+                    Box(Modifier.weight(1f).height(5.dp).clip(CircleShape).background(color))
                 }
             }
+            Text(stringResource(R.string.day_of_five,n(done),n(items.size)),color=c.secondary,fontSize=12.sp)
+            if(streak>0)Text(stringResource(R.string.streak_days,n(streak)),color=a.ink,fontSize=11.sp,fontWeight=FontWeight.Bold,
+                modifier=Modifier.background(a.tint,CircleShape).padding(horizontal=9.dp,vertical=3.dp))
         }
-        Spacer(Modifier.height(16.dp))
-    }
-    val done=remaining.count {it==0}
-    val shown by animateFloatAsState(done/items.size.toFloat(),tween(300),label="adhkar")
-    Row(verticalAlignment=Alignment.CenterVertically) {
-        // Focus mode hides progress and streaks: only the dhikr, its count and text size remain.
-        if(companion && focus) Spacer(Modifier.weight(1f)) else Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(6.dp)) {
-            Box(Modifier.fillMaxWidth().height(8.dp).clip(CircleShape).background(c.track)) {
-                Box(Modifier.fillMaxWidth(shown).fillMaxHeight().background(a.ink,CircleShape))
-            }
-            Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(R.string.adhkar_progress,done,items.size),color=c.secondary,fontSize=12.sp)
-                if(streak>0)Text(stringResource(R.string.streak_days,n(streak)),color=a.ink,fontSize=12.sp,fontWeight=FontWeight.Bold,
-                    modifier=Modifier.background(a.tint,CircleShape).padding(horizontal=10.dp,vertical=3.dp))
-            }
-        }
-        Spacer(Modifier.width(8.dp))
-        // Text size, remembered for every category.
-        TextButton(onClick={scale=(scale-.1f).coerceAtLeast(.8f);AdhkarProgressStore.setTextScale(context,scale)},Modifier.size(48.dp),
-            contentPadding=PaddingValues(0.dp)) {Text("أ−",color=c.mint,fontSize=15.sp,modifier=Modifier.semantics {contentDescription=context.getString(R.string.adhkar_smaller)})}
-        TextButton(onClick={scale=(scale+.1f).coerceAtMost(1.6f);AdhkarProgressStore.setTextScale(context,scale)},Modifier.size(48.dp),
-            contentPadding=PaddingValues(0.dp)) {Text("أ+",color=c.mint,fontSize=19.sp,modifier=Modifier.semantics {contentDescription=context.getString(R.string.adhkar_larger)})}
-        ReadingModeButton(mode) {mode=it}
-    }
-    if(companion) Row(Modifier.fillMaxWidth().padding(top=8.dp),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-        Pill(stringResource(if(focus)R.string.focus_exit else R.string.focus_enter),focus,glyph="sparkle") {focus=!focus}
-        if(history.isNotEmpty())Pill(stringResource(R.string.undo),false,glyph="undo") {undo()}
-    }
-    Spacer(Modifier.height(12.dp))
-    AnimatedVisibility(companion && finished!=null,enter=fadeIn(),exit=fadeOut()) {
-        Text(stringResource(R.string.dhikr_done),Modifier.fillMaxWidth().padding(bottom=10.dp),color=a.ink,fontSize=14.sp,fontWeight=FontWeight.Bold,textAlign=TextAlign.Center)
+        Spacer(Modifier.height(14.dp))
     }
     if(done==items.size) {
-        Panel(Modifier.fillMaxWidth().padding(bottom=12.dp),radius=22,selected=true) {
+        Panel(Modifier.fillMaxWidth().padding(bottom=14.dp),radius=22,selected=true) {
             Row(Modifier.padding(18.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(14.dp)) {
                 Box(Modifier.size(48.dp).background(c.green,CircleShape),contentAlignment=Alignment.Center) {Glyph(if(companion)"shield" else "check",c.bg,Modifier.size(24.dp))}
                 Column(Modifier.weight(1f)) {
@@ -366,20 +381,18 @@ enum class AdhkarCategory(val key: String,val title: Int,val glyph: String,val t
             }
         }
     }
-    if(companion && focus) {
-        // Focus: only the current dhikr, its path and a large surface to count on.
-        val i=remaining.indexOfFirst {it>0}
-        if(i>=0) {
-            val dhikr=items[i];val left=remaining[i]
-            Surface(onClick={tap(i)},shape=RoundedCornerShape(26.dp),color=r.page,border=BorderStroke(1.dp,r.frame),
-                modifier=Modifier.fillMaxWidth().heightIn(min=420.dp)) {
-                Column(Modifier.padding(24.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(18.dp)) {
-                    Text(dhikr.text,color=r.ink,fontSize=(22*scale).sp,lineHeight=(44*scale).sp,
-                        style=LocalTextStyle.current.copy(textDirection=TextDirection.Rtl,textAlign=TextAlign.Center))
-                    LuminousPath(dhikr.count-left,dhikr.count,a,large=true,ink=r.ink,muted=r.muted)
-                    Text(dhikr.source,color=r.muted,fontSize=12.sp)
-                }
-            }
+    if(!listView) {
+        val height=(androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp*.42f).coerceIn(280f,520f).dp
+        HorizontalPager(pager,Modifier.fillMaxWidth().height(height),pageSpacing=12.dp,key={"$tab-$it"}) {i->
+            DhikrCard(items[i],remaining.getOrElse(i) {0},i,items.size,r,a,scale,focus) {tap(i)}
+        }
+        Spacer(Modifier.height(18.dp))
+        // One large counter for the dhikr in view, between previous and next.
+        val i=pager.currentPage.coerceIn(0,items.lastIndex)
+        Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.SpaceEvenly) {
+            RoundIcon("back",stringResource(R.string.adhkar_previous),i>0) {scope.launch {pager.animateScrollToPage(i-1)}}
+            DhikrCounter(remaining.getOrElse(i) {0},items[i].count,a,focus) {tap(i)}
+            RoundIcon("chevron",stringResource(R.string.adhkar_next),i<items.lastIndex) {scope.launch {pager.animateScrollToPage(i+1)}}
         }
     } else items.forEachIndexed {i,dhikr->
         val left=remaining.getOrElse(i) {0}
@@ -388,36 +401,119 @@ enum class AdhkarCategory(val key: String,val title: Int,val glyph: String,val t
             Row(Modifier.fillMaxWidth().padding(bottom=8.dp).clip(RoundedCornerShape(16.dp)).background(c.surface).padding(horizontal=14.dp,vertical=10.dp),
                 verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(10.dp)) {
                 Glyph("check",a.ink,Modifier.size(18.dp))
-                Text(dhikr.text.lineSequence().last(),Modifier.weight(1f),color=c.secondary,fontSize=13.sp,maxLines=1,overflow=TextOverflow.Ellipsis)
+                Text(dhikr.text.lineSequence().last(),Modifier.weight(1f),color=c.secondary,fontSize=13.sp,maxLines=1,overflow=TextOverflow.Ellipsis,fontFamily=dhikrFont(dhikr.text))
             }
         } else Surface(onClick={tap(i)},shape=RoundedCornerShape(22.dp),color=r.page,border=BorderStroke(1.dp,r.frame),
             modifier=Modifier.fillMaxWidth().padding(bottom=12.dp).animateContentSize()) {
             Column(Modifier.padding(horizontal=20.dp,vertical=18.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
-                Text(dhikr.text,color=r.ink,fontSize=(20*scale).sp,lineHeight=(40*scale).sp,
+                Text(dhikr.text,color=r.ink,fontSize=(21*scale).sp,lineHeight=(42*scale).sp,fontFamily=dhikrFont(dhikr.text),
                     style=LocalTextStyle.current.copy(textDirection=TextDirection.Rtl,textAlign=TextAlign.Start))
                 Row(verticalAlignment=Alignment.CenterVertically) {
                     Text(dhikr.source,Modifier.weight(1f),color=r.muted,fontSize=12.sp)
-                    if(companion)LuminousPath(dhikr.count-left,dhikr.count,a,ink=r.ink,muted=r.muted,badge=r.band) else CountRing(dhikr.count-left,dhikr.count,a)
+                    CountRing(dhikr.count-left,dhikr.count,a)
                 }
             }
         }
     }
-    TextButton(onClick={
-        // Starting over loses today's progress in this category, so ask first when there is any.
-        if(companion && remaining.indices.any {remaining[it]<items[it].count})confirmRestart=true
-        else save(items.map {it.count})
-    }) {Text(stringResource(R.string.adhkar_restart))}
-    Text(stringResource(R.string.adhkar_source_note),color=c.secondary,fontSize=11.sp)
+    // Tools: undo, text size, reading colours and starting over.
+    Spacer(Modifier.height(18.dp))
+    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(c.surface).border(1.dp,c.border,RoundedCornerShape(20.dp)).padding(horizontal=6.dp,vertical=4.dp),
+        verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.SpaceEvenly) {
+        TextButton(onClick={undo()},enabled=history.isNotEmpty()) {Glyph("undo",if(history.isNotEmpty())c.mint else c.track,Modifier.size(18.dp));Spacer(Modifier.width(6.dp));Text(stringResource(R.string.undo),fontSize=13.sp)}
+        TextButton(onClick={scale=(scale-.1f).coerceAtLeast(.8f);AdhkarProgressStore.setTextScale(context,scale)},Modifier.size(48.dp),
+            contentPadding=PaddingValues(0.dp)) {Text("أ−",color=c.mint,fontSize=15.sp,modifier=Modifier.semantics {contentDescription=context.getString(R.string.adhkar_smaller)})}
+        TextButton(onClick={scale=(scale+.1f).coerceAtMost(1.6f);AdhkarProgressStore.setTextScale(context,scale)},Modifier.size(48.dp),
+            contentPadding=PaddingValues(0.dp)) {Text("أ+",color=c.mint,fontSize=19.sp,modifier=Modifier.semantics {contentDescription=context.getString(R.string.adhkar_larger)})}
+        ReadingModeButton(mode) {mode=it}
+        val restartLabel=stringResource(R.string.adhkar_restart)
+        TextButton(onClick={
+            // Starting over loses today's progress in this category, so ask first when there is any.
+            if(companion && remaining.indices.any {remaining[it]<items[it].count})confirmRestart=true
+            else {save(items.map {it.count});scope.launch {pager.scrollToPage(0)}}
+        },Modifier.semantics {contentDescription=restartLabel}) {Glyph("restore",c.mint,Modifier.size(18.dp))}
+    }
+    Text(stringResource(R.string.adhkar_source_note),color=c.secondary,fontSize=11.sp,modifier=Modifier.padding(top=12.dp))
     if(confirmRestart)AlertDialog(onDismissRequest={confirmRestart=false},title={Text(stringResource(R.string.adhkar_restart))},
         text={Text(stringResource(R.string.restart_confirm_text))},
         confirmButton={TextButton(onClick={
             // A new session: what was completed stays recorded; the next full reading is a separate record.
             WorshipRecorder.onAdhkarRestart(context,category.key)
-            history.clear();finished=null
+            history.clear()
             save(items.map {it.count})
+            scope.launch {pager.scrollToPage(0)}
             confirmRestart=false
         }) {Text(stringResource(R.string.restart_confirm))}},
         dismissButton={TextButton(onClick={confirmRestart=false}) {Text(stringResource(R.string.action_cancel))}})
+}
+
+/** Quranic passages (Uthmani spelling, with the wasla alif) take the Complex's font; the rest a classical naskh. */
+private fun dhikrFont(text: String)=if('ٱ' in text) QuranFont else FontFamily.Serif
+
+/** One dhikr as a page: its place and repetitions, the text centred, a small ornament, and its source. */
+@Composable private fun DhikrCard(d: Dhikr,left: Int,index: Int,total: Int,r: ReadingColors,a: Accent,scale: Float,focus: Boolean,onTap: ()->Unit) {
+    val finished=left==0
+    val shape=RoundedCornerShape(28.dp)
+    Surface(onClick=onTap,shape=shape,color=r.page,border=BorderStroke(1.dp,if(finished)a.ink.copy(alpha=.5f) else r.frame),modifier=Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize().padding(horizontal=20.dp,vertical=16.dp)) {
+            Row(verticalAlignment=Alignment.CenterVertically) {
+                if(!focus)Text(stringResource(R.string.day_of_five,n(index+1),n(total)),color=r.muted,fontSize=12.sp)
+                Spacer(Modifier.weight(1f))
+                if(finished)Row(Modifier.background(a.tint,CircleShape).padding(horizontal=10.dp,vertical=4.dp),verticalAlignment=Alignment.CenterVertically,
+                    horizontalArrangement=Arrangement.spacedBy(5.dp)) {Glyph("check",a.ink,Modifier.size(14.dp));Text(stringResource(R.string.day_routine_done),color=a.ink,fontSize=12.sp,fontWeight=FontWeight.Bold)}
+                else if(d.count>1)Text(stringResource(R.string.adhkar_times,n(d.count)),color=r.accentInk,fontSize=12.sp,fontWeight=FontWeight.Bold,
+                    modifier=Modifier.border(1.dp,r.frame,CircleShape).padding(horizontal=10.dp,vertical=4.dp))
+            }
+            // Short texts sit in the middle of the card; long ones scroll inside it.
+            BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
+                val min=maxHeight
+                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+                    Column(Modifier.fillMaxWidth().heightIn(min=min).padding(vertical=10.dp),verticalArrangement=Arrangement.Center) {
+                        Text(d.text,Modifier.fillMaxWidth().graphicsLayer {alpha=if(finished).55f else 1f},color=r.ink,fontSize=(21*scale).sp,lineHeight=(42*scale).sp,
+                            fontFamily=dhikrFont(d.text),style=LocalTextStyle.current.copy(textDirection=TextDirection.Rtl,textAlign=TextAlign.Center))
+                    }
+                }
+            }
+            // A thin ornament, then the source.
+            Row(Modifier.fillMaxWidth().padding(vertical=8.dp),verticalAlignment=Alignment.CenterVertically) {
+                Box(Modifier.weight(1f).height(1.dp).background(r.frame))
+                Box(Modifier.padding(horizontal=10.dp).size(7.dp).graphicsLayer {rotationZ=45f}.background(r.marker))
+                Box(Modifier.weight(1f).height(1.dp).background(r.frame))
+            }
+            Text(d.source,Modifier.fillMaxWidth(),color=r.muted,fontSize=12.sp,textAlign=TextAlign.Center,maxLines=2,overflow=TextOverflow.Ellipsis)
+        }
+    }
+}
+
+/** The large counter: a ring that fills with each repetition, what is left in the middle, a gentle press. */
+@Composable private fun DhikrCounter(left: Int,total: Int,a: Accent,focus: Boolean,onTap: ()->Unit) {
+    val c=LocalPalette.current
+    val scope=rememberCoroutineScope()
+    val press=remember {Animatable(1f)}
+    val shown by animateFloatAsState(if(total<=0) 0f else (total-left)/total.toFloat(),tween(240),label="counter")
+    val label=stringResource(R.string.adhkar_count_label,n(left))
+    Box(Modifier.size(132.dp).graphicsLayer {scaleX=press.value;scaleY=press.value}.clip(CircleShape)
+        .background(androidx.compose.ui.graphics.Brush.radialGradient(listOf(a.tint,c.surface)))
+        .clickable(role=Role.Button,onClickLabel=label) {onTap();scope.launch {press.snapTo(.93f);press.animateTo(1f,spring(dampingRatio=.45f,stiffness=600f))}}
+        .semantics {contentDescription=label},contentAlignment=Alignment.Center) {
+        Canvas(Modifier.fillMaxSize().padding(6.dp)) {
+            val w=6.dp.toPx();val rad=size.minDimension/2-w/2
+            drawCircle(c.track,rad,style=Stroke(w))
+            drawArc(a.ink,-90f,360f*shown,false,Offset(center.x-rad,center.y-rad),Size(rad*2,rad*2),style=Stroke(w,cap=StrokeCap.Round))
+        }
+        if(left==0)Glyph("check",a.ink,Modifier.size(42.dp))
+        else Column(horizontalAlignment=Alignment.CenterHorizontally) {
+            Text(n(left),color=a.ink,fontSize=38.sp,fontWeight=FontWeight.Bold,lineHeight=42.sp)
+            Text(if(left==total || focus)stringResource(R.string.adhkar_tap_count) else stringResource(R.string.path_of,total),color=c.secondary,fontSize=11.sp)
+        }
+    }
+}
+
+/** A quiet round button for previous / next. */
+@Composable private fun RoundIcon(glyph: String,label: String,enabled: Boolean,onClick: ()->Unit) {
+    val c=LocalPalette.current
+    Box(Modifier.size(52.dp).clip(CircleShape).background(c.surface).border(1.dp,c.border,CircleShape)
+        .clickable(enabled=enabled,role=Role.Button,onClickLabel=label,onClick=onClick).semantics {contentDescription=label},
+        contentAlignment=Alignment.Center) {Glyph(glyph,if(enabled)c.mint else c.track,Modifier.size(20.dp))}
 }
 
 /** A small ring that fills with each repetition and shows how many are left. */
@@ -437,7 +533,8 @@ enum class AdhkarCategory(val key: String,val title: Int,val glyph: String,val t
 
 // ───────────────────────────── Quran reading ─────────────────────────────
 
-@Composable fun QuranScreen(onMushaf: (Int?,Boolean)->Unit,onBack: ()->Unit) {
+/** The mushaf tab: continue reading, the khatma plan and the day's portion (a root of the bottom bar). */
+@Composable fun QuranScreen(onMushaf: (Int?,Boolean)->Unit) {
     val c=LocalPalette.current
     val context=LocalContext.current
     var q by remember {mutableStateOf(QuranStore.read(context))}
@@ -466,7 +563,6 @@ enum class AdhkarCategory(val key: String,val title: Int,val glyph: String,val t
         val before=q;refresh(QuranStore.addPages(context,pages),before)
     }
     val a=accent("teal")
-    BackLink(stringResource(R.string.tools_back),onBack)
     PageHeading(stringResource(R.string.quran_title),stringResource(R.string.mushaf_intro))
     // The mushaf itself: continue where you stopped, or choose a surah or juz.
     val last=remember {QuranStore.lastViewed(context)}
@@ -501,7 +597,7 @@ enum class AdhkarCategory(val key: String,val title: Int,val glyph: String,val t
                 }
             }
             Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(6.dp)) {
-                Text(if(q.page==0)stringResource(R.string.quran_start) else stringResource(R.string.quran_position,n(q.page),n(juzOfPage(q.page))),
+                Text(if(q.page==0)stringResource(R.string.quran_start) else stringResource(R.string.quran_khatma_at,n(q.page),n(juzOfPage(q.page))),
                     color=c.text,fontSize=16.sp,fontWeight=FontWeight.Bold)
                 Text(stringResource(R.string.quran_khatmas,n(q.khatmas)),color=c.secondary,fontSize=13.sp)
                 if(streak>0)Text(stringResource(R.string.streak_days,n(streak)),color=a.ink,fontSize=12.sp,fontWeight=FontWeight.Bold,

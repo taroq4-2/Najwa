@@ -26,7 +26,7 @@ object MushafSearch {
     fun normalize(text: String): String=buildString(text.length) {
         text.forEach {ch->
             when {
-                ch in 'ً'..'ٟ' || ch=='ٰ' || ch in 'ۖ'..'ۭ' || ch=='ـ' -> {}
+                ch in 'ً'..'ٟ' || ch=='ٰ' || ch in 'ۖ'..'ۭ' || ch in 'ࣰ'..'ࣲ' || ch=='ـ' -> {}
                 ch=='ٱ' || ch=='أ' || ch=='إ' || ch=='آ' -> append('ا')
                 ch=='ؤ' -> append('و')
                 ch=='ئ' || ch=='ى' -> append('ي')

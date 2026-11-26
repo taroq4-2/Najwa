@@ -40,9 +40,10 @@ class PrayerWidget: AppWidgetProvider() {
             val manager=AppWidgetManager.getInstance(context)
             manager.isRequestPinAppWidgetSupported && manager.requestPinAppWidget(component(context),null,null)
         }.getOrDefault(false)
-        fun views(context: Context,p: Preferences,now: Instant=Instant.now(),width: Int=360,height: Int=240,data: WidgetPrayer?=widgetPrayer(now,p),colors: WidgetColors=widgetColors(context,p)): RemoteViews {
+        /** [into] renders the prayer part of another layout that uses the same ids (the "My day" card). */
+        fun views(context: Context,p: Preferences,now: Instant=Instant.now(),width: Int=360,height: Int=240,data: WidgetPrayer?=widgetPrayer(now,p),colors: WidgetColors=widgetColors(context,p),into: Int?=null): RemoteViews {
             val strings=context.prayerLanguage()
-            val layout=when {
+            val layout=into ?: when {
                 width<110 || height<100 -> R.layout.prayer_widget_tiny
                 width>=360 && height>=240 -> R.layout.prayer_widget_large
                 width>=280 && height>=180 -> R.layout.prayer_widget_medium
@@ -109,7 +110,7 @@ class PrayerWidget: AppWidgetProvider() {
                     iqama -> "${strings.getString(R.string.system_iqama)} $time"
                     praying -> strings.getString(R.string.widget_prayer_until,time)
                     // Roomy sizes also show when the iqama of the next prayer will be.
-                    data.iqamaLabel!=null && (layout==R.layout.prayer_widget_large || layout==R.layout.prayer_widget_medium) ->
+                    data.iqamaLabel!=null && (layout==R.layout.prayer_widget_large || layout==R.layout.prayer_widget_medium || layout==R.layout.day_widget) ->
                         "$time · ${strings.getString(R.string.system_iqama)} ${strings.prayerTime(data.time.plusSeconds(p.iqamaMinutes.getValue(data.prayer)*60L),p)}"
                     else -> time
                 })

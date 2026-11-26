@@ -159,7 +159,7 @@
         <item>Appearance and transparency</item>
         <item>A subtle background with a readable countdown</item>
         <item>Auto adapts to the wallpaper when available and otherwise follows the system theme.</item>
-        <item>Only the background is translucent so text remains readable on light and dark wallpapers.</item>
+        <item>From a full background to fully transparent. With high transparency, pick the style that suits your wallpaper so the text stays clear.</item>
         <item>Widget preview</item>
         <item>Night</item>
         <item>Light</item>
@@ -223,5 +223,6 @@
         <item>Middle of the night</item>
         <item>One seventh of the night</item>
         <item>Twilight angle fraction</item>
+        <item>My day</item>
     </string-array>
 </resources>

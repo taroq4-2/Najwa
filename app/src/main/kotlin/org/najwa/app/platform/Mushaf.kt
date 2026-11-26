@@ -3,7 +3,8 @@ package org.najwa.app.platform
 import android.content.Context
 
 /**
- * The mushaf text for the in-app reader: Tanzil Quran Text (Uthmani), bundled unchanged in assets/quran/quran-uthmani.txt,
+ * The mushaf text for the in-app reader: the King Fahd Complex (KFGQPC) Hafs text, from the Complex's certified
+ * document, bundled in assets/quran/quran-hafs.txt (used with the Complex's permission),
  * with the page, surah and juz index of the 604-page Madinah mushaf (assets/quran/index.txt). Loaded once, off the main thread.
  */
 object Mushaf {
@@ -23,9 +24,10 @@ object Mushaf {
         fun juzOf(page: Int): Int {val first=pageStarts[page.coerceIn(1,PAGES)-1];return juzStarts.indexOfLast {it<=first}+1}
         fun pageOfJuz(juz: Int)=pageOf(juzStarts[juz.coerceIn(1,30)-1])
         fun pageOf(verseIndex: Int)=pageStarts.indexOfLast {it<=verseIndex}+1
-        /** Verse 1 of every surah but Al-Fatiha and At-Tawbah starts with the basmalah in the text; the reader shows it as a heading. */
-        fun displayText(v: Verse): String =
-            if(v.aya==1 && v.sura!=1 && v.sura!=9) v.text.split(' ').drop(4).joinToString(" ") else v.text
+        /** The Complex's text keeps the basmalah as a heading, outside verse 1 (except Al-Fatiha, where it is verse 1). */
+        fun displayText(v: Verse): String=v.text
+        /** The basmalah exactly as the Complex writes it (Al-Fatiha 1:1). */
+        val basmalah get()=verses.first().text
     }
 
     @Volatile private var cache: Data?=null
@@ -33,7 +35,7 @@ object Mushaf {
     @Synchronized fun load(context: Context): Data {
         cache?.let {return it}
         val verses=ArrayList<Verse>(6236)
-        context.assets.open("quran/quran-uthmani.txt").bufferedReader().useLines {lines->
+        context.assets.open("quran/quran-hafs.txt").bufferedReader().useLines {lines->
             lines.forEach {line->
                 if(line.isEmpty() || line.startsWith("#"))return@forEach
                 val a=line.indexOf('|');val b=line.indexOf('|',a+1)

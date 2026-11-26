@@ -3,7 +3,6 @@ package org.najwa.app.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,6 +14,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -36,6 +37,7 @@ import org.najwa.app.platform.AyahMarks
 import org.najwa.app.platform.Counts
 import org.najwa.app.platform.Mushaf
 import org.najwa.app.platform.MushafSearch
+import org.najwa.app.platform.MushafLayout
 import org.najwa.app.platform.QuranStore
 
 /** Reading view: the printed page, or the page's verses in large flowing text. */
@@ -45,48 +47,72 @@ object MushafViewPrefs {
     private fun prefs(context: android.content.Context)=context.getSharedPreferences("reading",android.content.Context.MODE_PRIVATE)
     fun view(context: android.content.Context)=runCatching {MushafView.valueOf(prefs(context).getString("view",null) ?: "")}.getOrDefault(MushafView.PAGE)
     fun setView(context: android.content.Context,v: MushafView)=prefs(context).edit().putString("view",v.name).apply()
-    fun largeSize(context: android.content.Context)=prefs(context).getFloat("largeSize",30f).coerceIn(22f,48f)
-    fun setLargeSize(context: android.content.Context,size: Float)=prefs(context).edit().putFloat("largeSize",size.coerceIn(22f,48f)).apply()
+    /** Flowing text sizes (sp): pinching below the smallest returns to the printed page. */
+    const val MIN_SIZE=22f
+    const val MAX_SIZE=60f
+    const val DOUBLE_TAP_SIZE=34f
+    /** The printed page's text, in sp, as the start of a pinch. */
+    const val PAGE_SIZE=24f
+    fun largeSize(context: android.content.Context)=prefs(context).getFloat("largeSize",32f).coerceIn(MIN_SIZE,MAX_SIZE)
+    fun setLargeSize(context: android.content.Context,size: Float)=prefs(context).edit().putFloat("largeSize",size.coerceIn(MIN_SIZE,MAX_SIZE)).apply()
 }
 
 /**
  * Large reading: the same page's verses as flowing text in a large size, with headings and verse numbers. Easier on
  * the eyes, and read verse by verse by screen readers.
  */
-@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
-@Composable fun LargeReadingPage(d: Mushaf.Data,page: Int,r: ReadingColors,size: Float,marks: PageDecor,onLongPress: (Int)->Unit) {
+@Composable fun LargeReadingPage(d: Mushaf.Data,page: Int,r: ReadingColors,size: Float,marks: PageDecor,onDoubleTap: ()->Unit,onLongPress: (Int)->Unit) {
     val verses=d.page(page)
     val base=d.firstIndex(page)
+    // Verses run on in one paragraph per surah, as in a printed mushaf; a surah that starts here opens with its heading.
+    val runs=remember(page) {
+        val out=mutableListOf<MutableList<Int>>()
+        verses.forEachIndexed {n,v->if(v.aya==1 || out.isEmpty())out+=mutableListOf(n) else out.last()+=n}
+        out
+    }
     Column(Modifier.fillMaxSize().clip(RoundedCornerShape(10.dp)).background(r.page).verticalScroll(rememberScrollState())
         .padding(horizontal=18.dp,vertical=16.dp),verticalArrangement=Arrangement.spacedBy(10.dp)) {
         Text(Mushaf.arabicDigits(page),color=r.muted,fontSize=13.sp,modifier=Modifier.align(Alignment.CenterHorizontally))
-        verses.forEachIndexed {n,v->
-            if(v.aya==1) {
-                val s=d.surahs[v.sura-1]
+        runs.forEach {run->
+            val first=verses[run.first()]
+            if(first.aya==1) {
+                val s=d.surahs[first.sura-1]
                 Surface(shape=RoundedCornerShape(12.dp),color=r.band,border=BorderStroke(.8.dp,r.frame),modifier=Modifier.fillMaxWidth()) {
                     Text("سورة ${s.name}",color=r.accentInk,fontSize=(size*.8f).sp,fontFamily=QuranFont,textAlign=TextAlign.Center,modifier=Modifier.padding(vertical=6.dp))
                 }
-                if(v.sura!=1 && v.sura!=9)Text("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",color=r.ink,fontSize=size.sp,fontFamily=QuranFont,
+                if(first.sura!=1 && first.sura!=9)Text(d.basmalah,color=r.ink,fontSize=size.sp,fontFamily=QuranFont,
                     textAlign=TextAlign.Center,modifier=Modifier.fillMaxWidth())
             }
-            val index=base+n
-            val tone=when {
-                index==marks.flash -> r.marker.copy(alpha=.3f)
-                index in marks.highlighted -> r.marker.copy(alpha=.16f)
-                else -> androidx.compose.ui.graphics.Color.Transparent
+            val text=buildAnnotatedString {
+                run.forEach {n->
+                    val v=verses[n];val index=base+n
+                    val tone=when {
+                        index==marks.flash -> r.marker.copy(alpha=.3f)
+                        index in marks.highlighted -> r.marker.copy(alpha=.16f)
+                        else -> androidx.compose.ui.graphics.Color.Unspecified
+                    }
+                    val start=length
+                    withStyle(SpanStyle(background=tone)) {append(d.displayText(v))}
+                    // The Complex font's own verse ornament.
+                    withStyle(SpanStyle(color=r.marker,background=tone)) {append(MushafLayout.VERSE_MARK_GAP+MushafLayout.verseMark(v.aya))}
+                    if(index in marks.bookmarked)withStyle(SpanStyle(color=r.marker)) {append(" ◆")}
+                    addStringAnnotation("verse",index.toString(),start,length)
+                    append(" ")
+                }
             }
-            Text(buildAnnotatedString {
-                append(d.displayText(v))
-                withStyle(SpanStyle(color=r.marker,fontSize=(size*.75f).sp)) {append(" ﴿${Mushaf.arabicDigits(v.aya)}﴾")}
-                if(index in marks.bookmarked)withStyle(SpanStyle(color=r.marker)) {append(" ◆")}
-            },color=r.ink,fontSize=size.sp,lineHeight=(size*2f).sp,fontFamily=QuranFont,
-                style=LocalTextStyle.current.copy(textDirection=TextDirection.Rtl,textAlign=TextAlign.Start),
-                modifier=Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(tone)
-                    .combinedClickable(onClick={},onLongClick={onLongPress(index)}))
+            var layout by remember {mutableStateOf<androidx.compose.ui.text.TextLayoutResult?>(null)}
+            Text(text,color=r.ink,fontSize=size.sp,lineHeight=(size*2f).sp,fontFamily=QuranFont,
+                style=LocalTextStyle.current.copy(textDirection=TextDirection.Rtl,textAlign=TextAlign.Justify),
+                onTextLayout={layout=it},
+                modifier=Modifier.fillMaxWidth().pointerInput(text) {
+                    detectTapGestures(onDoubleTap={onDoubleTap()},onLongPress={pos->
+                        val offset=layout?.getOffsetForPosition(pos) ?: return@detectTapGestures
+                        text.getStringAnnotations("verse",offset,offset).firstOrNull()?.item?.toIntOrNull()?.let(onLongPress)
+                    })
+                })
         }
     }
 }
-
 
 /** Search the mushaf: results by surah and verse, each opening its page with the verse lit for a moment. */
 @Composable fun MushafSearchDialog(d: Mushaf.Data,r: ReadingColors,onDismiss: ()->Unit,onOpen: (MushafSearch.Hit)->Unit) {

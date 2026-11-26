@@ -159,7 +159,7 @@
         <item>Görünüm ve şeffaflık</item>
         <item>Okunabilir bir geri sayımla ince bir arka plan</item>
         <item>Otomatik olarak var olduğunda duvar kağıdına uyar ve sistem temasını takip eder.</item>
-        <item>Sadece arka plan şeffaflık gösterir, böylece açık ve karanlık duvar kağıtlarında metin okunur.</item>
+        <item>Tam arka plandan tamamen şeffafa kadar. Yüksek şeffaflıkta yazının net kalması için duvar kâğıdına uyan görünümü seç.</item>
         <item>Widget ön görünümü</item>
         <item>Gece .</item>
         <item>Işık</item>
@@ -223,5 +223,6 @@
         <item>Gecenin ortasında</item>
         <item>Gecenin yedinci saatinde</item>
         <item>Karanlık açısı bölümü</item>
+        <item>Günüm</item>
     </string-array>
 </resources>

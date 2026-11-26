@@ -11,6 +11,10 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.*
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
@@ -173,14 +177,19 @@ import java.time.Instant
                         Screen.SUNNAH -> SunnahScreen(prefs,{save(it)},::back)
                         Screen.ADVANCED -> AdvancedScreen(prefs,{save(it)},{secondCityDialog=true},{navigate(Screen.BACKUP)},::back)
                         Screen.TASBEEH -> TasbeehScreen(::back)
-                        Screen.ADHKAR -> AdhkarScreen(adhkarTab,::back)
+                        Screen.ADHKAR -> AdhkarScreen(adhkarTab)
                         Screen.TIMETABLE -> TimetableScreen(prefs,::back)
                         Screen.PRAYER_LOG -> PrayerLogScreen(runtime,prefs,{save(it)},{adhkarTab=2;navigate(Screen.ADHKAR)}) {log=runtime.log();back()}
-                        Screen.QURAN -> QuranScreen({page,openIndex->mushafPage=page ?: 0;mushafIndex=openIndex;navigate(Screen.MUSHAF)},::back)
+                        Screen.QURAN -> QuranScreen({page,openIndex->mushafPage=page ?: 0;mushafIndex=openIndex;navigate(Screen.MUSHAF)})
                         Screen.HOME -> {
-                            if(!cityConfirmed) {
-                                Text(stringResource(R.string.city_unconfirmed),color=colors.amber,modifier=Modifier.padding(vertical=8.dp))
-                                TextButton(onClick={cityDialog=true}) {Text(stringResource(R.string.en_setup_choose_city))}
+                            // An unconfirmed city: one quiet notice with its action, above the header.
+                            if(!cityConfirmed) Surface(onClick={cityDialog=true},color=colors.amber.copy(alpha=.10f),shape=RoundedCornerShape(18.dp),
+                                border=BorderStroke(1.dp,colors.amber.copy(alpha=.35f)),modifier=Modifier.fillMaxWidth().padding(top=14.dp)) {
+                                Row(Modifier.padding(horizontal=14.dp,vertical=10.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(10.dp)) {
+                                    Glyph("pin",colors.amber,Modifier.size(18.dp))
+                                    Text(stringResource(R.string.city_unconfirmed),Modifier.weight(1f),color=colors.text,fontSize=12.sp,lineHeight=18.sp)
+                                    Text(stringResource(R.string.en_setup_choose_city),color=colors.amber,fontSize=12.sp,fontWeight=FontWeight.Bold)
+                                }
                             }
                             HomeScreen(prefs,now,current,times,runtime.error==null && days.all {it.complete} && prefs.enabled.isNotEmpty() && runtime.audio.capable() && runtime.alarms.exactAccess,onCity={cityDialog=true},
                                 onSilence={navigate(Screen.SILENCE)},onQibla={navigate(Screen.QIBLA)},activeUntil=session?.takeIf {it.state==SessionState.ACTIVE}?.let {Instant.ofEpochMilli(it.deadline)},
@@ -188,7 +197,7 @@ import java.time.Instant
                                 onTogglePrayed=if(prefs.prayerLog) {prayer->scope.launch {withContext(prayerDispatcher) {runtime.setPrayed(current.date,prayer,!log.prayed(current.date,prayer))};log=runtime.log()}} else null,
                                 onTool={navigate(it)},mosqueName=prefs.activeMosque?.let {id->mosques.firstOrNull {it.id==id}?.name},onAdhkar={adhkarTab=it;navigate(Screen.ADHKAR)})
                         }
-                        Screen.SILENCE -> SilenceScreen(runtime,prefs,session,now,onSave={save(it)},onAccess={navigate(Screen.PERMISSIONS)},onRestore={
+                        Screen.SILENCE -> SilenceScreen(runtime,prefs,session,now,onBack=::back,onSave={save(it)},onAccess={navigate(Screen.PERMISSIONS)},onRestore={
                             scope.launch { withContext(prayerDispatcher) {runtime.restore()};session=runtime.displayedSession() }
                         },onSilenceNow=::silenceNow,resumed=resumed)
                         Screen.QIBLA -> QiblaScreen(prefs,::back) {cityDialog=true}
@@ -248,16 +257,35 @@ import java.time.Instant
             .verticalScroll(scroll).padding(horizontal=if(screen==Screen.HOME)17.dp else 20.dp),content=content)
     }
 }
+/**
+ * The bottom bar: a floating rounded bar of four tabs (home, mushaf, adhkar, settings). The chosen tab widens into a
+ * tinted pill with its name; the others keep their icon and a small name, so every tab stays recognisable.
+ */
 @Composable fun BottomNavigation(tab: Int,onTab: (Int)->Unit) {
     val c=LocalPalette.current
-    Column {
-        HorizontalDivider(color=c.border)
-        NavigationBar(containerColor=c.surface,tonalElevation=0.dp,windowInsets=WindowInsets(0,0,0,0)) {
-        listOf(stringResource(R.string.en_tab_home) to "home",stringResource(R.string.en_tab_silence) to "sound",stringResource(R.string.en_tab_settings) to "settings").forEachIndexed { i,item ->
-            NavigationBarItem(selected=i==tab,onClick={onTab(i)},icon={Glyph(item.second,if(i==tab)c.mint else c.secondary)},
-                label={Text(item.first,fontSize=12.sp,fontWeight=if(i==tab)FontWeight.Bold else FontWeight.Normal)},
-                colors=NavigationBarItemDefaults.colors(indicatorColor=c.selected,selectedTextColor=c.mint,unselectedTextColor=c.secondary))
-        }
+    val items=listOf(stringResource(R.string.en_tab_home) to "home",stringResource(R.string.tab_mushaf) to "mushaf",
+        stringResource(R.string.tab_adhkar) to "beads",stringResource(R.string.en_tab_settings) to "settings")
+    val shape=RoundedCornerShape(26.dp)
+    Box(Modifier.fillMaxWidth().background(c.bg).padding(start=14.dp,end=14.dp,top=6.dp,bottom=10.dp)) {
+        Row(Modifier.fillMaxWidth().shadow(if(c.dark)0.dp else 10.dp,shape,ambientColor=c.mint.copy(alpha=.25f),spotColor=c.mint.copy(alpha=.25f))
+            .clip(shape).background(c.surface).border(1.dp,c.border,shape).padding(6.dp),
+            horizontalArrangement=Arrangement.spacedBy(4.dp),verticalAlignment=Alignment.CenterVertically) {
+            items.forEachIndexed {i,(label,glyph)->
+                val selected=i==tab
+                val weight by androidx.compose.animation.core.animateFloatAsState(if(selected)1.6f else 1f,tween(260),label="tab")
+                val fill by androidx.compose.animation.animateColorAsState(if(selected)c.selected else Color.Transparent,tween(260),label="tabFill")
+                Row(Modifier.weight(weight).height(54.dp).clip(RoundedCornerShape(21.dp)).background(fill)
+                    .selectable(selected=selected,role=androidx.compose.ui.semantics.Role.Tab) {onTab(i)},
+                    horizontalArrangement=Arrangement.Center,verticalAlignment=Alignment.CenterVertically) {
+                    if(selected) {
+                        Glyph(glyph,c.mint,Modifier.size(22.dp))
+                        Text(label,Modifier.padding(start=8.dp),color=c.mint,fontSize=13.sp,fontWeight=FontWeight.Bold,maxLines=1)
+                    } else Column(horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(3.dp)) {
+                        Glyph(glyph,c.secondary,Modifier.size(21.dp))
+                        Text(label,color=c.secondary,fontSize=10.sp,maxLines=1)
+                    }
+                }
+            }
         }
     }
 }

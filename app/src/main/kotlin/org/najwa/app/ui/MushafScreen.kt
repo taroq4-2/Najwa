@@ -92,12 +92,12 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
-/** The font the pages are set in (Amiri Quran, OFL). */
-val QuranFont=FontFamily(Font(R.font.amiri_quran))
+/** The font the pages are set in: the King Fahd Complex Hafs font (KFGQPC), drawn by the Madinah mushaf calligrapher. */
+val QuranFont=FontFamily(Font(R.font.kfgqpc_hafs))
 
 /**
  * The mushaf reader: the 604 pages of the Madinah mushaf as full printed pages, fifteen justified lines in an
- * ornamented frame, turned right to left. Pinch or double-tap zooms the page. Where you stop is kept; a page joins
+ * ornamented frame, turned right to left. Pinching or double-tapping enlarges the text itself, which flows anew. Where you stop is kept; a page joins
  * today's portion when you move on after reading it (or with the record button), never by flicking past it.
  */
 @Composable fun MushafScreen(startPage: Int?,openIndex: Boolean,onBack: ()->Unit) {
@@ -129,7 +129,10 @@ val QuranFont=FontFamily(Font(R.font.amiri_quran))
     val bookmarkPage=(quran.page+1).coerceIn(1,Mushaf.PAGES)
     val pager=rememberPagerState(initialPage=((startPage ?: bookmarkPage)-1).coerceIn(0,Mushaf.PAGES-1)) {Mushaf.PAGES}
     val page=pager.currentPage+1
-    val zoom=remember {ZoomState()}
+    // The size of the flowing text while a pinch is under way starts from here.
+    var pinchBase by remember {mutableFloatStateOf(0f)}
+    fun toPage() {view=MushafView.PAGE;MushafViewPrefs.setView(context,view)}
+    fun toLarge(size: Float) {largeSize=size.coerceIn(MushafViewPrefs.MIN_SIZE,MushafViewPrefs.MAX_SIZE);view=MushafView.LARGE}
     val bookmarked=remember(marksVersion) {AyahMarks.bookmarks(context)}
     val highlighted=remember(marksVersion) {AyahMarks.highlights(context)}
 
@@ -188,7 +191,6 @@ val QuranFont=FontFamily(Font(R.font.amiri_quran))
         val dwell=SystemClock.elapsedRealtime()-entered
         if(auto && page==previous+1 && dwell>=QuranStore.autoRecordMillis && previous !in readToday) record(previous,true)
         previous=page;entered=SystemClock.elapsedRealtime()
-        zoom.reset()
     }
     // A slow ring shows the page being read; when full, turning the page will record it.
     var dwellShown by remember {mutableFloatStateOf(0f)}
@@ -207,15 +209,25 @@ val QuranFont=FontFamily(Font(R.font.amiri_quran))
         // The page fills the screen; a tap brings the tools over it and another tap hides them again.
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
             // Pages always turn right to left, whatever the interface language.
-            HorizontalPager(pager,modifier=Modifier.fillMaxSize(),beyondViewportPageCount=1,userScrollEnabled=!zoom.zoomed,key={it}) {i->
+            HorizontalPager(pager,modifier=Modifier.fillMaxSize(),beyondViewportPageCount=1,key={it}) {i->
                 val p=i+1
                 val decor=PageDecor(bookmarked,highlighted,flash,if(memorize) revealed[p] ?: 0 else null)
+                // Pinch out on the printed page and the verses flow in large text; pinch in far enough and the page returns.
                 Box(Modifier.fillMaxSize().pointerInput(Unit) {detectTapGestures(onTap={chrome=!chrome})}
+                    .textPinch(onStart={pinchBase=if(view==MushafView.LARGE) largeSize else MushafViewPrefs.PAGE_SIZE},
+                        onScale={f->
+                            val size=pinchBase*f
+                            if(view==MushafView.PAGE) {if(f>1.08f)toLarge(size)} else largeSize=size.coerceIn(MushafViewPrefs.MIN_SIZE-4f,MushafViewPrefs.MAX_SIZE)
+                        },
+                        onEnd={
+                            if(view==MushafView.LARGE && largeSize<MushafViewPrefs.MIN_SIZE) toPage()
+                            else if(view==MushafView.LARGE) {MushafViewPrefs.setLargeSize(context,largeSize);MushafViewPrefs.setView(context,view)}
+                        })
                     .padding(horizontal=8.dp,vertical=6.dp),contentAlignment=Alignment.Center) {
                     if(view==MushafView.LARGE) CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                        LargeReadingPage(d,p,r,largeSize,decor) {verse->verseAction=verse}
+                        LargeReadingPage(d,p,r,largeSize,decor,onDoubleTap={toPage()}) {verse->verseAction=verse}
                     }
-                    else MushafSheet(d,p,r,bookmark=p==quran.page+1,read=p in readToday,decor=decor,zoom=if(p==page) zoom else null,scope=scope,
+                    else MushafSheet(d,p,r,bookmark=p==quran.page+1,read=p in readToday,decor=decor,onDoubleTap={toLarge(MushafViewPrefs.DOUBLE_TAP_SIZE)},
                         onTap={word->
                             // Memorization: each tap shows the next word; otherwise a tap shows or hides the tools.
                             if(memorize && word!=null) revealed[p]=(revealed[p] ?: 0)+1 else chrome=!chrome
@@ -236,9 +248,9 @@ val QuranFont=FontFamily(Font(R.font.amiri_quran))
                         onMode={mode=it;ReadingPrefs.setMode(context,it)})
                     if(view==MushafView.LARGE)Row(Modifier.padding(horizontal=16.dp,vertical=4.dp),verticalAlignment=Alignment.CenterVertically) {
                         Text(stringResource(R.string.mushaf_text_size),color=r.muted,fontSize=12.sp,modifier=Modifier.weight(1f))
-                        RoundAction("minus",stringResource(R.string.adhkar_smaller),r) {largeSize=(largeSize-3f).coerceAtLeast(22f);MushafViewPrefs.setLargeSize(context,largeSize)}
+                        RoundAction("minus",stringResource(R.string.adhkar_smaller),r) {largeSize=(largeSize-3f).coerceAtLeast(MushafViewPrefs.MIN_SIZE);MushafViewPrefs.setLargeSize(context,largeSize)}
                         Spacer(Modifier.width(8.dp))
-                        RoundAction("plus",stringResource(R.string.adhkar_larger),r) {largeSize=(largeSize+3f).coerceAtMost(48f);MushafViewPrefs.setLargeSize(context,largeSize)}
+                        RoundAction("plus",stringResource(R.string.adhkar_larger),r) {largeSize=(largeSize+3f).coerceAtMost(MushafViewPrefs.MAX_SIZE);MushafViewPrefs.setLargeSize(context,largeSize)}
                     }
                     WirdStrip(quran,summary,r,english)
                 }
@@ -249,7 +261,7 @@ val QuranFont=FontFamily(Font(R.font.amiri_quran))
             Surface(color=r.desk.copy(alpha=.97f),shape=RoundedCornerShape(topStart=24.dp,topEnd=24.dp),shadowElevation=6.dp,
                 modifier=Modifier.fillMaxWidth()) {
                 Box(Modifier.navigationBarsPadding().padding(vertical=4.dp)) {
-                    ReaderBottomBar(page,page in readToday,auto,dwellShown,zoom.zoomed,r,onRecord={record(page,false)},onResetZoom={scope.launch {zoom.animateTo(1f,Offset.Zero)}})
+                    ReaderBottomBar(page,page in readToday,auto,dwellShown,view==MushafView.LARGE,r,onRecord={record(page,false)},onResetZoom={toPage()})
                 }
             }
         }
@@ -388,7 +400,7 @@ private fun num(english: Boolean,n: Long): String =
             Text(stringResource(R.string.mushaf_auto_title),color=r.muted,fontSize=12.sp)
         }
         Spacer(Modifier.weight(1f))
-        if(zoomed)TextButton(onClick=onResetZoom) {Text(stringResource(R.string.mushaf_zoom_reset),color=r.accentInk,fontSize=13.sp)}
+        if(zoomed)TextButton(onClick=onResetZoom) {Text(stringResource(R.string.mushaf_view_page),color=r.accentInk,fontSize=13.sp)}
         else if(!read)OutlinedButton(onClick=onRecord,shape=RoundedCornerShape(50),border=BorderStroke(1.dp,r.marker),
             contentPadding=PaddingValues(horizontal=16.dp,vertical=6.dp)) {
             Text(stringResource(R.string.mushaf_record),color=r.accentInk,fontSize=13.sp,fontWeight=FontWeight.Bold)
@@ -423,70 +435,26 @@ private fun star(c: Offset,outer: Float,inner: Float,points: Int,turn: Float=0f)
 
 /* ───────────────────────── Zoom ───────────────────────── */
 
-/** Pinch and double-tap zoom of one page, from 1× to 4×, panning inside the page's own bounds. */
-@Stable class ZoomState {
-    var scale by mutableFloatStateOf(1f);private set
-    var offset by mutableStateOf(Offset.Zero);private set
-    var bounds=IntSize.Zero
-    val zoomed get()=scale>1.01f
-    fun reset() {scale=1f;offset=Offset.Zero}
-    fun set(s: Float,o: Offset) {
-        scale=s.coerceIn(1f,4f)
-        val mx=(scale-1)*bounds.width/2f;val my=(scale-1)*bounds.height/2f
-        offset=Offset(o.x.coerceIn(-mx,mx),o.y.coerceIn(-my,my))
-    }
-    /** Zooms by [factor] keeping the point under [focus] (in layout coordinates) still. */
-    fun zoomAround(factor: Float,focus: Offset,pan: Offset=Offset.Zero) {
-        val next=(scale*factor).coerceIn(1f,4f)
-        val center=Offset(bounds.width/2f,bounds.height/2f)
-        val rel=focus-center
-        set(next,rel-(rel-offset)*(next/scale)+pan)
-    }
-    suspend fun animateTo(target: Float,focus: Offset) {
-        val from=scale;val start=offset
-        val center=Offset(bounds.width/2f,bounds.height/2f)
-        val end=if(target<=1f) Offset.Zero else (focus-center).let {rel->rel-(rel-start)*(target/from)}
-        animate(0f,1f,animationSpec=tween(260)) {v,_->set(from+(target-from)*v,start+(end-start)*v)}
-    }
-}
-
-/** Inverse of the zoom transform: a point on screen to the page's own coordinates. */
-private fun ZoomState?.toContent(pt: Offset): Offset {
-    if(this==null || !zoomed)return pt
-    val center=Offset(bounds.width/2f,bounds.height/2f)
-    return center+(pt-center-offset)/scale
-}
-
-private fun Modifier.zoomable(state: ZoomState?,scope: kotlinx.coroutines.CoroutineScope,onTap: (Offset)->Unit,onLongPress: (Offset)->Unit): Modifier {
-    if(state==null)return this.pointerInput(Unit) {detectTapGestures(onTap={onTap(it)},onLongPress={onLongPress(it)})}
-    return this
-        .pointerInput(state) {
-            state.bounds=size
-            awaitEachGesture {
-                awaitFirstDown(requireUnconsumed=false)
-                do {
-                    val event=awaitPointerEvent()
-                    val fingers=event.changes.count {it.pressed}
-                    // Two fingers always zoom; one finger pans only once the page is zoomed (otherwise it turns the page).
-                    if(fingers>=2 || state.zoomed) {
-                        val z=event.calculateZoom();val pan=event.calculatePan()
-                        if(z!=1f || pan!=Offset.Zero) {
-                            val focus=event.calculateCentroid(useCurrent=false).takeIf {it.isSpecified} ?: Offset(size.width/2f,size.height/2f)
-                            state.zoomAround(z,focus,pan)
-                            event.changes.forEach {if(it.positionChanged())it.consume()}
-                        }
-                    }
-                } while(event.changes.any {it.pressed})
-                if(state.scale<1.05f)state.reset()
+/**
+ * Two fingers size the text, not the picture: the gesture reports the running scale factor, and the screen turns it
+ * into a font size for the flowing text (the printed page opens it). One finger is left to turn and scroll pages.
+ */
+private fun Modifier.textPinch(onStart: ()->Unit,onScale: (Float)->Unit,onEnd: ()->Unit)=this.pointerInput(Unit) {
+    awaitEachGesture {
+        awaitFirstDown(requireUnconsumed=false)
+        var factor=1f
+        var pinching=false
+        do {
+            val event=awaitPointerEvent(androidx.compose.ui.input.pointer.PointerEventPass.Initial)
+            if(event.changes.count {it.pressed}>=2) {
+                if(!pinching) {pinching=true;onStart()}
+                factor*=event.calculateZoom()
+                onScale(factor)
+                event.changes.forEach {it.consume()}
             }
-        }
-        .pointerInput(state) {
-            detectTapGestures(onTap={onTap(state.toContent(it))},onLongPress={onLongPress(state.toContent(it))},onDoubleTap={pt->
-                state.bounds=size
-                scope.launch {state.animateTo(if(state.zoomed)1f else 2.4f,pt)}
-            })
-        }
-        .graphicsLayer {scaleX=state.scale;scaleY=state.scale;translationX=state.offset.x;translationY=state.offset.y}
+        } while(event.changes.any {it.pressed})
+        if(pinching)onEnd()
+    }
 }
 
 /* ───────────────────────── The printed page ───────────────────────── */
@@ -501,7 +469,7 @@ private class PaintMeasure(typeface: Typeface): MushafLayout.Measure {
     override val space=paint.measureText(" ")*1.15f
     private val cache=HashMap<String,Float>()
     fun word(text: String)=cache.getOrPut(text) {paint.measureText(text)}
-    override fun width(token: MushafLayout.Token)=word(token.text)+if(token.aya!=null) MARKER_GAP*REF+MARKER*REF else 0f
+    override fun width(token: MushafLayout.Token)=word(token.text)
 }
 private const val MARKER=1.02f
 private const val MARKER_GAP=.16f
@@ -516,7 +484,8 @@ private fun geometry(w: Float,h: Float,dp: Float): Geometry {
 }
 
 /** One word as placed on the page: its drawn text, where it sits, its verse marker, and its order on the page. */
-private class Placed(val token: MushafLayout.Token,val text: String,val left: Float,val right: Float,val wordLeft: Float,val markerX: Float?,val ordinal: Int)
+private class Placed(val token: MushafLayout.Token,val text: String,val left: Float,val right: Float,val wordLeft: Float,val markerX: Float?,val ordinal: Int,
+                     val mark: String?=null,val markLeft: Float=0f)
 
 /** A laid-out page with every line justified to the full width (kashida included) and every word placed. */
 private class Typeset(val page: MushafLayout.Page,val rows: List<List<Placed>?>,val top: Float,val row: Float,val left: Float,val right: Float) {
@@ -540,18 +509,21 @@ private fun typeset(page: MushafLayout.Page,g: Geometry,typeface: Typeface): Typ
     val left=g.text.left+(g.text.width-blockWidth)/2
     val right=left+blockWidth
     val top=if(page.compact) g.text.top+(g.text.height-page.rows.size*row)/2 else g.text.top
-    val markerW=MARKER*fontSize;val markerGap=MARKER_GAP*fontSize
     val cache=HashMap<String,Float>()
     var ordinal=0
     val rows=page.rows.map {r->
         (r as? MushafLayout.Line)?.let {line->
-            val j=MushafLayout.justify(line.tokens,blockWidth,space,kashida,{if(it.aya!=null) markerW+markerGap else 0f}) {s->cache.getOrPut(s) {paint.measureText(s)}}
+            val j=MushafLayout.justify(line.tokens,blockWidth,space,kashida,{0f}) {s->cache.getOrPut(s) {paint.measureText(s)}}
             // Right to left: every line from the right edge (a single word is centred).
             var x=if(line.tokens.size==1) (left+right)/2+j.widths[0]/2 else right
             line.tokens.mapIndexed {k,t->
                 val full=j.widths[k]
-                val word=full-(if(t.aya!=null) markerGap+markerW else 0f)
-                val placed=Placed(t,j.texts[k],x-full,x,x-word,if(t.aya!=null) x-word-markerGap-markerW/2 else null,ordinal++)
+                // Right to left: the word, then the verse ornament at the token's left end.
+                val mark=t.aya?.let {MushafLayout.verseMark(it)}
+                val text=if(mark!=null) j.texts[k].substringBefore(MushafLayout.VERSE_MARK_GAP+mark) else j.texts[k]
+                val word=if(mark!=null) cache.getOrPut(text) {paint.measureText(text)} else full
+                val markW=if(mark!=null) cache.getOrPut(mark) {paint.measureText(mark)} else 0f
+                val placed=Placed(t,text,x-full,x,x-word,if(mark!=null) x-full+markW/2 else null,ordinal++,mark,x-full)
                 x-=full+(if(k<line.tokens.lastIndex) j.gap else 0f)
                 placed
             }
@@ -572,11 +544,11 @@ private object PageCache {
 data class PageDecor(val bookmarked: Set<Int> = emptySet(),val highlighted: Set<Int> = emptySet(),val flash: Int? = null,val revealed: Int? = null)
 
 @Composable private fun MushafSheet(d: Mushaf.Data,page: Int,r: ReadingColors,bookmark: Boolean,read: Boolean,decor: PageDecor,
-                                   zoom: ZoomState?,scope: kotlinx.coroutines.CoroutineScope,
+                                   onDoubleTap: ()->Unit,
                                    onTap: (Placed?)->Unit,onLongPress: (Placed?,Int)->Unit) {
     val context=LocalContext.current
     val density=LocalDensity.current.density
-    val typeface=remember {ResourcesCompat.getFont(context,R.font.amiri_quran) ?: Typeface.SERIF}
+    val typeface=remember {ResourcesCompat.getFont(context,R.font.kfgqpc_hafs) ?: Typeface.SERIF}
     BoxWithConstraints(Modifier.fillMaxSize(),contentAlignment=Alignment.Center) {
         // A printed page proportion, as large as the space allows.
         val maxW=constraints.maxWidth.toFloat();val maxH=constraints.maxHeight.toFloat()
@@ -601,9 +573,9 @@ data class PageDecor(val bookmarked: Set<Int> = emptySet(),val highlighted: Set<
             context.getString(R.string.mushaf_page_desc,Counts.format(context,page.toLong()),names,text)
         }
         Canvas(Modifier.size(wDp,hDp).semantics {contentDescription=description}
-            .zoomable(zoom,scope,onTap={pt->onTap(layout?.wordAt(pt.x,pt.y))},onLongPress={pt->
+            .pointerInput(page) {detectTapGestures(onTap={pt->onTap(layout?.wordAt(pt.x,pt.y))},onDoubleTap={onDoubleTap()},onLongPress={pt->
                 val set=layout;val word=set?.wordAt(pt.x,pt.y)
-                onLongPress(word,if(word!=null && set!=null) set.ordinalEndOfVerse(word.token.verse) else -1)})) {
+                onLongPress(word,if(word!=null && set!=null) set.ordinalEndOfVerse(word.token.verse) else -1)})}) {
             drawSheet(g,page,r,bookmark,read,d,paints)
             layout?.let {drawPageText(it,d,r,paints,decor)}
         }
@@ -615,6 +587,7 @@ private class SheetPaints(typeface: Typeface,r: ReadingColors) {
     val marker=Paint(Paint.ANTI_ALIAS_FLAG).apply {this.typeface=typeface;color=r.accentInk.toArgb();textAlign=Paint.Align.CENTER}
     val margin=Paint(Paint.ANTI_ALIAS_FLAG).apply {this.typeface=typeface;color=r.muted.toArgb()}
     val heading=Paint(Paint.ANTI_ALIAS_FLAG).apply {this.typeface=typeface;color=r.accentInk.toArgb();textAlign=Paint.Align.CENTER}
+    val ornament=Paint(Paint.ANTI_ALIAS_FLAG or Paint.SUBPIXEL_TEXT_FLAG).apply {this.typeface=typeface;color=r.marker.toArgb()}
 }
 
 /** Paper, binding shade, the ornamented frame, margin titles, page number, bookmark ribbon and the read seal. */
@@ -706,7 +679,7 @@ private fun DrawScope.drawPageText(set: Typeset,d: Mushaf.Data,r: ReadingColors,
             is MushafLayout.Heading -> drawHeading(d.surahs[line.surah-1],left,right,cy,row,r,p)
             is MushafLayout.Basmalah -> drawIntoCanvas {cv->
                 p.text.textAlign=Paint.Align.CENTER
-                cv.nativeCanvas.drawText(BASMALAH,(left+right)/2,baseline,p.text)
+                cv.nativeCanvas.drawText(d.basmalah,(left+right)/2,baseline,p.text)
                 p.text.textAlign=Paint.Align.LEFT
             }
             is MushafLayout.Line -> {
@@ -734,9 +707,11 @@ private fun DrawScope.drawPageText(set: Typeset,d: Mushaf.Data,r: ReadingColors,
                             drawRoundRect(r.frame,Offset(w.wordLeft,cy-fontSize*.32f),Size(w.right-w.wordLeft,fontSize*.5f),CornerRadius(fontSize*.25f),style=Stroke(.8f*dp))
                         } else nc.drawText(w.text,w.wordLeft,baseline,p.text)
                         val aya=w.token.aya
-                        if(aya!=null && w.markerX!=null) {
+                        if(aya!=null && w.mark!=null && w.markerX!=null) {
+                            // The verse ornament from the Complex's font, in the marker colour.
+                            p.ornament.textSize=fontSize
+                            nc.drawText(w.mark,w.markLeft,baseline,p.ornament)
                             val c=Offset(w.markerX,baseline-fontSize*.3f)
-                            drawMarker(nc,c,markerW/2,aya,r,p)
                             // A bookmarked verse: a small ribbon over its marker.
                             if(w.token.verse in decor.bookmarked) {
                                 val rw=markerW*.32f;val rh=markerW*.5f;val x0=c.x-rw/2;val y0=c.y-markerW*.95f
@@ -750,17 +725,6 @@ private fun DrawScope.drawPageText(set: Typeset,d: Mushaf.Data,r: ReadingColors,
     }
 }
 
-private const val BASMALAH="بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
-
-/** A verse marker: an eight-pointed rosette around the verse number. */
-private fun DrawScope.drawMarker(nc: android.graphics.Canvas,c: Offset,radius: Float,aya: Int,r: ReadingColors,p: SheetPaints) {
-    drawPath(star(c,radius,radius*.86f,8,(PI/8).toFloat()),r.band)
-    drawPath(star(c,radius,radius*.86f,8,(PI/8).toFloat()),r.marker,style=Stroke(radius*.075f))
-    drawCircle(r.marker,radius*.7f,c,style=Stroke(radius*.05f))
-    val digits=Mushaf.arabicDigits(aya)
-    p.marker.textSize=radius*(if(digits.length>=3) .86f else 1.04f)
-    nc.drawText(digits,c.x,c.y+p.marker.textSize*.36f,p.marker)
-}
 
 /** A surah heading: a framed band with a pointed cartouche holding the name, its verse count and Meccan or Medinan. */
 private fun DrawScope.drawHeading(s: Mushaf.Surah,left: Float,right: Float,cy: Float,row: Float,r: ReadingColors,p: SheetPaints) {

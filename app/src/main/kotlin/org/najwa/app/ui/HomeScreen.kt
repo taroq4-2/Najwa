@@ -39,8 +39,9 @@ import androidx.compose.ui.semantics.Role
     val iqama=focus?.phase==CountdownPhase.IQAMA
     val accent=if(iqama)c.amber else c.mint
     val start=focus?.start
-    val remainingProgress=if(focus!=null && start!=null && start<focus.time) {
-        (Duration.between(now,focus.time).toMillis().toDouble()/Duration.between(start,focus.time).toMillis())
+    // The bar fills up as the prayer approaches (elapsed share of the wait), from the reading side: right to left in Arabic.
+    val elapsedProgress=if(focus!=null && start!=null && start<focus.time) {
+        (1-Duration.between(now,focus.time).toMillis().toDouble()/Duration.between(start,focus.time).toMillis())
             .toFloat().coerceIn(0f,1f)
     } else null
     var calendar by remember {mutableStateOf(false)}
@@ -123,48 +124,53 @@ import androidx.compose.ui.semantics.Role
                 Spacer(Modifier.height(10.dp))
                 Text(stringResource(if(iqama)R.string.system_to_iqama else R.string.system_to_adhan),
                     color=heroDetail,fontSize=11.sp,lineHeight=17.sp)
-                if(remainingProgress!=null) {
+                if(elapsedProgress!=null) {
                     Canvas(Modifier.padding(top=10.dp).fillMaxWidth().height(3.dp)) {
                         val corner=CornerRadius(size.height/2f)
                         drawRoundRect(heroTrack,cornerRadius=corner)
-                        val filled=size.width*remainingProgress
+                        val filled=size.width*elapsedProgress
                         if(filled>0f) {
                             val left=if(rtl)size.width-filled else 0f
-                            val colors=if(rtl)listOf(heroAccent.copy(alpha=.68f),heroAccent)
-                                else listOf(heroAccent,heroAccent.copy(alpha=.68f))
+                            // Brightest at the moving edge, which also carries a small dot.
+                            val colors=if(rtl)listOf(heroAccent,heroAccent.copy(alpha=.6f))
+                                else listOf(heroAccent.copy(alpha=.6f),heroAccent)
                             drawRoundRect(Brush.horizontalGradient(colors,left,left+filled),
                                 Offset(left,0f),Size(filled,size.height),corner)
+                            drawCircle(heroAccent,size.height*1.6f,Offset(if(rtl)left else filled,size.height/2))
                         }
                     }
                 }
             } else {
                 Text(stringResource(org.najwa.app.platform.dayIssueResource(day.issue)),color=heroAccent)
             }
-        }
-    }
-    Spacer(Modifier.height(12.dp))
-    val active=activeUntil?.isAfter(now)==true
-    Surface(onClick=onSilence,color=c.surface,shape=RoundedCornerShape(20.dp),border=BorderStroke(1.dp,c.border)) {
-        Row(Modifier.fillMaxWidth().padding(14.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(10.dp)) {
-            Box(Modifier.size(44.dp).background(if(active || p.autoSilent && capable)c.selected else c.bg,RoundedCornerShape(16.dp)),
-                contentAlignment=Alignment.Center) {Glyph("sound",if(active || p.autoSilent && capable)c.mint else c.secondary)}
-            Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(3.dp)) {
-                Text(when {active->stringResource(R.string.en_home_silent_active);p.autoSilent && capable->stringResource(R.string.en_home_silent_ready);p.autoSilent->stringResource(R.string.en_home_silent_needs_setup);else->stringResource(R.string.en_home_silent_off)},color=c.text,fontWeight=FontWeight.Bold,fontSize=13.sp)
-                Text(if(active)stringResource(R.string.en_home_ringer_return,localizedUiTime(activeUntil!!,p)) else stringResource(R.string.en_home_silence_summary),color=c.secondary,fontSize=11.sp)
+            // Silence during prayer: its state in one line at the foot of the card (the settings page holds the rest).
+            val active=activeUntil?.isAfter(now)==true
+            val on=active || p.autoSilent && capable
+            Box(Modifier.padding(top=16.dp).fillMaxWidth().height(1.dp).background(heroAccent.copy(alpha=.16f)))
+            Row(Modifier.fillMaxWidth().padding(top=6.dp).clip(RoundedCornerShape(14.dp)).clickable(onClick=onSilence).padding(vertical=8.dp),
+                verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(10.dp)) {
+                Glyph("sound",if(on)heroAccent else heroDetail,Modifier.size(18.dp))
+                Text(when {active->stringResource(R.string.en_home_ringer_return,localizedUiTime(activeUntil!!,p))
+                        p.autoSilent && capable->stringResource(R.string.en_home_silent_ready)
+                        p.autoSilent->stringResource(R.string.en_home_silent_needs_setup)
+                        else->stringResource(R.string.en_home_silent_off)},
+                    Modifier.weight(1f),color=if(on)heroText else heroDetail,fontSize=12.sp,fontWeight=if(on)FontWeight.Bold else FontWeight.Normal,maxLines=1,overflow=TextOverflow.Ellipsis)
+                if(on)Box(Modifier.size(8.dp).background(heroAccent,RoundedCornerShape(50)))
+                Glyph("chevron",heroDetail,Modifier.size(14.dp))
             }
-            Glyph("chevron",modifier=Modifier.size(16.dp))
         }
     }
+    // Quick tools straight under the countdown, then the day.
+    Spacer(Modifier.height(14.dp))
+    ToolsGrid(p) {if(it==Screen.QIBLA)onQibla() else onTool(it)}
     RamadanCard(p,now,day,tomorrow)
-    SecondCityCard(p,now)
-    Spacer(Modifier.height(10.dp))
+    Spacer(Modifier.height(16.dp))
     // Worship companion: one optional card summarising today's confirmed records (off restores the 1.6 home).
     val context=androidx.compose.ui.platform.LocalContext.current
     val minute=now.epochSecond/60
     val worship=remember(minute) {org.najwa.app.platform.WorshipSettingsStore.read(context)}
     if(worship.enabled && worship.summary)DaySummaryCard(worship,(minute+logged.hashCode()).toInt(),onPrayers={onTool(Screen.PRAYER_LOG)},onQuran={onTool(Screen.QURAN)},onAdhkar=onAdhkar,onMushaf={onTool(Screen.MUSHAF)})
-    ToolsGrid(p) {if(it==Screen.QIBLA)onQibla() else onTool(it)}
-    if(p.dailyDua)DuaOfDay(now.atZone(p.city.zoneId).toLocalDate())
+    // Then the day's times, the tools, and the quieter extras.
     Row(Modifier.fillMaxWidth().padding(top=12.dp),verticalAlignment=Alignment.CenterVertically) {
         Text(stringResource(R.string.en_home_today_times),Modifier.weight(1f).semantics {heading()},color=c.text,fontSize=18.sp,fontWeight=FontWeight.Bold)
         TextButton(onClick={calendar=true}) {Text(stringResource(R.string.en_home_upcoming_days),fontSize=12.sp)}
@@ -179,7 +185,8 @@ import androidx.compose.ui.semantics.Role
                 horizontalArrangement=Arrangement.spacedBy(10.dp)) {
                 Box(Modifier.size(36.dp).background(if(highlighted)accent.copy(alpha=.14f) else c.bg,RoundedCornerShape(14.dp)),
                     contentAlignment=Alignment.Center) {
-                    Glyph(when {event.prayer==Prayer.SUNRISE->"sun";highlighted->"dot";passed->"check";else->"clock"},color,Modifier.size(17.dp))
+                    // A tick here would read as "prayed"; the prayed mark is the round button at the end of the row.
+                    Glyph(when {event.prayer==Prayer.SUNRISE->"sun";highlighted->"dot";else->"clock"},color,Modifier.size(17.dp))
                 }
                 Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(2.dp)) {
                     Text(localizedPrayerName(event.prayer,event.time,p),color=color,fontSize=if(p.largeDisplay)19.sp else 15.sp,fontWeight=if(highlighted)FontWeight.Bold else FontWeight.Normal)
@@ -216,48 +223,33 @@ import androidx.compose.ui.semantics.Role
             }
         }
     }
+    SecondCityCard(p,now)
+    Spacer(Modifier.height(6.dp))
+    if(p.dailyDua)DuaOfDay(now.atZone(p.city.zoneId).toLocalDate())
     Text(listOfNotNull("${p.city.name} · ${localizedMethodName(p.method)}",mosqueName?.let {stringResource(R.string.home_mosque,it)}).joinToString(" · "),
         color=c.secondary,fontSize=11.sp,modifier=Modifier.padding(top=12.dp,bottom=8.dp))
 }
 
-/** Six quick tools under the countdown. */
+/** Four quick tools in one row under the countdown: a round badge and a short name each. */
 @Composable private fun ToolsGrid(p: Preferences,onTool: (Screen)->Unit) {
     val c=LocalPalette.current
-    val bearing=remember(p.city) {kotlin.math.round(qiblaBearing(p.city)).toInt()}
-    val context=androidx.compose.ui.platform.LocalContext.current
-    val quran=remember {org.najwa.app.platform.QuranStore.read(context)}
     val tools=listOf(
-        Triple(Screen.QIBLA,stringResource(R.string.qibla_title),"$bearing°"),
-        Triple(Screen.ADHKAR,stringResource(R.string.adhkar_title),stringResource(R.string.adhkar_short)),
-        Triple(Screen.TASBEEH,stringResource(R.string.tasbeeh_title),stringResource(R.string.tasbeeh_short)),
-        Triple(Screen.TIMETABLE,stringResource(R.string.timetable_title),stringResource(R.string.timetable_short)),
-        Triple(Screen.PRAYER_LOG,stringResource(R.string.log_title),stringResource(R.string.log_short)),
-        Triple(Screen.QURAN,stringResource(R.string.quran_tool),quran.let {if(it.page==0)stringResource(R.string.quran_start_short) else stringResource(R.string.quran_page_short,it.page)}))
-    Text(stringResource(R.string.tools_title),color=c.text,fontSize=18.sp,fontWeight=FontWeight.Bold,modifier=Modifier.padding(top=4.dp,bottom=10.dp).semantics {heading()})
-    // Every tool in view at once (no hidden sideways scrolling): three per row, two at large text.
-    val perRow=if(androidx.compose.ui.platform.LocalDensity.current.fontScale>1.25f)2 else 3
-    Column(verticalArrangement=Arrangement.spacedBy(10.dp)) {tools.chunked(perRow).forEach {row-> Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min),horizontalArrangement=Arrangement.spacedBy(10.dp)) {
-        row.forEach {(screen,title,detail)->
-            Surface(onClick={onTool(screen)},color=c.surface,shape=RoundedCornerShape(20.dp),border=BorderStroke(1.dp,c.border),modifier=Modifier.weight(1f).fillMaxHeight()) {
-                Column(Modifier.padding(14.dp),verticalArrangement=Arrangement.spacedBy(8.dp)) {
-                    Box(Modifier.size(40.dp).background(c.selected,RoundedCornerShape(14.dp)),contentAlignment=Alignment.Center) {
-                        when(screen) {
-                            Screen.QIBLA -> QiblaGlyph(c.mint,Modifier.size(20.dp))
-                            Screen.ADHKAR -> Glyph("book",c.mint,Modifier.size(20.dp))
-                            Screen.TASBEEH -> Glyph("beads",c.mint,Modifier.size(20.dp))
-                            Screen.TIMETABLE -> Glyph("calendar",c.mint,Modifier.size(20.dp))
-                            Screen.QURAN -> Glyph("mushaf",c.mint,Modifier.size(20.dp))
-                            else -> Glyph("check",c.mint,Modifier.size(20.dp))
-                        }
-                    }
-                    // Two lines so longer names ("Qibla direction", "Morning and evening") are never cut off.
-                    Text(title,color=c.text,fontSize=13.sp,lineHeight=17.sp,fontWeight=FontWeight.Bold,maxLines=2,overflow=TextOverflow.Ellipsis)
-                    Text(detail,color=c.secondary,fontSize=11.sp,lineHeight=15.sp,maxLines=2,overflow=TextOverflow.Ellipsis)
+        Triple(Screen.QIBLA,stringResource(R.string.qibla_title),""),
+        Triple(Screen.PRAYER_LOG,stringResource(R.string.log_title),"check"),
+        Triple(Screen.TASBEEH,stringResource(R.string.tasbeeh_title),"beads"),
+        Triple(Screen.TIMETABLE,stringResource(R.string.timetable_title),"calendar"))
+    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+        tools.forEach {(screen,title,glyph)->
+            Column(Modifier.weight(1f).clip(RoundedCornerShape(18.dp)).clickable(role=Role.Button) {onTool(screen)}.padding(vertical=6.dp),
+                horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(7.dp)) {
+                Box(Modifier.size(54.dp).background(c.surface,RoundedCornerShape(19.dp)).border(1.dp,c.border,RoundedCornerShape(19.dp)),
+                    contentAlignment=Alignment.Center) {
+                    if(screen==Screen.QIBLA)QiblaGlyph(c.mint,Modifier.size(22.dp)) else Glyph(glyph,c.mint,Modifier.size(22.dp))
                 }
+                Text(title,color=c.text,fontSize=12.sp,lineHeight=16.sp,maxLines=2,textAlign=androidx.compose.ui.text.style.TextAlign.Center,overflow=TextOverflow.Ellipsis)
             }
         }
-        repeat(perRow-row.size) {Spacer(Modifier.weight(1f))}
-    }}}
+    }
 }
 
 /** During Ramadan: time left to iftar (by day) or to the end of suhoor (by night). */

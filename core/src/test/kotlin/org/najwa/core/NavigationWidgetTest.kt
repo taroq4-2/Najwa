@@ -34,6 +34,11 @@ class NavigationWidgetTest {
         Screen.entries.forEach {assertEquals(it,Screen.fromSaved(it.name))}
         assertEquals(Screen.HOME,Screen.fromSaved("deleted_screen"))
         assertEquals(Screen.SETTINGS,Screen.forTab(Screen.PRIVACY.tab))
+        // Four tabs: home, mushaf, adhkar, settings; silence is reached from settings.
+        assertEquals(listOf(Screen.HOME,Screen.QURAN,Screen.ADHKAR,Screen.SETTINGS),(0 until Screen.TABS).map {Screen.forTab(it)})
+        assertEquals(Screen.SETTINGS,Screen.SILENCE.parent)
+        assertEquals(Screen.forTab(Screen.SETTINGS.tab),Screen.forTab(Screen.SILENCE.tab))
+        assertEquals(Screen.QURAN.tab,Screen.MUSHAF.tab)
     }
     @Test fun widgetSkipsSunriseAndAdvancesAtPrayerBoundary() {
         val p=Preferences()

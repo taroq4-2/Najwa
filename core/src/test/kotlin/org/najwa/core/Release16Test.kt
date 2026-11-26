@@ -88,6 +88,6 @@ class Release16Test {
 
     @Test fun quranScreenHasAHomeParent() {
         assertEquals(Screen.HOME,Screen.QURAN.parent)
-        assertEquals(0,Screen.QURAN.tab)
+        assertEquals(1,Screen.QURAN.tab)
     }
 }

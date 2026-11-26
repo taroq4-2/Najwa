@@ -56,16 +56,18 @@ private data class SettingsEntry(val title: String,val subtitle: String,val icon
     var query by rememberSaveable {mutableStateOf("")}
     val sections=listOf(
         SettingsSection(stringResource(R.string.section_times),"${p.city.name} · ${localizedMethodName(p.method)}","pin","teal",onCalculation),
+        SettingsSection(stringResource(R.string.section_silence),stringResource(if(p.autoSilent)R.string.section_silence_on else R.string.section_silence_off),"sound","green",onSilence),
         SettingsSection(stringResource(R.string.section_adhan),stringResource(R.string.section_adhan_summary),"speaker","amber") {onNavigate(Screen.SOUND)},
         SettingsSection(stringResource(R.string.section_alerts),stringResource(R.string.section_alerts_summary,p.adhanPrayers.size.takeIf {p.adhanNotifications} ?: 0,
             p.iqamaPrayers.size.takeIf {p.iqamaNotifications} ?: 0),"bell","blue",onNotifications),
         SettingsSection(stringResource(R.string.section_mosque),stringResource(R.string.section_mosque_summary),"mosque","violet") {onNavigate(Screen.MOSQUES)},
         SettingsSection(stringResource(R.string.section_worship),stringResource(R.string.section_worship_summary),"moon","pink") {onNavigate(Screen.SUNNAH)},
         SettingsSection(stringResource(R.string.section_display),"${uiText(p.theme.label)} · ${activity?.let {supportedLanguages.getValue(appLanguage(it))} ?: ""}","palette","mint",onAppearance),
+        SettingsSection(stringResource(R.string.section_widget),stringResource(R.string.section_widget_summary),"widget","blue",onWidget),
     )
     // Search reaches every section and the pages inside them.
     val searchable=sections.map {SettingsEntry(it.title,it.subtitle,it.glyph,it.open)}+listOfNotNull(
-        SettingsEntry(uiText("الصمت أثناء الصلاة"),uiText("التفعيل والمدة واستعادة الرنين"),"sound",onSilence),
+        SettingsEntry(uiText("التفعيل والمدة واستعادة الرنين"),stringResource(R.string.section_silence),"sound",onSilence),
         SettingsEntry(uiText("ويدجت الشاشة الرئيسية"),stringResource(R.string.widget_summary),"widget",onWidget),
         if(activity!=null)SettingsEntry(stringResource(R.string.app_language_label),supportedLanguages.getValue(appLanguage(activity)),"globe") {languageDialog=true} else null,
         SettingsEntry(stringResource(R.string.ramadan_title),stringResource(R.string.ramadan_help),"moon") {onNavigate(Screen.SUNNAH)},
@@ -95,7 +97,7 @@ private data class SettingsEntry(val title: String,val subtitle: String,val icon
                 }
             }
         }
-        // Six sections, two per row (one per row at very large text).
+        // Eight sections, two per row (one per row at very large text).
         val perRow=if(androidx.compose.ui.platform.LocalDensity.current.fontScale>1.3f)1 else 2
         Column(verticalArrangement=Arrangement.spacedBy(10.dp)) {
             sections.chunked(perRow).forEach {row->
@@ -106,10 +108,15 @@ private data class SettingsEntry(val title: String,val subtitle: String,val icon
             }
         }
         Spacer(Modifier.height(18.dp))
+        SectionLabel(stringResource(R.string.settings_group_data))
+        Panel(Modifier.fillMaxWidth()) {
+            SettingsDestination(stringResource(R.string.backup_title),stringResource(R.string.backup_summary),"restore",onBackup)
+            SettingsDivider()
+            SettingsDestination(stringResource(R.string.data_title),stringResource(R.string.data_summary),"data") {onNavigate(Screen.ADVANCED)}
+        }
+        Spacer(Modifier.height(18.dp))
         SectionLabel(stringResource(R.string.settings_group_more))
         Panel(Modifier.fillMaxWidth()) {
-            SettingsDestination(stringResource(R.string.data_title),stringResource(R.string.data_summary),"data") {onNavigate(Screen.ADVANCED)}
-            SettingsDivider()
             SettingsDestination(stringResource(R.string.whats_new_title),stringResource(R.string.whats_new_summary,BuildConfig.VERSION_NAME),"star") {whatsNew=true}
             SettingsDivider()
             SettingsDestination(stringResource(R.string.share_app_title),stringResource(R.string.share_app_summary),"share") {share=true}
@@ -127,7 +134,8 @@ private data class SettingsSection(val title: String,val subtitle: String,val gl
 
 @Composable private fun SectionTile(s: SettingsSection,modifier: Modifier) {
     val c=LocalPalette.current
-    val a=accent(s.tone)
+    // One brand colour for every section: the identity stays calm and the titles carry the meaning.
+    val a=accent("brand")
     Surface(onClick=s.open,shape=RoundedCornerShape(22.dp),color=c.surface,border=androidx.compose.foundation.BorderStroke(1.dp,c.border),modifier=modifier) {
         Column(Modifier.padding(16.dp),verticalArrangement=Arrangement.spacedBy(10.dp)) {
             IconBadge(s.glyph,a,44)
@@ -139,9 +147,10 @@ private data class SettingsSection(val title: String,val subtitle: String,val gl
 
 @Composable private fun QuickSwitch(label: String,glyph: String,on: Boolean,modifier: Modifier,enabled: Boolean=true,onChange: (Boolean)->Unit) {
     val c=LocalPalette.current
+    val onLabel=stringResource(if(on)R.string.settings_on else R.string.settings_off)
     Surface(onClick={if(enabled)onChange(!on)},shape=RoundedCornerShape(18.dp),color=if(on)c.selected else c.surface,
         border=androidx.compose.foundation.BorderStroke(1.dp,if(on)c.green else c.border),
-        modifier=modifier.heightIn(min=64.dp).semantics {role=androidx.compose.ui.semantics.Role.Switch;stateDescription=if(on)"on" else "off";contentDescription=label}) {
+        modifier=modifier.heightIn(min=64.dp).semantics {role=androidx.compose.ui.semantics.Role.Switch;stateDescription=onLabel;contentDescription=label}) {
         Column(Modifier.padding(vertical=10.dp,horizontal=8.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(4.dp)) {
             Glyph(glyph,if(on)c.mint else c.secondary,Modifier.size(20.dp))
             Text(label,color=if(on)c.mint else c.secondary,fontSize=13.sp,fontWeight=if(on)FontWeight.Bold else FontWeight.Normal,maxLines=1)
@@ -153,17 +162,24 @@ private data class SettingsSection(val title: String,val subtitle: String,val gl
 /** City, method and alert readiness in one card; problems show their fix right here. */
 @Composable private fun StatusHeader(p: Preferences,issues: List<HealthIssue>?,onFix: (HealthIssue)->Unit,onCity: ()->Unit) {
     val c=LocalPalette.current
-    val ok=issues.isNullOrEmpty()
+    val context=androidx.compose.ui.platform.LocalContext.current
+    // With adhan, iqama and silence all off there is nothing to be "ready" for: say so instead of a perfect score.
+    val allOff=!p.adhanNotifications && !p.iqamaNotifications && !p.autoSilent
+    val ok=issues.isNullOrEmpty() && !allOff
     Panel(Modifier.fillMaxWidth(),radius=24,selected=ok) {
         Column(Modifier.padding(16.dp),verticalArrangement=Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(12.dp),
                 modifier=Modifier.clip(RoundedCornerShape(16.dp)).clickable(onClick=onCity)) {
                 Box(Modifier.size(52.dp).background(if(ok)c.green else c.amber.copy(alpha=.2f),androidx.compose.foundation.shape.CircleShape),contentAlignment=Alignment.Center) {
-                    if(issues==null)Glyph("pin",c.bg) else Text("${healthScore(issues)}",color=if(ok)c.bg else c.amber,fontWeight=FontWeight.Bold,fontSize=17.sp)
+                    when {
+                        allOff -> Glyph("bell",c.amber)
+                        issues==null -> Glyph("pin",c.bg)
+                        else -> Text(org.najwa.app.platform.Counts.format(context,healthScore(issues).toLong()),color=if(ok)c.bg else c.amber,fontWeight=FontWeight.Bold,fontSize=17.sp)
+                    }
                 }
                 Column(Modifier.weight(1f)) {
                     Text(p.city.name,color=c.text,fontWeight=FontWeight.Bold,fontSize=16.sp)
-                    Text(if(issues==null)localizedMethodName(p.method) else stringResource(if(ok)R.string.health_ok else R.string.health_needs),
+                    Text(when {allOff->stringResource(R.string.health_all_off);issues==null->localizedMethodName(p.method);else->stringResource(if(ok)R.string.health_ok else R.string.health_needs)},
                         color=if(ok)c.secondary else c.amber,fontSize=12.sp)
                 }
             }

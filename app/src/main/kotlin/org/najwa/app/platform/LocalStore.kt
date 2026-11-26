@@ -42,7 +42,7 @@ class PreferencesStore(context: Context) {
             silenceMinutes=Prayer.entries.filter {it.isPrayer}.associateWith {j.optJSONObject("silenceMinutes")?.optInt(it.name,defaultSilenceMinutes().getValue(it)) ?: defaultSilenceMinutes().getValue(it)},
             showIqamaCountdown=j.optBoolean("showIqamaCountdown",true),
             widgetTheme=runCatching {WidgetTheme.valueOf(j.optString("widgetTheme","AUTO"))}.getOrDefault(WidgetTheme.AUTO),
-            widgetOpacity=j.optInt("widgetOpacity",85).coerceIn(80,100),
+            widgetOpacity=j.optInt("widgetOpacity",85).coerceIn(0,100),
             fridayReminder=j.optBoolean("fridayReminder",false),
             fridayLeadMinutes=j.optInt("fridayLeadMinutes",DEFAULT_FRIDAY_LEAD_MINUTES).coerceIn(5,60),
             showLockScreenDetails=j.optBoolean("showLockScreenDetails",false),

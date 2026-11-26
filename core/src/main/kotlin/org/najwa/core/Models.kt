@@ -105,7 +105,7 @@ data class Preferences(
     require(iqamaMinutes.keys == Prayer.entries.filter { it.isPrayer }.toSet())
     require(iqamaMinutes.values.all { it in 1..120 })
     require(silenceMinutes.keys == iqamaMinutes.keys && silenceMinutes.values.all {it in 5..120})
-    require(widgetOpacity in 80..100)
+    require(widgetOpacity in 0..100)
     require(fridayLeadMinutes in 5..60)
     require(adhanPrayers.all {it.isPrayer} && iqamaPrayers.all {it.isPrayer})
     require(offsets.values.all {it in -MAX_OFFSET_MINUTES..MAX_OFFSET_MINUTES})

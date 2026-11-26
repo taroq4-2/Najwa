@@ -1,12 +1,16 @@
 package org.najwa.core
 
+/**
+ * The bottom bar has four tabs: home (0), the mushaf (1), adhkar (2) and settings (3). Silence lives in settings.
+ */
 enum class Screen(val tab: Int) {
-    HOME(0), SILENCE(1), SETTINGS(2), PERMISSIONS(1), NOTIFICATIONS(2),
-    WIDGET(2), INFORMATION(2), ABOUT(2), CONTACT(2), PRIVACY(2), CALCULATION(2), APPEARANCE(2), QIBLA(0), BACKUP(2),
-    MOSQUES(2), SOUND(2), SUNNAH(2), ADVANCED(2), TASBEEH(0), ADHKAR(0), TIMETABLE(0), PRAYER_LOG(0), QURAN(0), MUSHAF(0);
+    HOME(0), SILENCE(3), SETTINGS(3), PERMISSIONS(3), NOTIFICATIONS(3),
+    WIDGET(3), INFORMATION(3), ABOUT(3), CONTACT(3), PRIVACY(3), CALCULATION(3), APPEARANCE(3), QIBLA(0), BACKUP(3),
+    MOSQUES(3), SOUND(3), SUNNAH(3), ADVANCED(3), TASBEEH(0), ADHKAR(2), TIMETABLE(0), PRAYER_LOG(0), QURAN(1), MUSHAF(1);
     val parent: Screen? get() = when(this) {
         HOME -> null
-        SILENCE, SETTINGS, QIBLA, TASBEEH, ADHKAR, TIMETABLE, PRAYER_LOG, QURAN -> HOME
+        SETTINGS, QIBLA, TASBEEH, ADHKAR, TIMETABLE, PRAYER_LOG, QURAN -> HOME
+        SILENCE -> SETTINGS
         PERMISSIONS -> SILENCE
         NOTIFICATIONS, WIDGET, INFORMATION, CALCULATION, APPEARANCE, BACKUP, MOSQUES, SOUND, SUNNAH, ADVANCED -> SETTINGS
         ABOUT, CONTACT, PRIVACY -> INFORMATION
@@ -14,7 +18,8 @@ enum class Screen(val tab: Int) {
     }
     companion object {
         fun fromSaved(value: String) = entries.firstOrNull {it.name==value} ?: HOME
-        fun forTab(index: Int) = when(index) {1->SILENCE;2->SETTINGS;else->HOME}
+        const val TABS = 4
+        fun forTab(index: Int) = when(index) {1->QURAN;2->ADHKAR;3->SETTINGS;else->HOME}
     }
 }
 
