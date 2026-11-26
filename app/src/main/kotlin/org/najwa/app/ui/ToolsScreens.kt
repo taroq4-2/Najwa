@@ -1,6 +1,8 @@
 package org.najwa.app.ui
 
 import android.Manifest
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.text.KeyboardOptions
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -169,32 +171,63 @@ import kotlin.math.roundToInt
     val context=LocalContext.current
     val scope=rememberCoroutineScope()
     var message by remember {mutableStateOf<Pair<Int,Boolean>?>(null)}
+    // Optional password: typed by the person here, used once and never stored.
+    var protect by rememberSaveable {mutableStateOf(false)}
+    var password by remember {mutableStateOf("")}
+    var again by remember {mutableStateOf("")}
+    val passwordOk=!protect || (password.length>=6 && password==again)
+    // A file read for restore: asked for its password when protected, then previewed before it replaces anything.
+    var pending by remember {mutableStateOf<String?>(null)}
+    var locked by remember {mutableStateOf<String?>(null)}
+    var unlock by remember {mutableStateOf("")}
+    var unlockWrong by remember {mutableStateOf(false)}
     val save=rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) {uri->
         if(uri!=null)scope.launch {
+            val chars=password.toCharArray()
             val ok=withContext(Dispatchers.IO) {runCatching {
-                context.contentResolver.openOutputStream(uri,"wt")!!.use {it.write(runtime.exportSettings().toByteArray(Charsets.UTF_8))}
+                val plain=runtime.exportSettings()
+                val text=if(protect) org.najwa.app.platform.BackupCrypto.encrypt(plain,chars) else plain
+                context.contentResolver.openOutputStream(uri,"wt")!!.use {it.write(text.toByteArray(Charsets.UTF_8))}
             }.isSuccess}
+            chars.fill(' ')
             message=(if(ok)R.string.backup_saved else R.string.backup_save_failed) to ok
         }
     }
     val open=rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {uri->
         if(uri!=null)scope.launch {
             val text=withContext(Dispatchers.IO) {runCatching {
-                context.contentResolver.openInputStream(uri)!!.use {input->
-                    val bytes=input.readNBytesCompat(256*1024)
-                    String(bytes,Charsets.UTF_8)
-                }
+                context.contentResolver.openInputStream(uri)!!.use {input->String(input.readNBytesCompat(8*1024*1024),Charsets.UTF_8)}
             }.getOrNull()}
-            val ok=text!=null && withContext(prayerDispatcher) {runtime.importSettings(text)}
+            when {
+                text==null -> message=R.string.backup_invalid to false
+                org.najwa.app.platform.BackupCrypto.isEncrypted(text) -> {locked=text;unlock="";unlockWrong=false}
+                else -> pending=text
+            }
+        }
+    }
+    fun restore(text: String) {
+        scope.launch {
+            val ok=withContext(prayerDispatcher) {runtime.importSettings(text)}
             if(ok)onRestored()
             message=(if(ok)R.string.backup_restored else R.string.backup_invalid) to ok
         }
     }
     BackLink(stringResource(R.string.backup_back),onBack)
     PageHeading(stringResource(R.string.backup_title),stringResource(R.string.backup_intro))
+    Text(stringResource(R.string.backup_worship_note),color=c.secondary,fontSize=13.sp,modifier=Modifier.padding(bottom=12.dp))
     SettingsCard(stringResource(R.string.backup_save_title),stringResource(R.string.backup_save_help)) {
-        Action(stringResource(R.string.backup_save),Modifier.fillMaxWidth(),true) {
-            runCatching {save.launch("najwa-settings-${LocalDate.now()}.json")}.onFailure {message=R.string.backup_save_failed to false}
+        PreferenceSwitch(stringResource(R.string.backup_protect),stringResource(R.string.backup_protect_help),protect) {protect=it}
+        if(protect) {
+            OutlinedTextField(password,{password=it},label={Text(stringResource(R.string.backup_password))},singleLine=true,
+                visualTransformation=androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                keyboardOptions=KeyboardOptions(keyboardType=androidx.compose.ui.text.input.KeyboardType.Password),modifier=Modifier.fillMaxWidth())
+            OutlinedTextField(again,{again=it},label={Text(stringResource(R.string.backup_password_again))},singleLine=true,
+                visualTransformation=androidx.compose.ui.text.input.PasswordVisualTransformation(),isError=again.isNotEmpty() && !passwordOk,
+                keyboardOptions=KeyboardOptions(keyboardType=androidx.compose.ui.text.input.KeyboardType.Password),modifier=Modifier.fillMaxWidth())
+            if(again.isNotEmpty() && !passwordOk)Text(stringResource(R.string.backup_password_mismatch),color=c.amber,fontSize=12.sp)
+        }
+        Action(stringResource(R.string.backup_save),Modifier.fillMaxWidth(),passwordOk) {
+            if(passwordOk)runCatching {save.launch("najwa-backup-${LocalDate.now()}.json")}.onFailure {message=R.string.backup_save_failed to false}
         }
     }
     SettingsCard(stringResource(R.string.backup_restore_title),stringResource(R.string.backup_restore_help)) {
@@ -204,6 +237,31 @@ import kotlin.math.roundToInt
     }
     message?.let {(text,ok)->Text(stringResource(text),color=if(ok)c.mint else c.amber,fontSize=14.sp)}
     Text(stringResource(R.string.backup_note),color=c.secondary,fontSize=12.sp)
+
+    locked?.let {text->
+        AlertDialog(onDismissRequest={locked=null},title={Text(stringResource(R.string.backup_password_needed))},text={
+            Column {
+                OutlinedTextField(unlock,{unlock=it;unlockWrong=false},label={Text(stringResource(R.string.backup_password))},singleLine=true,
+                    visualTransformation=androidx.compose.ui.text.input.PasswordVisualTransformation(),isError=unlockWrong,modifier=Modifier.fillMaxWidth())
+                if(unlockWrong)Text(stringResource(R.string.backup_password_wrong),color=c.amber,fontSize=12.sp)
+            }
+        },confirmButton={TextButton(onClick={
+            val chars=unlock.toCharArray()
+            val plain=org.najwa.app.platform.BackupCrypto.decrypt(text,chars)
+            chars.fill(' ')
+            if(plain==null)unlockWrong=true else {locked=null;unlock="";pending=plain}
+        }) {Text(stringResource(R.string.mushaf_done))}},
+            dismissButton={TextButton(onClick={locked=null}) {Text(stringResource(R.string.action_cancel))}})
+    }
+    pending?.let {text->
+        val preview=remember(text) {org.najwa.app.platform.BackupPreview.of(text)}
+        AlertDialog(onDismissRequest={pending=null},title={Text(stringResource(R.string.backup_preview_title))},text={
+            Text(if(preview==null) stringResource(R.string.backup_invalid) else stringResource(R.string.backup_preview_text,preview.city,
+                org.najwa.app.platform.Counts.format(context,preview.page.toLong()),org.najwa.app.platform.Counts.format(context,preview.khatmas.toLong()),
+                org.najwa.app.platform.Counts.format(context,preview.logDays.toLong()),org.najwa.app.platform.Counts.format(context,preview.mosques.toLong())))
+        },confirmButton={if(preview!=null)TextButton(onClick={pending=null;restore(text)}) {Text(stringResource(R.string.backup_replace))}},
+            dismissButton={TextButton(onClick={pending=null}) {Text(stringResource(R.string.action_cancel))}})
+    }
 }
 
 private fun java.io.InputStream.readNBytesCompat(limit: Int): ByteArray {
@@ -238,6 +296,23 @@ internal fun Context.ignoresBatteryOptimizations(): Boolean =
             else -> null
         }
         tip?.let {Text(stringResource(it),color=c.text,fontSize=13.sp)}
+        // The maker's own autostart page, where one is known (tried in order; nothing happens if none exists).
+        val vendorPages=when {
+            "xiaomi" in vendor || "redmi" in vendor || "poco" in vendor -> listOf("com.miui.securitycenter" to "com.miui.permcenter.autostart.AutoStartManagementActivity")
+            "huawei" in vendor || "honor" in vendor -> listOf("com.huawei.systemmanager" to "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity",
+                "com.huawei.systemmanager" to "com.huawei.systemmanager.optimize.process.ProtectActivity")
+            "oppo" in vendor || "realme" in vendor || "oneplus" in vendor -> listOf("com.coloros.safecenter" to "com.coloros.safecenter.permission.startup.StartupAppListActivity",
+                "com.oplus.safecenter" to "com.oplus.safecenter.permission.startup.StartupAppListActivity")
+            "vivo" in vendor -> listOf("com.vivo.permissionmanager" to "com.vivo.permissionmanager.activity.BgStartUpManagerActivity")
+            "samsung" in vendor -> listOf("com.samsung.android.lool" to "com.samsung.android.sm.battery.ui.BatteryActivity",
+                "com.samsung.android.sm" to "com.samsung.android.sm.ui.battery.BatteryActivity")
+            else -> emptyList()
+        }
+        if(vendorPages.isNotEmpty())Action(stringResource(R.string.oem_open),Modifier.fillMaxWidth()) {
+            vendorPages.firstOrNull {(pkg,cls)->runCatching {
+                context.startActivity(Intent().setComponent(android.content.ComponentName(pkg,cls)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));true
+            }.getOrDefault(false)}
+        }
         Action(stringResource(R.string.bg_open),Modifier.fillMaxWidth(),true) {
             val list=Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
             if(!openSystemSettings(context,list))

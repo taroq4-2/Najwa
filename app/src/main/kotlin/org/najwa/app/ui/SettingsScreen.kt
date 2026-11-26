@@ -137,6 +137,7 @@ import kotlinx.coroutines.withContext
     BackLink("الرجوع إلى الإعدادات",onBack)
     PageHeading(stringResource(R.string.section_display),stringResource(R.string.display_intro))
     var languageDialog by rememberSaveable {mutableStateOf(false)}
+    val context=androidx.compose.ui.platform.LocalContext.current
     val activity=androidx.activity.compose.LocalActivity.current as? MainActivity
     SettingsCard("مظهر التطبيق","اختر سمة ثابتة أو اتبع إعدادات هاتفك") {
         OptionGrid(ThemeChoice.entries.toList(),p.theme,{it.label}) {onSave(p.copy(theme=it))}
@@ -144,6 +145,18 @@ import kotlinx.coroutines.withContext
     SettingsCard("صيغة الوقت") {OptionGrid(listOf(false,true),p.hour24,{if(it)"24 ساعة" else "12 ساعة"},2) {onSave(p.copy(hour24=it))}}
     if(android.os.Build.VERSION.SDK_INT>=31)SettingsCard(stringResource(R.string.dynamic_color_title)) {
         PreferenceSwitch(stringResource(R.string.dynamic_color_switch),stringResource(R.string.dynamic_color_help),p.dynamicColor) {onSave(p.copy(dynamicColor=it))}
+    }
+    // One way of writing counts, and reading colours that can follow the app, so every page looks like one app.
+    SettingsCard(stringResource(R.string.digits_title),stringResource(R.string.digits_help)) {
+        OptionGrid(org.najwa.core.Digits.entries.toList(),p.digits,{d->when(d) {
+            org.najwa.core.Digits.AUTO -> context.getString(R.string.digits_auto)
+            org.najwa.core.Digits.ARABIC -> "١٢٣"
+            org.najwa.core.Digits.LATIN -> "123"
+        }},3) {onSave(p.copy(digits=it))}
+    }
+    SettingsCard(stringResource(R.string.reading_colors_title)) {
+        var follow by remember {mutableStateOf(ReadingPrefs.follows(context))}
+        PreferenceSwitch(stringResource(R.string.reading_follow_title),stringResource(R.string.reading_follow_help),follow) {follow=it;ReadingPrefs.setFollows(context,it)}
     }
     SettingsCard(stringResource(R.string.large_display_title)) {
         PreferenceSwitch(stringResource(R.string.large_display),stringResource(R.string.large_display_help),p.largeDisplay) {onSave(p.copy(largeDisplay=it))}

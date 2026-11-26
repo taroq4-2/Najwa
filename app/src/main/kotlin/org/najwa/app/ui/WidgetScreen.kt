@@ -33,6 +33,7 @@ import java.time.Instant
     val c=LocalPalette.current
     TextButton(onClick=onBack) {Text(uiText("الرجوع إلى الإعدادات"))}
     PageHeading("ويدجت نجوى","مواقيتك أمامك على الشاشة الرئيسية")
+    WidgetGallery()
     var previewSize by rememberSaveable {mutableIntStateOf(1)}
     var background by rememberSaveable {mutableIntStateOf(0)}
     var opacity by remember(p.widgetOpacity) {mutableFloatStateOf(p.widgetOpacity.toFloat())}
@@ -83,5 +84,41 @@ import java.time.Instant
         Text(uiText("اضغط زر الإضافة ووافق في نافذة الهاتف. إذا لم يدعم مشغّل الشاشة هذه الطريقة، اضغط مطولًا على الشاشة الرئيسية ثم اختر الأدوات وابحث عن نجوى."),color=c.secondary)
         Text(uiText("الويدجت يتبع المدينة وطريقة الحساب في التطبيق. اضغط عليه لفتح نجوى، أو على ↻ للتحديث، واسحب أطرافه لتغيير الحجم."),color=c.secondary)
         Text(uiText("قد يؤخر الهاتف تحديث الصلاة التالية أثناء السكون. فتح الشاشة أو تحديث الويدجت يعيد عرض المواقيت؛ لا يغيّر ذلك جدولة الصمت وتنبيهات الصلاة."),color=c.secondary,fontSize=12.sp)
+    }
+}
+
+/**
+ * Every Najwa widget in one list, each with what it shows and a button that places it on the home screen (the
+ * launcher shows its live preview before adding). The one that fits how you use Najwa is marked as suggested.
+ */
+@Composable fun WidgetGallery() {
+    val c=LocalPalette.current
+    val context=LocalContext.current
+    val manager=remember {android.appwidget.AppWidgetManager.getInstance(context)}
+    val canPin=remember {android.os.Build.VERSION.SDK_INT>=26 && manager.isRequestPinAppWidgetSupported}
+    val worship=remember {org.najwa.app.platform.WorshipSettingsStore.read(context).enabled}
+    val reading=remember {org.najwa.app.platform.QuranStore.days(context).isNotEmpty()}
+    val counting=remember {org.najwa.app.platform.TasbeehStore.read(context).total>0}
+    data class Item(val cls: Class<*>,val label: Int,val description: Int,val suggested: Boolean)
+    val items=listOf(
+        Item(org.najwa.app.platform.DayWidget::class.java,R.string.widget_day_label,R.string.widget_desc_day,worship),
+        Item(org.najwa.app.platform.PrayerWidget::class.java,R.string.widget_gallery_title,R.string.widget_desc_prayer,!worship),
+        Item(org.najwa.app.platform.PrayerListWidget::class.java,R.string.widget_gallery_title,R.string.widget_desc_list,false),
+        Item(org.najwa.app.platform.MinimalWidget::class.java,R.string.widget_gallery_title,R.string.widget_desc_minimal,false),
+        Item(org.najwa.app.platform.QuranWidget::class.java,R.string.widget_quran_label,R.string.widget_desc_quran,reading && !worship),
+        Item(org.najwa.app.platform.PrayerLogWidget::class.java,R.string.widget_gallery_title,R.string.widget_desc_log,false),
+        Item(org.najwa.app.platform.TasbeehWidget::class.java,R.string.widget_tasbeeh_label,R.string.widget_desc_tasbeeh,counting))
+    SettingsCard(stringResource(R.string.widget_gallery_title),stringResource(R.string.widget_gallery_help)) {
+        items.sortedByDescending {it.suggested}.forEach {item->
+            Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(10.dp)) {
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(item.description),color=c.text,fontSize=14.sp,fontWeight=FontWeight.Bold)
+                    if(item.suggested)Text(stringResource(R.string.widget_suggested),color=c.mint,fontSize=12.sp)
+                }
+                if(canPin)TextButton(onClick={runCatching {manager.requestPinAppWidget(android.content.ComponentName(context,item.cls),null,null)}}) {
+                    Text(stringResource(R.string.widget_add),color=c.mint,fontWeight=FontWeight.Bold)
+                }
+            }
+        }
     }
 }

@@ -74,7 +74,13 @@ class PreferencesStore(context: Context) {
             secondCity=j.optJSONObject("secondCity")?.let {c->runCatching {City(c.getString("name"),c.getDouble("lat"),c.getDouble("lon"),c.getString("zone"),
                 c.optString("country").takeIf {it.isNotBlank()},c.optString("catalogId").takeIf {it.isNotBlank()})}.getOrNull()},
             broadcastEvents=j.optBoolean("broadcastEvents",false),
-            activeMosque=j.optString("activeMosque").takeIf {it.isNotBlank()}).normalized()
+            activeMosque=j.optString("activeMosque").takeIf {it.isNotBlank()},
+            wirdReminder=j.optBoolean("wirdReminder",false),
+            wirdReminderAfter=runCatching {Prayer.valueOf(j.optString("wirdReminderAfter"))}.getOrNull()?.takeIf {it in WIRD_PRAYERS} ?: Prayer.ISHA,
+            afterPrayerCard=j.optBoolean("afterPrayerCard",false),
+            digits=runCatching {org.najwa.core.Digits.valueOf(j.optString("digits"))}.getOrDefault(org.najwa.core.Digits.AUTO),
+            sleepReminder=j.optBoolean("sleepReminder",false),sleepReminderMinutes=j.optInt("sleepReminderMinutes",90).coerceIn(15,300),
+            weeklySummary=j.optBoolean("weeklySummary",false)).normalized()
     }
     private fun readPrayerSelection(j: JSONObject,key: String): Set<Prayer> {
         val values=j.optJSONArray(key) ?: return dailyPrayers
@@ -106,6 +112,8 @@ class PreferencesStore(context: Context) {
         .put("headphonesOnly",p.headphonesOnly).put("quietDuringCalls",p.quietDuringCalls).put("announceAdhan",p.announceAdhan)
         .put("flashAlert",p.flashAlert).put("prayerLog",p.prayerLog).put("largeDisplay",p.largeDisplay).put("dailyDua",p.dailyDua).put("logCheckIn",p.logCheckIn)
         .put("broadcastEvents",p.broadcastEvents).put("activeMosque",p.activeMosque ?: "")
+        .put("wirdReminder",p.wirdReminder).put("wirdReminderAfter",p.wirdReminderAfter.name).put("afterPrayerCard",p.afterPrayerCard).put("digits",p.digits.name)
+        .put("sleepReminder",p.sleepReminder).put("sleepReminderMinutes",p.sleepReminderMinutes).put("weeklySummary",p.weeklySummary)
         .apply {p.secondCity?.let {c->put("secondCity",JSONObject().put("name",c.name).put("lat",c.latitude).put("lon",c.longitude)
             .put("zone",c.zone).put("country",c.countryCode ?: "").put("catalogId",c.catalogId ?: ""))}}
 }

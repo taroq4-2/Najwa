@@ -50,14 +50,14 @@ object WorshipSettingsStore {
 /**
  * Confirmed worship actions per day. The single source for dhikr completions, tasbeeh rounds and Quran reading ranges
  * (prayers are read from the prayer log itself, never copied). Records are keyed by id, so writing the same id twice
- * changes nothing and an intentional repeat carries a new id. Kept for 60 days, private to the app, never backed up.
+ * changes nothing and an intentional repeat carries a new id. Kept for 400 days (like the Quran and adhkar days), private to the app, never backed up.
  */
 object WorshipStore {
     data class Entry(val id: String,val action: String,val count: Long,val window: TimeWindow,val from: Int=0) {
         fun record(date: LocalDate)=WorshipRecord(id,action,count,window,date)
     }
     const val QURAN_RANGE="quran.range"
-    private const val KEEP_DAYS=60L
+    private const val KEEP_DAYS=400L
 
     private fun prefs(context: Context)=context.getSharedPreferences("worship",Context.MODE_PRIVATE)
 
@@ -144,15 +144,15 @@ object WorshipRecorder {
         }
         return out
     }
-    fun onAdhkar(context: Context,category: String,items: List<Dhikr>,remaining: List<Int>,date: LocalDate=LocalDate.now()) {
+    fun onAdhkar(context: Context,category: String,items: List<Dhikr>,remaining: List<Int>,date: LocalDate=WorshipDay.today(context)) {
         val session=WorshipStore.session(context,category,date)
         WorshipStore.replace(context,date,"a:$category:$session:",adhkarEntries(category,items,remaining,session))
         DayWidget.update(context)
     }
-    fun onAdhkarRestart(context: Context,category: String,date: LocalDate=LocalDate.now()) = WorshipStore.nextSession(context,category,date)
+    fun onAdhkarRestart(context: Context,category: String,date: LocalDate=WorshipDay.today(context)) = WorshipStore.nextSession(context,category,date)
 
     /** A finished tasbeeh round: only phrases with linked evidence are recorded. */
-    fun onTasbeehRound(context: Context,phrase: Int,target: Int,date: LocalDate=LocalDate.now()) {
+    fun onTasbeehRound(context: Context,phrase: Int,target: Int,date: LocalDate=WorshipDay.today(context)) {
         val action=when(phrase) {
             0->WorshipActions.TASBIH
             5->WorshipActions.TASBIH_BIHAMDIHI
@@ -165,11 +165,11 @@ object WorshipRecorder {
     }
 
     /** The last reading range recorded today, which an undo takes back. */
-    fun lastQuranRange(context: Context,date: LocalDate=LocalDate.now())=
+    fun lastQuranRange(context: Context,date: LocalDate=WorshipDay.today(context))=
         WorshipStore.entries(context,date).lastOrNull {it.action==WorshipStore.QURAN_RANGE}
 
     /** Pages [from]..from+pages-1 confirmed as read; returns the record id so it can be undone. */
-    fun onQuranRead(context: Context,from: Int,pages: Int,date: LocalDate=LocalDate.now()): String {
+    fun onQuranRead(context: Context,from: Int,pages: Int,date: LocalDate=WorshipDay.today(context)): String {
         val id=WorshipStore.newId(context,"q:")
         WorshipStore.put(context,date,WorshipStore.Entry(id,WorshipStore.QURAN_RANGE,pages.toLong(),TimeWindow.ANY_TIME,from))
         DayWidget.update(context)

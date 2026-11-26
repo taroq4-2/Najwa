@@ -17,6 +17,8 @@ object Mushaf {
             val p=page.coerceIn(1,PAGES)
             return verses.subList(pageStarts[p-1],if(p<PAGES)pageStarts[p] else verses.size)
         }
+        /** Index of the first verse printed on [page]. */
+        fun firstIndex(page: Int)=pageStarts[page.coerceIn(1,PAGES)-1]
         fun surahsOn(page: Int)=page(page).map {it.sura}.distinct().map {surahs[it-1]}
         fun juzOf(page: Int): Int {val first=pageStarts[page.coerceIn(1,PAGES)-1];return juzStarts.indexOfLast {it<=first}+1}
         fun pageOfJuz(juz: Int)=pageOf(juzStarts[juz.coerceIn(1,30)-1])

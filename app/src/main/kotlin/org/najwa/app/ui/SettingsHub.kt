@@ -242,12 +242,15 @@ private fun healthText(issue: HealthIssue)=when(issue) {
     val ctx=LocalContext.current
     BackLink(stringResource(R.string.settings_back),onBack)
     PageHeading(stringResource(R.string.section_worship),stringResource(R.string.worship_intro))
+    // The worship plan comes first: everything else on this page and in the app follows it.
+    WorshipPlanCard(p,onSave)
     SettingsCard(stringResource(R.string.worship_daily_title),stringResource(R.string.worship_daily_help)) {
         PreferenceSwitch(stringResource(R.string.dua_setting),stringResource(R.string.dua_setting_help),p.dailyDua) {onSave(p.copy(dailyDua=it))}
         PreferenceSwitch(stringResource(R.string.log_setting),stringResource(R.string.log_setting_help),p.prayerLog) {onSave(p.copy(prayerLog=it))}
         if(p.prayerLog)PreferenceSwitch(stringResource(R.string.log_check_setting),stringResource(R.string.log_check_setting_help),p.logCheckIn) {onSave(p.copy(logCheckIn=it))}
     }
     WorshipCompanionSettings()
+    ReviewExportCard()
     SettingsCard(stringResource(R.string.ramadan_title),stringResource(R.string.ramadan_help)) {
         PreferenceSwitch(stringResource(R.string.ramadan_mode),stringResource(R.string.ramadan_mode_help),p.ramadanMode) {onSave(p.copy(ramadanMode=it))}
         if(p.ramadanMode) {
@@ -265,8 +268,7 @@ private fun healthText(issue: HealthIssue)=when(issue) {
         PreferenceSwitch(stringResource(R.string.qiyam_reminder),stringResource(R.string.qiyam_reminder_help),p.qiyamReminder) {onSave(p.copy(qiyamReminder=it))}
     }
     SettingsCard(stringResource(R.string.sunnah_reminders_title),stringResource(R.string.sunnah_reminders_help)) {
-        PreferenceSwitch(stringResource(R.string.adhkar_reminders),stringResource(R.string.adhkar_reminders_help),p.adhkarReminders) {onSave(p.copy(adhkarReminders=it))}
-        PreferenceSwitch(stringResource(R.string.kahf_reminder),stringResource(R.string.kahf_reminder_help),p.kahfReminder) {onSave(p.copy(kahfReminder=it))}
+        // Adhkar and Al-Kahf reminders live in the worship plan above.
         PreferenceSwitch(stringResource(R.string.fasting_reminders),stringResource(R.string.fasting_reminders_help),p.fastingReminders) {onSave(p.copy(fastingReminders=it))}
     }
     Text(stringResource(R.string.sunnah_note),color=c.secondary,fontSize=12.sp)

@@ -35,7 +35,7 @@ class Release15PlatformTest {
         val task=ScheduledPrayer(PrayerEvent(Prayer.FAJR,now),PrayerAction.REMINDER,now,Reminder.MORNING_ADHKAR)
         assertEquals(NotificationDelivery.POSTED,app.runtime.notifications.show(task,Preferences()))
         val posted=shadowOf(manager).allNotifications.single()
-        assertEquals(PrayerNotifications.REMINDERS,posted.channelId)
+        assertEquals(ReminderChannels.ADHKAR,posted.channelId)
         assertTrue(posted.extras.getCharSequence(android.app.Notification.EXTRA_TITLE).toString().contains("أذكار"))
     }
 

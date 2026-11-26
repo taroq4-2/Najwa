@@ -86,7 +86,19 @@ data class Preferences(
     /** Broadcast prayer events for automation apps such as Tasker. */
     val broadcastEvents: Boolean = false,
     /** Id of the mosque profile whose iqama times are in use. */
-    val activeMosque: String? = null
+    val activeMosque: String? = null,
+    /** A reminder of the day's Quran portion, 30 minutes after [wirdReminderAfter] (Fajr, Asr or Isha), only while pages remain. */
+    val wirdReminder: Boolean = false,
+    val wirdReminderAfter: Prayer = Prayer.ISHA,
+    /** When a prayer's silence ends: "May Allah accept it", with prayed / prayed in congregation / after-prayer adhkar. */
+    val afterPrayerCard: Boolean = false,
+    /** Digits for counts in the worship pages, widget and reminders. */
+    val digits: Digits = Digits.AUTO,
+    /** Sleep adhkar reminder, [sleepReminderMinutes] after Isha. */
+    val sleepReminder: Boolean = false,
+    val sleepReminderMinutes: Int = 90,
+    /** The week in one gentle line after Jumu'ah. */
+    val weeklySummary: Boolean = false,
 ) { init {
     require(durationMinutes in 5..120); require(customFajr in 1.0..30.0 && customIsha in 1.0..30.0)
     require(mode != Ringer.NORMAL); require(enabled.none { !it.isPrayer })
@@ -141,8 +153,9 @@ fun timeline(events: List<PrayerEvent>, now: Instant): Timeline? {
 }
 fun displayTime(time: Instant, prefs: Preferences): String {
     val local = time.atZone(prefs.city.zoneId)
-    return if (prefs.hour24) local.format(DateTimeFormatter.ofPattern("HH:mm",Locale.US))
+    val text = if (prefs.hour24) local.format(DateTimeFormatter.ofPattern("HH:mm",Locale.US))
     else "${if(local.hour % 12 == 0) 12 else local.hour % 12}:${local.minute.toString().padStart(2,'0')} ${if(local.hour < 12) "ص" else "م"}"
+    return prefs.digits.render(text)
 }
 fun countdown(seconds: Long): String = "%02d:%02d:%02d".format(Locale.US, seconds/3600,seconds%3600/60,seconds%60)
 
@@ -163,4 +176,14 @@ fun distanceKm(lat1: Double,lon1: Double,lat2: Double,lon2: Double): Double {
     val a=Math.sin(Math.toRadians(lat2-lat1)/2).let {it*it}+
         Math.cos(Math.toRadians(lat1))*Math.cos(Math.toRadians(lat2))*Math.sin(Math.toRadians(lon2-lon1)/2).let {it*it}
     return 6371.0*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))
+}
+
+/** How counts are written: Arabic-Indic digits (١٢٣), Western digits (123), or by the app language. */
+enum class Digits { AUTO, ARABIC, LATIN;
+    /** Rewrites digits in the chosen style; AUTO leaves the text as the language wrote it. */
+    fun render(text: String): String = when(this) {
+        AUTO -> text
+        ARABIC -> text.map {if(it in '0'..'9') '٠' + (it - '0') else it}.joinToString("")
+        LATIN -> text.map {when(it) {in '٠'..'٩' -> '0' + (it - '٠'); in '۰'..'۹' -> '0' + (it - '۰'); else -> it}}.joinToString("")
+    }
 }

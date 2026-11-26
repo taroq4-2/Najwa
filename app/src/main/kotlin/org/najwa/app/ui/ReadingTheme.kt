@@ -22,20 +22,26 @@ import org.najwa.app.R
  */
 enum class ReadingMode {PAPER,NIGHT}
 
-data class ReadingColors(val page: Color,val ink: Color,val muted: Color,val marker: Color,val frame: Color,val band: Color,val accentInk: Color)
+data class ReadingColors(val page: Color,val ink: Color,val muted: Color,val marker: Color,val frame: Color,val band: Color,val accentInk: Color,
+    /** Around the page, like the table a mushaf rests on. */ val desk: Color)
 
 fun readingColors(mode: ReadingMode)=when(mode) {
     ReadingMode.PAPER->ReadingColors(page=Color(0xFFFBF6EA),ink=Color(0xFF2B2219),muted=Color(0xFF7B6B57),marker=Color(0xFF9C6E35),
-        frame=Color(0xFFE3D5B8),band=Color(0xFFF2E7CF),accentInk=Color(0xFF7A5222))
+        frame=Color(0xFFE3D5B8),band=Color(0xFFF2E7CF),accentInk=Color(0xFF7A5222),desk=Color(0xFFECE2CC))
     ReadingMode.NIGHT->ReadingColors(page=Color(0xFF1F1C18),ink=Color(0xFFE6DCC8),muted=Color(0xFFA39682),marker=Color(0xFFC4A06A),
-        frame=Color(0xFF3A342C),band=Color(0xFF2A2620),accentInk=Color(0xFFD9B985))
+        frame=Color(0xFF3A342C),band=Color(0xFF2A2620),accentInk=Color(0xFFD9B985),desk=Color(0xFF151310))
 }
 
 /** One reading mode for the mushaf and the adhkar, remembered on this device. */
 object ReadingPrefs {
     private fun prefs(context: Context)=context.getSharedPreferences("reading",Context.MODE_PRIVATE)
     fun mode(context: Context)=runCatching {ReadingMode.valueOf(prefs(context).getString("mode",null) ?: "")}.getOrDefault(ReadingMode.PAPER)
-    fun setMode(context: Context,mode: ReadingMode)=prefs(context).edit().putString("mode",mode.name).apply()
+    /** Choosing paper or night by hand ends "follow the app theme". */
+    fun setMode(context: Context,mode: ReadingMode)=prefs(context).edit().putString("mode",mode.name).putBoolean("follow",false).apply()
+    /** Reading colours follow the app: night when the app is dark, paper when it is light. */
+    fun follows(context: Context)=prefs(context).getBoolean("follow",false)
+    fun setFollows(context: Context,on: Boolean)=prefs(context).edit().putBoolean("follow",on).apply()
+    fun resolve(context: Context,appDark: Boolean)=if(follows(context)) (if(appDark) ReadingMode.NIGHT else ReadingMode.PAPER) else mode(context)
 }
 
 /** A round button that switches between paper and night reading. */

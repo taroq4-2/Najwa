@@ -60,7 +60,12 @@ class Release15Test {
         val taraweeh=reminders.filter {it.reminder==Reminder.TARAWEEH}.map {it.event.time.atZone(riyadh.zoneId).toLocalDate()}
         // The first taraweeh is the evening before the first fast.
         assertEquals(start.minusDays(1),taraweeh.first())
-        assertTrue(reminderSchedule(days,p.copy(ramadanMode=false)).isEmpty())
+        // With Ramadan mode off: no suhoor or taraweeh, only the prompt to turn it on (the evening before and the first morning).
+        val off=reminderSchedule(days,p.copy(ramadanMode=false))
+        assertTrue(off.none {it.reminder==Reminder.SUHOOR || it.reminder==Reminder.TARAWEEH})
+        assertEquals(listOf(start.minusDays(1),start),off.filter {it.reminder==Reminder.RAMADAN}.map {it.event.time.atZone(riyadh.zoneId).toLocalDate()})
+        // With it on, no prompt.
+        assertTrue(reminders.none {it.reminder==Reminder.RAMADAN})
     }
 
     @Test fun sunnahRemindersFollowTheirRules() {

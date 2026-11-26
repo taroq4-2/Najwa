@@ -149,6 +149,16 @@ private const val STEPS=4
                     if(silence && !fixed)SummaryRow("sound",stringResource(R.string.settings_quick_silence),null,policyOk && exactOk)
                 }
             }
+            // The Quran portion is chosen here too, so the worship companion starts from the person's own plan.
+            Spacer(Modifier.height(18.dp))
+            Panel(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(18.dp),verticalArrangement=Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.setup_plan_title),color=c.text,fontSize=16.sp,fontWeight=androidx.compose.ui.text.font.FontWeight.Bold)
+                    Text(stringResource(R.string.setup_plan_help),color=c.secondary,fontSize=12.sp)
+                    val planGoal=remember {org.najwa.app.platform.QuranStore.read(context).goal}
+                    KhatmaPlanPicker(planGoal,appPlanColors()) {}
+                }
+            }
             Spacer(Modifier.height(18.dp))
             Action(stringResource(R.string.setup_start),Modifier.fillMaxWidth(),true) {onFinish(SetupChoices(adhan,iqama,friday,silence && !fixed),false)}
             Spacer(Modifier.height(8.dp))

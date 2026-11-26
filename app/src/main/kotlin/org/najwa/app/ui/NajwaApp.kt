@@ -79,7 +79,11 @@ import java.time.Instant
             org.najwa.app.platform.ACTION_HEALTH -> trail=navigateScreens(trail,Screen.SETTINGS,true)
             org.najwa.app.platform.ACTION_PRAYER_LOG -> {log=runtime.log();trail=navigateScreens(navigateScreens(trail,Screen.HOME,true),Screen.PRAYER_LOG)}
             org.najwa.app.platform.ACTION_TASBEEH -> trail=navigateScreens(navigateScreens(trail,Screen.HOME,true),Screen.TASBEEH)
-            org.najwa.app.platform.ACTION_QURAN -> trail=navigateScreens(navigateScreens(trail,Screen.HOME,true),Screen.QURAN)
+            org.najwa.app.platform.ACTION_QURAN -> {
+                val page=actionData?.toIntOrNull()
+                trail=navigateScreens(navigateScreens(trail,Screen.HOME,true),Screen.QURAN)
+                if(page!=null) {mushafPage=page;mushafIndex=false;trail=navigateScreens(trail,Screen.MUSHAF)}
+            }
             ACTION_MOSQUE -> {mosqueImport=actionData;trail=navigateScreens(navigateScreens(trail,Screen.SETTINGS,true),Screen.MOSQUES)}
         }
     }
@@ -120,8 +124,11 @@ import java.time.Instant
     }
     CompositionLocalProvider(LocalPalette provides colors) {
         NajwaTheme(dark,prefs.dynamicColor) {
-            Column(Modifier.fillMaxSize().background(colors.bg).safeDrawingPadding(),horizontalAlignment=Alignment.CenterHorizontally) {
-                PageScroll(screen) {
+            // The mushaf reader draws edge to edge and handles the system bars itself, so its page never jumps.
+            Column(Modifier.fillMaxSize().background(colors.bg).then(if(screen==Screen.MUSHAF) Modifier else Modifier.safeDrawingPadding()),horizontalAlignment=Alignment.CenterHorizontally) {
+                // The mushaf reader takes the whole screen: its pages zoom and turn, so it is not inside the page scroll.
+                if(screen==Screen.MUSHAF) Box(Modifier.weight(1f).fillMaxWidth()) {MushafScreen(mushafPage.takeIf {it>0},mushafIndex,::back)}
+                else PageScroll(screen) {
                     runtime.error?.let { Text(it,color=colors.amber,modifier=Modifier.padding(vertical=10.dp)) }
                     runtime.notice?.let {Text(it,color=colors.mint,modifier=Modifier.padding(vertical=10.dp))}
                     when(screen) {
@@ -170,7 +177,6 @@ import java.time.Instant
                         Screen.TIMETABLE -> TimetableScreen(prefs,::back)
                         Screen.PRAYER_LOG -> PrayerLogScreen(runtime,prefs,{save(it)},{adhkarTab=2;navigate(Screen.ADHKAR)}) {log=runtime.log();back()}
                         Screen.QURAN -> QuranScreen({page,openIndex->mushafPage=page ?: 0;mushafIndex=openIndex;navigate(Screen.MUSHAF)},::back)
-                        Screen.MUSHAF -> MushafScreen(mushafPage.takeIf {it>0},mushafIndex,::back)
                         Screen.HOME -> {
                             if(!cityConfirmed) {
                                 Text(stringResource(R.string.city_unconfirmed),color=colors.amber,modifier=Modifier.padding(vertical=8.dp))
@@ -204,7 +210,7 @@ import java.time.Instant
                     }
                     Spacer(Modifier.height(16.dp))
                 }
-                if(!onboarding && !editingContact)BottomNavigation(screen.tab) {trail=navigateScreens(trail,Screen.forTab(it),true)}
+                if(!onboarding && !editingContact && screen!=Screen.MUSHAF)BottomNavigation(screen.tab) {trail=navigateScreens(trail,Screen.forTab(it),true)}
             }
             if(cityDialog) CityDialog(prefs.city,onDismiss={cityDialog=false},onSelect={
                 // First choice of city: also use the usual calculation method of its country.

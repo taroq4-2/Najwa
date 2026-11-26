@@ -53,7 +53,7 @@ import androidx.compose.ui.semantics.Role
         Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(2.dp)) {
             Text(stringResource(R.string.en_app_name),fontSize=26.sp,lineHeight=33.sp,fontWeight=FontWeight.Bold,color=c.text,
                 modifier=Modifier.semantics {heading()})
-            if(!largeText)Text(stringResource(R.string.en_home_tagline),fontSize=11.sp,lineHeight=17.sp,color=c.secondary)
+            if(!largeText)Text(stringResource(if(org.najwa.app.platform.WorshipSettingsStore.read(androidx.compose.ui.platform.LocalContext.current).enabled) R.string.brand_line else R.string.en_home_tagline),fontSize=11.sp,lineHeight=17.sp,color=c.secondary)
         }
         Surface(onClick=onCity,color=c.surface,shape=RoundedCornerShape(24.dp),border=BorderStroke(1.dp,c.border)) {
             Row(Modifier.widthIn(max=if(largeText)110.dp else 160.dp).heightIn(min=48.dp).padding(horizontal=12.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(6.dp)) {
@@ -162,7 +162,7 @@ import androidx.compose.ui.semantics.Role
     val context=androidx.compose.ui.platform.LocalContext.current
     val minute=now.epochSecond/60
     val worship=remember(minute) {org.najwa.app.platform.WorshipSettingsStore.read(context)}
-    if(worship.enabled && worship.summary)DaySummaryCard(worship,(minute+logged.hashCode()).toInt(),onPrayers={onTool(Screen.PRAYER_LOG)},onQuran={onTool(Screen.QURAN)},onAdhkar=onAdhkar)
+    if(worship.enabled && worship.summary)DaySummaryCard(worship,(minute+logged.hashCode()).toInt(),onPrayers={onTool(Screen.PRAYER_LOG)},onQuran={onTool(Screen.QURAN)},onAdhkar=onAdhkar,onMushaf={onTool(Screen.MUSHAF)})
     ToolsGrid(p) {if(it==Screen.QIBLA)onQibla() else onTool(it)}
     if(p.dailyDua)DuaOfDay(now.atZone(p.city.zoneId).toLocalDate())
     Row(Modifier.fillMaxWidth().padding(top=12.dp),verticalAlignment=Alignment.CenterVertically) {

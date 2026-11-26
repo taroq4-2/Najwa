@@ -18,7 +18,7 @@ const val MANUAL_SILENCE_MINUTES = 30
 
 class NajwaApplication: Application() {
     lateinit var runtime: NajwaRuntime; private set
-    override fun onCreate() { super.onCreate(); runtime=NajwaRuntime(this) }
+    override fun onCreate() { super.onCreate(); runtime=NajwaRuntime(this); runCatching {org.najwa.app.platform.Counts.arabicDigits(this)} }
     override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
         super.onConfigurationChanged(newConfig)
         prayerExecutor.execute { PrayerWidget.updateAll(this) }
@@ -73,11 +73,19 @@ class NajwaRuntime(private val context: Context,private val clock: ()->Instant =
         if(disabled)attempt(R.string.rt_restore_ringer) {sessions.disable()}
         attempt(R.string.rt_schedule) {reschedule()}
     }
-    /** Settings backup: returns the JSON text to save. */
-    fun exportSettings(): String = preferencesStore.export(preferences)
-    /** Restores a backup made by [exportSettings]; false when the file is not a Najwa backup. */
+    /** Backup: the settings, plus the khatma, records, logs and mosques ([WorshipBackup]), as the JSON text to save. */
+    fun exportSettings(): String =
+        org.json.JSONObject(preferencesStore.export(preferences)).put("data",WorshipBackup.export(context)).toString(2)
+    /** Restores a backup made by [exportSettings]; false when the file is not a Najwa backup. Older files hold settings only. */
     fun importSettings(text: String): Boolean {
         val restored=runCatching {preferencesStore.import(text)}.getOrElse {Log.w(TAG,"import",it);return false}
+        val data=runCatching {org.json.JSONObject(text).optJSONObject("data")}.getOrNull()
+        // A copy of what is here now, put back if writing the file's data fails part-way.
+        val before=runCatching {WorshipBackup.export(context)}.getOrNull()
+        if(data!=null && !WorshipBackup.restore(context,data)) {
+            before?.let {WorshipBackup.restore(context,it)}
+            return false
+        }
         update(restored)
         return preferences==restored.normalized()
     }
@@ -303,6 +311,13 @@ class NajwaRuntime(private val context: Context,private val clock: ()->Instant =
     }
     @Synchronized fun setSunnah(date: java.time.LocalDate,prayer: SunnahPrayer,done: Boolean) =
         prayerLog.write(prayerLog.read().withSunnah(date,prayer,done))
-    @Synchronized fun setQada(value: Int) = prayerLog.write(prayerLog.read().withQada(value))
+    /** The make-up prayer total; a decrease counts toward today's qada share. */
+    @Synchronized fun setQada(value: Int) {
+        val before=prayerLog.read()
+        val after=before.withQada(value)
+        prayerLog.write(after)
+        org.najwa.app.platform.QadaPlan.onTotalChanged(context,before.qada,after.qada)
+        org.najwa.app.platform.DayWidget.update(context)
+    }
     private companion object { const val TAG="Najwa" }
 }

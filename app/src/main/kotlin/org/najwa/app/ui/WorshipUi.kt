@@ -42,7 +42,11 @@ import org.najwa.core.DailyGoal
 import org.najwa.core.EvidenceStatus
 import org.najwa.core.GoalKind
 import org.najwa.core.VirtueKind
+import org.najwa.core.StepKind
+import org.najwa.app.platform.Counts
 import java.text.NumberFormat
+import kotlinx.coroutines.launch
+import androidx.compose.ui.semantics.liveRegion
 import java.util.Locale
 
 private val numbers: NumberFormat get()=NumberFormat.getIntegerInstance(Locale.US)
@@ -106,10 +110,16 @@ private fun num(v: Long)=numbers.format(v)
 }
 
 /** One compact card on the home screen: today's prayers, reading and adhkar, and — when rules are active — the hoped-for reward. */
-@Composable fun DaySummaryCard(settings: WorshipSettings,refresh: Int,onPrayers: ()->Unit,onQuran: ()->Unit,onAdhkar: (Int)->Unit) {
+@Composable fun DaySummaryCard(settings: WorshipSettings,refresh: Int,onPrayers: ()->Unit,onQuran: ()->Unit,onAdhkar: (Int)->Unit,onMushaf: ()->Unit=onQuran) {
     val c=LocalPalette.current
     val context=LocalContext.current
-    val s=remember(refresh) {runCatching {WorshipSummary.build(context,settings)}.getOrNull()} ?: return
+    // Built off the main thread from the shared day snapshot; the card appears once it is ready.
+    var marked by remember {mutableIntStateOf(0)}
+    val loaded by produceState<org.najwa.app.platform.DaySummary?>(null,refresh,marked,settings) {
+        value=kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {runCatching {org.najwa.app.platform.DaySnapshot.get(context,settings)}.getOrNull()}
+    }
+    val s=loaded ?: return
+    val scope=rememberCoroutineScope()
     var details by rememberSaveable {mutableStateOf(false)}
     val gold=accent("amber");val teal=accent("teal");val blue=accent("blue")
     Panel(Modifier.fillMaxWidth().padding(bottom=14.dp),radius=24) {
@@ -119,9 +129,16 @@ private fun num(v: Long)=numbers.format(v)
                 if(s.preview)Text(stringResource(R.string.worship_preview_badge),color=gold.ink,fontSize=11.sp,fontWeight=FontWeight.Bold,
                     modifier=Modifier.background(gold.tint,CircleShape).padding(horizontal=10.dp,vertical=3.dp))
             }
-            // Reward and goal share one block so the same number never appears twice.
+            // What now: the one step the day engine picks for this moment.
+            NextStepBanner(s,onAdhkar,onMushaf,onPrayers) {prayer->
+                // "I prayed" straight from the card: recorded in the log like the log screen does.
+                scope.launch {kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    (context.applicationContext as org.najwa.app.NajwaApplication).runtime.setPrayed(s.date,prayer,true)}
+                    marked++}
+            }
+            // Reward and goal share one block so the same number never appears twice; a bare zero is not shown.
             val goal=s.goal
-            if(goal!=null || s.virtues.hasanat!=null) Surface(onClick={details=true},shape=RoundedCornerShape(18.dp),color=gold.tint) {
+            if(goal!=null || (s.virtues.hasanat ?: 0)>0) Surface(onClick={details=true},shape=RoundedCornerShape(18.dp),color=gold.tint) {
                 Column(Modifier.fillMaxWidth().padding(14.dp),verticalArrangement=Arrangement.spacedBy(6.dp)) {
                     if(goal!=null) {
                         Text(stringResource(R.string.day_goal_title),color=gold.ink,fontSize=12.sp,fontWeight=FontWeight.Bold)
@@ -133,19 +150,33 @@ private fun num(v: Long)=numbers.format(v)
                         Text(if(goal.reached)stringResource(R.string.day_goal_reached) else stringResource(R.string.day_goal_left,num(goal.remaining),num(goal.target)),
                             color=c.secondary,fontSize=12.sp)
                     } else {
-                        Text(stringResource(R.string.day_reward_title),color=gold.ink,fontSize=12.sp,fontWeight=FontWeight.Bold)
-                        Text(stringResource(R.string.day_unit_hasanat,num(s.virtues.hasanat ?: 0)),color=c.text,fontSize=20.sp,fontWeight=FontWeight.Bold)
+                        val earned=s.virtues.hasanat ?: 0
+                        val target=maxOf(s.hasanatTarget ?: earned,earned)
+                        Text(stringResource(R.string.day_hasanat_title),color=gold.ink,fontSize=12.sp,fontWeight=FontWeight.Bold)
+                        Text(stringResource(R.string.day_unit_hasanat,Counts.format(context,earned)),color=c.text,fontSize=20.sp,fontWeight=FontWeight.Bold)
+                        // Against today's target: the same rules, with the rest of today's Quran portion read.
+                        if(target>earned) {
+                            val shown by animateFloatAsState(earned.toFloat()/target,tween(400),label="target")
+                            Box(Modifier.fillMaxWidth().height(8.dp).clip(CircleShape).background(c.track)) {
+                                Box(Modifier.fillMaxWidth(shown).fillMaxHeight().background(gold.ink,CircleShape))
+                            }
+                            Text(stringResource(R.string.mushaf_hasanat_target,Counts.format(context,target)),color=c.secondary,fontSize=12.sp)
+                        }
                     }
                     if(s.virtues.hasanat!=null)Text(stringResource(R.string.day_reward_note),color=c.secondary,fontSize=11.sp)
                 }
             }
             Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-                DayTile(stringResource(R.string.day_prayers_title),String.format(Locale.ROOT,"%d/5",s.prayed),"check",teal,Modifier.weight(1f),onPrayers)
-                DayTile(stringResource(R.string.day_quran_title),String.format(Locale.ROOT,"%d/%d",s.pages,s.pageGoal),"mushaf",blue,Modifier.weight(1f),onQuran)
-                val morningFirst=!s.morning.complete
+                DayTile(stringResource(R.string.day_prayers_title),"${Counts.format(context,s.prayed.toLong())}/${Counts.format(context,5)}","check",teal,Modifier.weight(1f),onPrayers)
+                DayTile(stringResource(R.string.day_wird_title),"${Counts.format(context,s.pages.toLong())}/${Counts.format(context,s.pageGoal.toLong())}","mushaf",blue,Modifier.weight(1f),onMushaf)
+                // The adhkar of this moment: morning from Fajr until Asr, evening after.
+                val morningFirst=s.adhkarNow==StepKind.MORNING_ADHKAR
+                // When the banner already shows that routine, the tile shows the day's adhkar count instead.
+                val bannerShows=s.next.kind==StepKind.MORNING_ADHKAR || s.next.kind==StepKind.EVENING_ADHKAR
                 val r=if(morningFirst)s.morning else s.evening
-                DayTile(stringResource(if(morningFirst)R.string.adhkar_morning else R.string.adhkar_evening),
-                    if(r.complete)stringResource(R.string.day_routine_done) else stringResource(R.string.day_routine_left,r.left),
+                if(bannerShows)DayTile(stringResource(R.string.day_adhkar_today),Counts.adhkar(context,s.adhkarItems),"beads",accent("teal"),Modifier.weight(1f)) {onAdhkar(if(morningFirst)0 else 1)}
+                else DayTile(stringResource(if(morningFirst)R.string.adhkar_morning else R.string.adhkar_evening),
+                    if(r.complete)stringResource(R.string.day_routine_done) else stringResource(R.string.next_left,Counts.adhkar(context,r.left)),
                     if(r.complete)"shield" else if(morningFirst)"sun" else "moon",accent(if(morningFirst)"amber" else "violet"),Modifier.weight(1f)) {onAdhkar(if(morningFirst)0 else 1)}
             }
             if(s.virtues.qualified.isNotEmpty()) Surface(onClick={details=true},shape=RoundedCornerShape(16.dp),color=c.surface,border=BorderStroke(1.dp,c.border)) {
@@ -158,6 +189,83 @@ private fun num(v: Long)=numbers.format(v)
         }
     }
     if(details)EvidenceDialog(s) {details=false}
+}
+
+/** The day engine's next step, with a button that opens it (or records the prayer). */
+@Composable private fun NextStepBanner(s: DaySummary,onAdhkar: (Int)->Unit,onMushaf: ()->Unit,onPrayers: ()->Unit,onPrayed: (org.najwa.core.Prayer)->Unit) {
+    val c=LocalPalette.current
+    val context=LocalContext.current
+    val n=s.next
+    val (glyph,tone)=when(n.kind) {
+        StepKind.PRAYER -> "mosque" to "teal"
+        StepKind.AFTER_PRAYER_ADHKAR -> "beads" to "teal"
+        StepKind.MORNING_ADHKAR -> "sun" to "amber"
+        StepKind.EVENING_ADHKAR -> "moon" to "violet"
+        StepKind.WIRD -> "mushaf" to "blue"
+        StepKind.QADA -> "restore" to "coral"
+        StepKind.SLEEP_ADHKAR -> "bed" to "violet"
+        StepKind.LOG_PRAYERS -> "check" to "coral"
+        StepKind.DONE -> "check" to "teal"
+    }
+    val a=accent(tone)
+    val prayerName=n.prayer?.let {stringResource(org.najwa.app.platform.prayerNameResource(it))}.orEmpty()
+    val title=when(n.kind) {
+        StepKind.PRAYER -> stringResource(R.string.next_prayer,prayerName)
+        StepKind.AFTER_PRAYER_ADHKAR -> stringResource(R.string.next_after_prayer,prayerName)
+        StepKind.MORNING_ADHKAR -> stringResource(R.string.reminder_morning_title)
+        StepKind.EVENING_ADHKAR -> stringResource(R.string.reminder_evening_title)
+        StepKind.WIRD -> stringResource(R.string.day_wird_title)
+        StepKind.QADA -> stringResource(R.string.next_qada)
+        StepKind.SLEEP_ADHKAR -> stringResource(R.string.sleep_adhkar_title)
+        StepKind.LOG_PRAYERS -> stringResource(R.string.next_log_prayers)
+        StepKind.DONE -> stringResource(R.string.next_done)
+    }
+    val detail=when(n.kind) {
+        StepKind.PRAYER -> stringResource(R.string.next_prayer_detail)
+        StepKind.WIRD -> stringResource(R.string.next_left,Counts.pages(context,n.left))
+        StepKind.QADA -> stringResource(R.string.next_left,Counts.format(context,n.left.toLong()))
+        StepKind.LOG_PRAYERS -> stringResource(R.string.next_unrecorded,Counts.format(context,n.left.toLong()))
+        StepKind.DONE -> null
+        else -> stringResource(R.string.next_left,Counts.adhkar(context,n.left))
+    }
+    val open: (()->Unit)?=when(n.kind) {
+        StepKind.PRAYER -> {{onPrayed(n.prayer!!)}}
+        StepKind.AFTER_PRAYER_ADHKAR -> {{onAdhkar(2)}}
+        StepKind.MORNING_ADHKAR -> {{onAdhkar(0)}}
+        StepKind.EVENING_ADHKAR -> {{onAdhkar(1)}}
+        StepKind.SLEEP_ADHKAR -> {{onAdhkar(3)}}
+        StepKind.WIRD -> onMushaf
+        StepKind.QADA,StepKind.LOG_PRAYERS -> onPrayers
+        StepKind.DONE -> null
+    }
+    // "Continue" once a routine is under way; "I prayed" records the prayer directly.
+    val started=when(n.kind) {
+        StepKind.MORNING_ADHKAR -> s.morning.done>0
+        StepKind.EVENING_ADHKAR -> s.evening.done>0
+        StepKind.SLEEP_ADHKAR -> s.sleep.done>0
+        StepKind.WIRD -> s.pages>0
+        else -> false
+    }
+    val action=when(n.kind) {
+        StepKind.PRAYER -> stringResource(R.string.action_prayed)
+        StepKind.LOG_PRAYERS -> stringResource(R.string.next_record)
+        else -> stringResource(if(started) R.string.next_continue else R.string.next_open)
+    }
+    Surface(onClick={open?.invoke()},enabled=open!=null,shape=RoundedCornerShape(18.dp),color=a.tint,
+        modifier=Modifier.semantics {liveRegion=androidx.compose.ui.semantics.LiveRegionMode.Polite}) {
+        Row(Modifier.fillMaxWidth().padding(horizontal=14.dp,vertical=12.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+            IconBadge(glyph,a,38)
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.next_title),color=a.ink,fontSize=11.sp,fontWeight=FontWeight.Bold)
+                Text(title,color=c.text,fontSize=16.sp,fontWeight=FontWeight.Bold)
+                detail?.let {Text(it,color=c.secondary,fontSize=12.sp)}
+            }
+            if(open!=null)Text(action,color=a.ink,fontSize=14.sp,fontWeight=FontWeight.Bold,
+                modifier=Modifier.background(c.surface,CircleShape).padding(horizontal=14.dp,vertical=6.dp))
+        }
+    }
+    // A prayer can also be recorded as in congregation, late or missed from the log.
+    if(n.kind==StepKind.PRAYER)TextButton(onClick=onPrayers) {Text(stringResource(R.string.next_prayer_other),color=c.secondary,fontSize=12.sp)}
 }
 
 @Composable private fun goalValue(kind: GoalKind,value: Long)=when(kind) {
@@ -178,7 +286,7 @@ private fun num(v: Long)=numbers.format(v)
 }
 
 /** Localized one-line summary of each rule (pending review with the rule itself). */
-private val virtueText=mapOf(
+internal val virtueText=mapOf(
     "quran.letters" to R.string.virtue_quran_letters,
     "prayer.five" to R.string.virtue_prayer_five,
     "prayer.jamaah" to R.string.virtue_prayer_jamaah,
@@ -224,6 +332,36 @@ private val virtueText=mapOf(
 }
 
 /** Worship companion settings: master switch, home card, goal, widget strip, preview (trial only) and deleting the records. */
+/** The review file for a qualified reviewer: every virtue rule with its wording and sources, and blank verdict fields. */
+@Composable fun ReviewExportCard() {
+    val context=LocalContext.current
+    val scope=rememberCoroutineScope()
+    var saved by remember {mutableStateOf(false)}
+    val save=androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/json")) {uri->
+        if(uri!=null)scope.launch {
+            saved=kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {runCatching {
+                val rules=org.json.JSONArray()
+                org.najwa.core.WorshipCatalog.rules.forEach {r->
+                    rules.put(org.json.JSONObject().put("id",r.id).put("version",r.version).put("action",r.action).put("required",r.required)
+                        .put("window",r.window.name).put("relation",r.relation.name).put("perUnit",r.perUnit).put("status",r.status.name)
+                        .put("wording",virtueText[r.id]?.let {res->if(res!=0) context.getString(res) else ""} ?: "")
+                        .put("outcomes",org.json.JSONArray(r.outcomes.map {o->org.json.JSONObject().put("kind",o.kind.name).put("quantity",o.quantity ?: org.json.JSONObject.NULL)}))
+                        .put("evidence",org.json.JSONArray(r.evidence.map {e->org.json.JSONObject().put("collection",e.collection).put("reference",e.reference)}))
+                        .put("verdict","").put("note",""))
+                }
+                val text=org.json.JSONObject().put("najwaReview",1).put("app",org.najwa.app.BuildConfig.VERSION_NAME)
+                    .put("instructions","For each rule set verdict to APPROVED or REJECTED and add a note; fill reviewer and date. The developer applies it with scripts/apply_review.py.")
+                    .put("reviewer","").put("date","").put("rules",rules).toString(2)
+                context.contentResolver.openOutputStream(uri,"wt")!!.use {it.write(text.toByteArray(Charsets.UTF_8))}
+            }.isSuccess}
+        }
+    }
+    SettingsCard(stringResource(R.string.review_export_title),stringResource(R.string.review_export_help)) {
+        Action(stringResource(R.string.review_export_action),Modifier.fillMaxWidth()) {runCatching {save.launch("najwa-review-${org.najwa.app.BuildConfig.VERSION_NAME}.json")}}
+        if(saved)Text(stringResource(R.string.review_saved),color=LocalPalette.current.mint,fontSize=13.sp)
+    }
+}
+
 @Composable fun WorshipCompanionSettings() {
     val c=LocalPalette.current
     val context=LocalContext.current

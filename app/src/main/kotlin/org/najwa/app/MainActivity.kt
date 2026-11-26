@@ -56,9 +56,22 @@ class MainActivity: ComponentActivity() {
         if(intent.action==Intent.ACTION_VIEW && intent.data?.scheme=="najwa" && intent.data?.host=="mosque") {
             action.value=org.najwa.app.ui.ACTION_MOSQUE;actionData.value=intent.dataString;actionRequest.intValue++;return
         }
+        // A card's own button opened the app: close the card.
+        intent.getIntExtra("cancel_notification",-1).takeIf {it>=0}?.let {getSystemService(android.app.NotificationManager::class.java).cancel(it)}
         val requested=intent.action?.takeIf {it in setOf(ACTION_SILENCE_NOW,ACTION_QIBLA,ACTION_CHOOSE_CITY,ACTION_ADHKAR,ACTION_HEALTH,ACTION_PRAYER_LOG,ACTION_TASBEEH,ACTION_QURAN)} ?: return
         action.value=requested
-        actionData.value=if(requested==ACTION_ADHKAR)intent.getIntExtra("adhkar",0).toString() else null
+        actionData.value=when(requested) {
+            ACTION_ADHKAR -> (if(intent.getBooleanExtra("now",false)) {
+                val (day,_)=org.najwa.app.platform.WorshipDay.times(this,org.najwa.app.platform.WorshipDay.today(this))
+                val fajr=day.events.firstOrNull {it.prayer==org.najwa.core.Prayer.FAJR}?.time
+                val asr=day.events.firstOrNull {it.prayer==org.najwa.core.Prayer.ASR}?.time
+                if(fajr!=null && asr!=null && org.najwa.core.DayEngine.adhkarOfTheMoment(java.time.Instant.now(),fajr,asr)==org.najwa.core.StepKind.MORNING_ADHKAR) 0 else 1
+            } else intent.getIntExtra("adhkar",0)).toString()
+            // A page opens the mushaf there (the wird reminder at the bookmark, Al-Kahf on Friday).
+            ACTION_QURAN -> (if(intent.getBooleanExtra("bookmark",false)) (org.najwa.app.platform.QuranStore.read(this).page+1).coerceIn(1,604)
+                else intent.getIntExtra("page",0)).takeIf {it>0}?.toString()
+            else -> null
+        }
         actionRequest.intValue++
     }
     /** The tasbeeh screen can count with the volume keys (when chosen there). */
@@ -120,13 +133,17 @@ internal fun changeAppLanguage(activity: MainActivity,language: String) {
 internal fun publishShortcuts(context: Context) {
     runCatching {
         val strings=context.prayerLanguage()
-        fun shortcut(id: String,action: String,short: Int,long: Int,icon: Int)=ShortcutInfoCompat.Builder(context,id)
+        fun shortcut(id: String,action: String,short: Int,long: Int,icon: Int,extra: String?=null)=ShortcutInfoCompat.Builder(context,id)
             .setShortLabel(strings.getString(short)).setLongLabel(strings.getString(long))
             .setIcon(IconCompat.createWithResource(context,icon))
-            .setIntent(Intent(context,MainActivity::class.java).setAction(action).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP))
+            .setIntent(Intent(context,MainActivity::class.java).setAction(action).apply {if(extra!=null)putExtra(extra,true)}
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP))
             .build()
         ShortcutManagerCompat.setDynamicShortcuts(context,listOf(
             shortcut("silence_now",ACTION_SILENCE_NOW,R.string.shortcut_silence_short,R.string.shortcut_silence_long,R.drawable.ic_shortcut_silence),
+            // Continue at the khatma bookmark; the adhkar of this moment (morning or evening).
+            shortcut("quran",ACTION_QURAN,R.string.shortcut_quran_short,R.string.shortcut_quran_long,R.drawable.ic_shortcut_quran,"bookmark"),
+            shortcut("adhkar_now",ACTION_ADHKAR,R.string.shortcut_adhkar_short,R.string.shortcut_adhkar_long,R.drawable.ic_shortcut_adhkar,"now"),
             shortcut("qibla",ACTION_QIBLA,R.string.shortcut_qibla_short,R.string.shortcut_qibla_long,R.drawable.ic_shortcut_qibla),
             shortcut("tasbeeh",ACTION_TASBEEH,R.string.shortcut_tasbeeh_short,R.string.shortcut_tasbeeh_long,R.drawable.ic_shortcut_tasbeeh),
             shortcut("prayer_log",ACTION_PRAYER_LOG,R.string.shortcut_log_short,R.string.shortcut_log_long,R.drawable.ic_shortcut_log)))

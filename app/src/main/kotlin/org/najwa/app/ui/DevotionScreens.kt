@@ -54,6 +54,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.najwa.app.R
 import org.najwa.app.platform.AdhkarProgressStore
+import org.najwa.app.platform.Counts
 import org.najwa.app.platform.WorshipRecorder
 import org.najwa.app.platform.WorshipSettingsStore
 import org.najwa.core.RoutineState
@@ -69,7 +70,8 @@ import kotlin.math.sin
 object VolumeKeyCounter {@Volatile var onPress: (()->Unit)?=null}
 
 /** Same digits as the rest of the counter (Latin), whatever the interface language. */
-private fun n(value: Int)=String.format(Locale.ROOT,"%d",value)
+/** Counts in the digits chosen in Appearance. */
+private fun n(value: Int)=Counts.format(Counts.lastArabic,value.toLong())
 
 @Composable private fun OnResume(block: ()->Unit) {
     val lifecycle=LocalLifecycleOwner.current.lifecycle
@@ -262,7 +264,8 @@ enum class AdhkarCategory(val key: String,val title: Int,val glyph: String,val t
     var finished by remember(tab) {mutableStateOf<Int?>(null)}
     var statusTick by remember {mutableIntStateOf(0)}
     // Dhikr texts use the calm reading colours (paper or night), like the mushaf.
-    var mode by remember {mutableStateOf(ReadingPrefs.mode(context))}
+    val appDark=LocalPalette.current.dark
+    var mode by remember(appDark) {mutableStateOf(ReadingPrefs.resolve(context,appDark))}
     val r=readingColors(mode)
     val a=accent(category.tone)
     fun save(next: List<Int>) {
@@ -442,10 +445,10 @@ enum class AdhkarCategory(val key: String,val title: Int,val glyph: String,val t
     var streak by remember {mutableIntStateOf(QuranStore.streak(context))}
     var pageDialog by rememberSaveable {mutableStateOf(false)}
     var message by remember {mutableStateOf<String?>(null)}
-    val week=remember(today) {QuranStore.days(context).filterKeys {!it.isBefore(java.time.LocalDate.now().minusDays(6))}.values.sum()}
+    val week=remember(today) {QuranStore.days(context).filterKeys {!it.isBefore(org.najwa.app.platform.WorshipDay.today(context).minusDays(6))}.values.sum()}
     val companion=remember {WorshipSettingsStore.read(context).enabled}
     var canUndo by remember {mutableStateOf(companion && WorshipRecorder.lastQuranRange(context)!=null)}
-    val letters=remember(today) {if(companion) org.najwa.app.platform.WorshipStore.entries(context,java.time.LocalDate.now())
+    val letters=remember(today) {if(companion) org.najwa.app.platform.WorshipStore.entries(context,org.najwa.app.platform.WorshipDay.today(context))
         .filter {it.action==org.najwa.app.platform.WorshipStore.QURAN_RANGE}.map {org.najwa.app.platform.QuranPageLetters.letters(context,it.from,it.count.toInt())}
         .takeIf {it.isNotEmpty() && it.all {n->n!=null}}?.sumOf {it ?: 0L} else null}
     fun refresh(next: QuranStore.State,before: QuranStore.State) {
@@ -454,6 +457,13 @@ enum class AdhkarCategory(val key: String,val title: Int,val glyph: String,val t
         canUndo=companion && WorshipRecorder.lastQuranRange(context)!=null
         message=if(next.khatmas>before.khatmas)context.getString(R.string.quran_khatma_done)
             else if(earlier<next.goal && today>=next.goal)context.getString(R.string.quran_goal_done) else null
+    }
+    // Pages read outside the app. Right after reading in the mushaf, ask first, so the same reading is not counted twice.
+    var confirmOutside by remember {mutableStateOf<Int?>(null)}
+    fun addOutside(pages: Int,confirmed: Boolean=false) {
+        val recent=QuranStore.recentMushafPages(context)
+        if(!confirmed && recent>0) {confirmOutside=pages;return}
+        val before=q;refresh(QuranStore.addPages(context,pages),before)
     }
     val a=accent("teal")
     BackLink(stringResource(R.string.tools_back),onBack)
@@ -500,20 +510,22 @@ enum class AdhkarCategory(val key: String,val title: Int,val glyph: String,val t
         }
     }
     Spacer(Modifier.height(14.dp))
-    SettingsCard(stringResource(R.string.quran_today_title),stringResource(R.string.quran_today,n(today),n(q.goal))) {
+    SettingsCard(stringResource(R.string.quran_today_title),stringResource(R.string.quran_today_pages,Counts.format(context,today.toLong()),Counts.pages(context,q.goal))) {
         val shown by animateFloatAsState((today/q.goal.toFloat()).coerceAtMost(1f),tween(300),label="today")
         Box(Modifier.fillMaxWidth().height(8.dp).clip(CircleShape).background(c.track)) {
             Box(Modifier.fillMaxWidth(shown).fillMaxHeight().background(if(today>=q.goal)c.green else a.ink,CircleShape))
         }
-        Text(stringResource(R.string.quran_add),color=c.text,fontSize=14.sp,fontWeight=FontWeight.Bold)
+        // Reading in the app's mushaf records itself; these buttons are for a printed mushaf or memory.
+        Text(stringResource(R.string.quran_add_outside),color=c.text,fontSize=14.sp,fontWeight=FontWeight.Bold)
+        Text(stringResource(R.string.quran_add_outside_help),color=c.secondary,fontSize=12.sp)
         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
             listOf(1,2,5,10).forEach {pages->
                 // A left-to-right mark keeps the plus before the number in Arabic layouts.
-                OptionButton("‎+${n(pages)}",false,Modifier.weight(1f)) {val before=q;refresh(QuranStore.addPages(context,pages),before)}
+                OptionButton("‎+${n(pages)}",false,Modifier.weight(1f)) {addOutside(pages)}
             }
         }
         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-            OptionButton(stringResource(R.string.quran_add_juz),false,Modifier.weight(1f)) {val before=q;refresh(QuranStore.addPages(context,20),before)}
+            OptionButton(stringResource(R.string.quran_add_juz),false,Modifier.weight(1f)) {addOutside(20)}
             OptionButton(stringResource(R.string.quran_set_page),false,Modifier.weight(1f)) {pageDialog=true}
         }
         AnimatedVisibility(message!=null) {Text(message.orEmpty(),color=c.mint,fontSize=14.sp,fontWeight=FontWeight.Bold)}
@@ -524,10 +536,28 @@ enum class AdhkarCategory(val key: String,val title: Int,val glyph: String,val t
             Text(stringResource(R.string.quran_undo),color=c.mint)
         }
     }
+    confirmOutside?.let {pages->
+        AlertDialog(onDismissRequest={confirmOutside=null},
+            text={Text(stringResource(R.string.quran_recent_mushaf,Counts.pages(context,QuranStore.recentMushafPages(context))))},
+            confirmButton={TextButton(onClick={confirmOutside=null;addOutside(pages,true)}) {Text(stringResource(R.string.quran_add_anyway))}},
+            dismissButton={TextButton(onClick={confirmOutside=null}) {Text(stringResource(R.string.action_cancel))}})
+    }
+    // Completed khatmas, newest first.
+    val log=remember(q.khatmas) {QuranStore.khatmaLog(context)}
+    if(log.isNotEmpty())SettingsCard(stringResource(R.string.khatma_log_title)) {
+        log.take(12).forEachIndexed {i,(date,days)->
+            Row(verticalAlignment=Alignment.CenterVertically) {
+                Text(Counts.digits(context,date.format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.LONG)
+                    .withLocale(context.resources.configuration.locales[0]))),Modifier.weight(1f),color=c.text,fontSize=14.sp)
+                if(days!=null)Text(stringResource(R.string.count_days,Counts.format(context,days.toLong())),color=c.secondary,fontSize=12.sp)
+                Spacer(Modifier.width(8.dp))
+                Text("#${n(log.size-i)}",color=c.mint,fontSize=12.sp,fontWeight=FontWeight.Bold)
+            }
+        }
+    }
     SettingsCard(stringResource(R.string.quran_goal),stringResource(R.string.quran_goal_help)) {
-        OptionGrid(listOf(1,2,4,5,10,20),q.goal,{context.getString(R.string.quran_pages,n(it))},3) {QuranStore.setGoal(context,it);q=QuranStore.read(context)}
-        val days=(QuranStore.PAGES-q.page+q.goal-1)/q.goal
-        Text(stringResource(R.string.quran_estimate,n(days)),color=c.secondary,fontSize=13.sp)
+        // The same khatma plan as in Settings and the mushaf.
+        KhatmaPlanPicker(q.goal,appPlanColors()) {q=QuranStore.read(context);org.najwa.app.platform.DayWidget.update(context)}
     }
     if(pageDialog) {
         var text by rememberSaveable {mutableStateOf(if(q.page>0)q.page.toString() else "")}

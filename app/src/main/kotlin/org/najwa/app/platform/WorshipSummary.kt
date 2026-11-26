@@ -17,6 +17,13 @@ import org.najwa.core.WorshipCatalog
 import org.najwa.core.WorshipEngine
 import org.najwa.core.WorshipRecord
 import org.najwa.core.dailyPrayers
+import org.najwa.core.silenceFor
+import org.najwa.core.DayEngine
+import org.najwa.core.DayProgress
+import org.najwa.core.NextStep
+import org.najwa.core.Prayer
+import org.najwa.core.PrayerCalculator
+import org.najwa.core.StepKind
 import java.time.LocalDate
 
 /**
@@ -68,7 +75,33 @@ data class DaySummary(
     val preview: Boolean,
     val goalKind: GoalKind,
     val goal: GoalProgress?,
-)
+    /** Letters of today's whole portion: what was read plus the pages still due after your khatma position. */
+    val wirdLetters: Long?=null,
+    /** Hoped-for hasanat if today's portion is completed (null whenever [DayVirtues.hasanat] is null). */
+    val hasanatTarget: Long?=null,
+    /** The day engine's answer to "what now?", shared by the home card, the widget and the reminders. */
+    val next: NextStep=NextStep(StepKind.DONE,0),
+    /** Morning adhkar from Fajr until Asr, evening adhkar after. */
+    val adhkarNow: StepKind=StepKind.MORNING_ADHKAR,
+    val sleep: RoutineState=RoutineState(0,0),
+) {
+    val wirdLeft get()=(pageGoal-pages).coerceAtLeast(0)
+}
+
+/**
+ * One snapshot of the day for every surface (home, widget, reminders): rebuilt at most once a minute, and at once
+ * after any record changes ([invalidate] is called from [DayWidget.update]).
+ */
+object DaySnapshot {
+    @Volatile private var cache: Pair<String,DaySummary>?=null
+    @Volatile private var version=0
+    fun invalidate() {version++;cache=null}
+    fun get(context: Context,settings: WorshipSettings=WorshipSettingsStore.read(context)): DaySummary {
+        val key="${System.currentTimeMillis()/60_000}:$version:${settings.hashCode()}:${WorshipDay.today(context)}"
+        cache?.let {(k,s)->if(k==key)return s}
+        return WorshipSummary.build(context,settings).also {cache=key to it}
+    }
+}
 
 object WorshipSummary {
     private val routineSizes=mapOf("morning" to Adhkar.morning.size,"evening" to Adhkar.evening.size,"after" to Adhkar.afterPrayer.size,
@@ -86,10 +119,11 @@ object WorshipSummary {
     /**
      * [date] is the phone's date, like the adhkar, tasbeeh and Quran stores; prayers use the city's date, like the prayer log.
      */
-    fun build(context: Context,settings: WorshipSettings,date: LocalDate=LocalDate.now()): DaySummary {
+    fun build(context: Context,settings: WorshipSettings,date: LocalDate=WorshipDay.today(context)): DaySummary {
         val runtime=(context.applicationContext as NajwaApplication).runtime
         val log=if(runtime.preferences.prayerLog) runtime.log() else PrayerLog()
-        val prayerDate=if(date==LocalDate.now()) LocalDate.now(runtime.preferences.city.zoneId) else date
+        // The worship day (Fajr to Fajr) is also the prayer log's day.
+        val prayerDate=date
         val entries=WorshipStore.entries(context,date)
         val ranges=entries.filter {it.action==WorshipStore.QURAN_RANGE}
         val rangeLetters=ranges.map {it to QuranPageLetters.letters(context,it.from,it.count.toInt())}
@@ -109,8 +143,45 @@ object WorshipSummary {
             GoalKind.QURAN_PAGES->pages.toLong()
             GoalKind.ADHKAR_ITEMS->adhkarItems.toLong()
         }
+        // Target: the same rules applied as if the rest of today's portion were read too.
+        val quran=QuranStore.read(context)
+        val due=(quran.goal-pages).coerceAtLeast(0)
+        val dueLetters=if(due==0) 0L else QuranPageLetters.letters(context,quran.page+1,due)
+        val wirdLetters=if(letters==null || dueLetters==null) null else letters+dueLetters
+        val hasanatTarget=when {
+            virtues.hasanat==null -> null
+            dueLetters==null || dueLetters==0L -> virtues.hasanat
+            else -> WorshipEngine.evaluate(records+WorshipRecord("wird.target",WorshipActions.QURAN_LETTER,dueLetters,TimeWindow.ANY_TIME,date),
+                WorshipCatalog.rules,policy).hasanat
+        }
+        // What now: from today's prayer times (the city's) and what is still open.
+        val morning=routine("morning");val evening=routine("evening");val sleep=routine("sleep")
+        val now=java.time.Instant.now()
+        val (prayerDay,nextFajr)=WorshipDay.times(context,prayerDate)
+        val times=prayerDay.events.associate {it.prayer to it.time}
+        val (fajr,asr,isha)=Triple(times[Prayer.FAJR],times[Prayer.ASR],times[Prayer.ISHA])
+        // The prayers themselves, when the log is on: the one running now, its after-prayer adhkar, earlier ones unrecorded.
+        val prefs=runtime.preferences
+        val current=if(prefs.prayerLog) DayEngine.currentPrayer(now,prayerDay,nextFajr) else null
+        val duePrayer=current?.takeIf {log.status(prayerDate,it)==null}
+        val recent=current?.takeIf {log.prayed(prayerDate,it)}?.takeIf {p->
+            val adhan=times[p] ?: return@takeIf false
+            val event=prayerDay.events.first {it.prayer==p}
+            now.isBefore(adhan.plusSeconds((prefs.silenceFor(event)+20)*60L)) && !AfterPrayerMarks.done(context,prayerDate,p)
+        }
+        val after=routine("after")
+        val unrecorded=if(!prefs.prayerLog) 0 else dailyPrayers.count {p->
+            p!=current && log.status(prayerDate,p)==null && DayEngine.prayerWindowEnd(p,prayerDay,nextFajr)?.let {now.isAfter(it)}==true
+        }
+        val progress=DayProgress(morning.left,evening.left,sleep.left,(quran.goal-pages).coerceAtLeast(0),
+            duePrayer=duePrayer,afterPrayer=recent,afterLeft=if(after.complete && recent!=null) after.total else after.left,
+            qadaLeft=QadaPlan.leftToday(context,log.qada),unrecordedEarlier=unrecorded)
+        val next=if(fajr==null || asr==null || isha==null) NextStep(if(progress.wirdLeft>0)StepKind.WIRD else StepKind.DONE,progress.wirdLeft)
+            else DayEngine.next(now,fajr,asr,isha,progress)
+        val adhkarNow=if(fajr==null || asr==null) (if(morning.complete)StepKind.EVENING_ADHKAR else StepKind.MORNING_ADHKAR)
+            else DayEngine.adhkarOfTheMoment(now,fajr,asr)
         return DaySummary(date,dailyPrayers.count {log.prayed(prayerDate,it)},dailyPrayers.count {log.status(prayerDate,it)==PrayerStatus.JAMAAH},
-            pages,QuranStore.read(context).goal,letters,routine("morning"),routine("evening"),adhkarItems,virtues,
-            settings.previewActive,settings.goalKind,DailyGoal.progress(settings.goal,value))
+            pages,quran.goal,letters,morning,evening,adhkarItems,virtues,
+            settings.previewActive,settings.goalKind,DailyGoal.progress(settings.goal,value),wirdLetters,hasanatTarget,next,adhkarNow,sleep)
     }
 }

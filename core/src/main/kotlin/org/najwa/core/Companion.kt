@@ -51,7 +51,11 @@ fun extraTimes(today: PrayerDay, tomorrow: PrayerDay?): ExtraTimes? {
 
 // ───────────────────────────── Reminders ─────────────────────────────
 
-enum class Reminder { SUHOOR, TARAWEEH, SUNRISE, DUHA, QIYAM, MORNING_ADHKAR, EVENING_ADHKAR, KAHF, FASTING, LOG_CHECK }
+enum class Reminder { SUHOOR, TARAWEEH, SUNRISE, DUHA, QIYAM, MORNING_ADHKAR, EVENING_ADHKAR, KAHF, FASTING, LOG_CHECK, WIRD, AFTER_PRAYER, SLEEP_ADHKAR, WEEKLY, RAMADAN }
+
+/** Prayers after which the Quran portion can be reminded. */
+val WIRD_PRAYERS=setOf(Prayer.FAJR,Prayer.ASR,Prayer.ISHA)
+const val WIRD_DELAY_MINUTES=45
 
 /** Gentle reminders around the prayers (Ramadan, sunnah, adhkar). Each is opt-in. */
 fun reminderSchedule(days: List<PrayerDay>, p: Preferences): List<ScheduledPrayer> = buildList {
@@ -77,6 +81,22 @@ fun reminderSchedule(days: List<PrayerDay>, p: Preferences): List<ScheduledPraye
         }
         if(p.kahfReminder && p.isFriday(event(Prayer.DHUHR))) add(Prayer.SUNRISE,Reminder.KAHF,sunrise.plusSeconds(2*3600))
         if(p.fastingReminders && fastingReason(day.date.plusDays(1),p)!=null) add(Prayer.ISHA,Reminder.FASTING,isha.plusSeconds(30*60))
+        // The day's Quran portion, 45 minutes after the chosen prayer (clear of the half-hour reminders); posted only while pages remain.
+        if(p.wirdReminder) add(p.wirdReminderAfter,Reminder.WIRD,event(p.wirdReminderAfter).time.plusSeconds(WIRD_DELAY_MINUTES*60L))
+        // "May Allah accept it" as each prayer's silence window ends, or ten minutes after the iqama when silence is off.
+        if(p.prayerLog && p.afterPrayerCard) dailyPrayers.forEach {prayer->
+            val e=event(prayer)
+            val at=if(p.autoSilent && prayer in p.enabled) e.time.plusSeconds(p.silenceFor(e)*60L)
+                else e.time.plusSeconds((p.iqamaMinutes.getValue(prayer)+10)*60L)
+            add(prayer,Reminder.AFTER_PRAYER,at)
+        }
+        // Sleep adhkar, a chosen time after Isha.
+        if(p.sleepReminder) add(Prayer.ISHA,Reminder.SLEEP_ADHKAR,isha.plusSeconds(p.sleepReminderMinutes*60L))
+        // The week in one line, two hours after Jumu'ah.
+        if(p.weeklySummary && p.isFriday(event(Prayer.DHUHR))) add(Prayer.DHUHR,Reminder.WEEKLY,event(Prayer.DHUHR).time.plusSeconds(2*3600))
+        // Ramadan: the evening before it starts and its first morning, unless Ramadan mode is already on (asked once a year).
+        if(!p.ramadanMode && !isRamadan(day.date,p) && isRamadan(day.date.plusDays(1),p)) add(Prayer.MAGHRIB,Reminder.RAMADAN,maghrib.plusSeconds(30*60))
+        if(!p.ramadanMode && isRamadan(day.date,p) && !isRamadan(day.date.minusDays(1),p)) add(Prayer.SUNRISE,Reminder.RAMADAN,sunrise.plusSeconds(3600))
         if(p.prayerLog && p.logCheckIn) {
             // Before each prayer's time runs out: Fajr before sunrise, the others before the next adhan, Isha before midnight.
             val dhuhr=event(Prayer.DHUHR).time

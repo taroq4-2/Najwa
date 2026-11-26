@@ -1,8 +1,8 @@
 # Najwa third-party notices
 
-This notice covers the 53 external artifacts in the resolved application runtime graph reviewed on 2026-11-08, plus the two packaged Noto Sans Arabic fonts. Dependencies may be reduced by the release code shrinker; this notice deliberately retains their attributions. The internal `Najwa:core` module is application code and is not a third-party dependency.
+This notice covers the 53 external artifacts in the resolved application runtime graph reviewed on 2026-11-08, plus the two packaged Noto Sans Arabic fonts and the Amiri Quran font. Dependencies may be reduced by the release code shrinker; this notice deliberately retains their attributions. The internal `Najwa:core` module is application code and is not a third-party dependency.
 
-License texts are packaged with the application in `assets/licenses/`: `Apache-2.0.txt`, `Boost-1.0.txt`, and `Noto-OFL.txt`. This notice is included there as `THIRD_PARTY_NOTICES.md`. These third-party licenses do not assign a license to Najwa's own source code, logo, or other original materials.
+License texts are packaged with the application in `assets/licenses/`: `Apache-2.0.txt`, `Boost-1.0.txt`, `Noto-OFL.txt`, and `Amiri-OFL.txt`. This notice is included there as `THIRD_PARTY_NOTICES.md`. These third-party licenses do not assign a license to Najwa's own source code, logo, or other original materials.
 
 ## AndroidX, Jetpack Compose, and Material components
 
@@ -53,6 +53,12 @@ Source: https://github.com/google/guava/blob/v26.0/guava/src/com/google/common/u
 Copyright 2022 The Noto Project Authors (https://github.com/notofonts/arabic)
 
 License: SIL Open Font License 1.1. The full copyright and license are in `Noto-OFL.txt`. The regular and bold TTF name tables both declare this copyright, version 2.010, and OFL 1.1. Font files: `noto_sans_arabic_regular.ttf` and `noto_sans_arabic_bold.ttf`.
+
+## Amiri Quran, version 1.003
+
+Copyright 2010-2022 The Amiri Project Authors (https://github.com/aliftype/amiri)
+
+License: SIL Open Font License 1.1. The full copyright and license are in `Amiri-OFL.txt`. The mushaf reader draws the Quran text with `AmiriQuran.ttf` from the official Amiri 1.003 release (`Amiri-1.003.zip`, SHA-256 81af0aff7d2086d8af24cea7202f7546130997982534691373485cd96744d05e), unmodified and packaged as `amiri_quran.ttf`.
 
 ## GeoNames
 

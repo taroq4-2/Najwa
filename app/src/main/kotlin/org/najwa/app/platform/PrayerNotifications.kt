@@ -42,6 +42,10 @@ class PrayerNotifications(
         /** Silent heads-up card while Najwa plays the adhan itself (enhanced playback). */
         const val ADHAN_VISUAL="adhan_visual_v1"
         const val MARK_PRAYED="org.najwa.notification.MARK_PRAYED"
+        const val SNOOZE_WIRD="org.najwa.notification.SNOOZE_WIRD"
+        const val WIRD_AGAIN="org.najwa.notification.WIRD_AGAIN"
+        const val ENABLE_RAMADAN="org.najwa.notification.ENABLE_RAMADAN"
+        const val RETURN_HOME="org.najwa.notification.RETURN_HOME"
         const val HEALTH_ID=560
         private const val TRAVEL_ID=470
         const val STOP_ADHAN="org.najwa.notification.STOP_ADHAN"
@@ -98,6 +102,14 @@ class PrayerNotifications(
         manager.createNotificationChannel(NotificationChannel(REMINDERS,strings.getString(R.string.channel_reminders_name),NotificationManager.IMPORTANCE_DEFAULT).apply {
             description=strings.getString(R.string.channel_reminders_description)
         })
+        // One channel per kind of reminder, so each can be silenced on its own.
+        listOf(ReminderChannels.ADHKAR to R.string.channel_adhkar_name,ReminderChannels.QURAN to R.string.channel_quran_name,
+            ReminderChannels.SEASON to R.string.channel_season_name,ReminderChannels.SUNNAH to R.string.channel_sunnah_name,
+            ReminderChannels.PRAYER to R.string.channel_prayer_cards_name).forEach {(id,name)->
+            manager.createNotificationChannel(NotificationChannel(id,strings.getString(name),NotificationManager.IMPORTANCE_DEFAULT).apply {
+                description=strings.getString(R.string.channel_reminders_description)
+            })
+        }
         manager.createNotificationChannel(NotificationChannel(LIVE,strings.getString(R.string.channel_live_name),NotificationManager.IMPORTANCE_DEFAULT).apply {
             setSound(null,null);enableVibration(false);setShowBadge(false)
             description=strings.getString(R.string.channel_live_description)
@@ -308,24 +320,89 @@ fun PrayerNotifications.showLive(task: ScheduledPrayer,p: Preferences,test: Bool
     }.getOrDefault(NotificationDelivery.BLOCKED)
 }
 
-/** Ramadan, sunnah and adhkar reminders on their own gentle channel. */
+/** Reminder channels, one per kind, so each can be silenced on its own in the system settings. */
+object ReminderChannels {
+    const val ADHKAR="reminders_adhkar_v1"
+    const val QURAN="reminders_quran_v1"
+    const val SEASON="reminders_season_v1"
+    const val SUNNAH="reminders_sunnah_v1"
+    const val PRAYER="reminders_prayer_v1"
+    const val GROUP="org.najwa.reminders"
+    const val SUMMARY_ID=599
+    fun of(r: Reminder)=when(r) {
+        Reminder.MORNING_ADHKAR,Reminder.EVENING_ADHKAR,Reminder.SLEEP_ADHKAR -> ADHKAR
+        Reminder.WIRD,Reminder.KAHF -> QURAN
+        Reminder.SUHOOR,Reminder.TARAWEEH,Reminder.FASTING,Reminder.RAMADAN -> SEASON
+        Reminder.SUNRISE,Reminder.DUHA,Reminder.QIYAM -> SUNNAH
+        Reminder.LOG_CHECK,Reminder.AFTER_PRAYER,Reminder.WEEKLY -> PRAYER
+    }
+}
+
+/** Posts a reminder in the reminders bundle: two or more at the same time arrive as one group. */
+private fun PrayerNotifications.postReminder(id: Int,builder: NotificationCompat.Builder): NotificationDelivery {
+    val context=appContext
+    builder.setGroup(ReminderChannels.GROUP)
+    return runCatching {
+        val nm=context.getSystemService(NotificationManager::class.java)
+        nm.notify(id,builder.build())
+        val active=nm.activeNotifications.count {it.notification.group==ReminderChannels.GROUP && it.id!=ReminderChannels.SUMMARY_ID}
+        if(active>=2) nm.notify(ReminderChannels.SUMMARY_ID,NotificationCompat.Builder(context,PrayerNotifications.REMINDERS)
+            .setSmallIcon(R.drawable.ic_notification).setColor(Color.parseColor("#9F7535"))
+            .setContentTitle(context.prayerLanguage().getString(R.string.reminder_bundle_title))
+            .setGroup(ReminderChannels.GROUP).setGroupSummary(true).setAutoCancel(true).build())
+        NotificationDelivery.POSTED
+    }.getOrDefault(NotificationDelivery.BLOCKED)
+}
+
+private fun PrayerNotifications.openApp(code: Int,action: String?,extras: Intent.()->Unit={})=PendingIntent.getActivity(appContext,code,
+    Intent(appContext,MainActivity::class.java).apply {if(action!=null)setAction(action) else putExtra("open_home",true);extras()}
+        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP),PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+
+private fun PrayerNotifications.reminderBuilder(channel: String,title: String,text: String,open: PendingIntent,p: Preferences)=
+    NotificationCompat.Builder(appContext,channel).setSmallIcon(R.drawable.ic_notification)
+        .setContentTitle(title).setContentText(text).setStyle(NotificationCompat.BigTextStyle().bigText(text))
+        .setColor(Color.parseColor("#9F7535")).setCategory(NotificationCompat.CATEGORY_REMINDER)
+        .setContentIntent(open).setAutoCancel(true).setTimeoutAfter(3*3600_000L)
+        .setVisibility(if(p.showLockScreenDetails)NotificationCompat.VISIBILITY_PUBLIC else NotificationCompat.VISIBILITY_PRIVATE)
+
+/** Ramadan, sunnah, adhkar, Quran and prayer reminders, each on its own channel and checked against the day's records. */
 fun PrayerNotifications.showReminder(task: ScheduledPrayer,p: Preferences): NotificationDelivery {
     val context=appContext
     val reminder=task.reminder ?: return NotificationDelivery.BLOCKED
-    if(!enabled(PrayerNotifications.REMINDERS))return NotificationDelivery.BLOCKED
+    if(!enabled(ReminderChannels.of(reminder)))return NotificationDelivery.BLOCKED
     val strings=context.prayerLanguage()
     val zone=p.city.zoneId
-    if(reminder==Reminder.LOG_CHECK)return showLogCheck(task,p)
+    when(reminder) {
+        Reminder.LOG_CHECK -> return showLogCheck(task,p)
+        Reminder.AFTER_PRAYER -> return showAfterPrayer(task,p)
+        Reminder.WIRD -> return showWird(p)
+        Reminder.RAMADAN -> return showRamadan(task,p)
+        Reminder.WEEKLY -> return showWeekly(p)
+        else -> {}
+    }
+    // Adhkar reminders ask the day's records first: nothing to remind once a routine is done.
+    val adhkarKey=when(reminder) {Reminder.MORNING_ADHKAR->"morning";Reminder.EVENING_ADHKAR->"evening";Reminder.SLEEP_ADHKAR->"sleep";else->null}
+    val adhkarSize=when(reminder) {
+        Reminder.MORNING_ADHKAR->org.najwa.app.ui.Adhkar.morning.size
+        Reminder.EVENING_ADHKAR->org.najwa.app.ui.Adhkar.evening.size
+        Reminder.SLEEP_ADHKAR->org.najwa.app.ui.Adhkar.sleep.size
+        else->0
+    }
+    val adhkarLeft=adhkarKey?.let {AdhkarProgressStore.remaining(context,it,adhkarSize)?.count {n->n>0} ?: adhkarSize} ?: 0
+    if(adhkarKey!=null && adhkarLeft==0)return NotificationDelivery.ALREADY_POSTED
+    // Al-Kahf already read today (all its pages confirmed): no reminder.
+    if(reminder==Reminder.KAHF && (KAHF_PAGE..KAHF_LAST_PAGE).all {it in QuranStore.readToday(context)})return NotificationDelivery.ALREADY_POSTED
+    fun adhkarText()=if(adhkarLeft<adhkarSize) strings.getString(R.string.next_left,Counts.adhkar(context,adhkarLeft)) else strings.getString(R.string.reminder_adhkar_text)
     val (title,text)=when(reminder) {
         Reminder.SUHOOR -> strings.getString(R.string.reminder_suhoor_title) to strings.getString(R.string.reminder_suhoor_text,p.suhoorMinutes)
         Reminder.TARAWEEH -> strings.getString(R.string.reminder_taraweeh_title) to strings.getString(R.string.reminder_taraweeh_text)
         Reminder.SUNRISE -> strings.getString(R.string.reminder_sunrise_title,p.sunriseLeadMinutes) to strings.getString(R.string.reminder_sunrise_text)
         Reminder.DUHA -> strings.getString(R.string.reminder_duha_title) to strings.getString(R.string.reminder_duha_text)
         Reminder.QIYAM -> strings.getString(R.string.reminder_qiyam_title) to strings.getString(R.string.reminder_qiyam_text)
-        Reminder.MORNING_ADHKAR -> strings.getString(R.string.reminder_morning_title) to strings.getString(R.string.reminder_adhkar_text)
-        Reminder.EVENING_ADHKAR -> strings.getString(R.string.reminder_evening_title) to strings.getString(R.string.reminder_adhkar_text)
+        Reminder.MORNING_ADHKAR -> strings.getString(R.string.reminder_morning_title) to adhkarText()
+        Reminder.EVENING_ADHKAR -> strings.getString(R.string.reminder_evening_title) to adhkarText()
+        Reminder.SLEEP_ADHKAR -> strings.getString(R.string.sleep_adhkar_title) to adhkarText()
         Reminder.KAHF -> strings.getString(R.string.reminder_kahf_title) to strings.getString(R.string.reminder_kahf_text)
-        Reminder.LOG_CHECK -> return NotificationDelivery.BLOCKED
         Reminder.FASTING -> {
             val tomorrow=task.event.time.atZone(zone).toLocalDate().plusDays(1)
             val reason=fastingReason(tomorrow,p) ?: return NotificationDelivery.BLOCKED
@@ -338,60 +415,159 @@ fun PrayerNotifications.showReminder(task: ScheduledPrayer,p: Preferences): Noti
                 FastReason.THURSDAY -> R.string.fast_thursday
             })
         }
+        else -> return NotificationDelivery.BLOCKED
     }
-    val target=when(reminder) {
-        Reminder.MORNING_ADHKAR,Reminder.EVENING_ADHKAR -> ACTION_ADHKAR
-        else -> null
+    // Every reminder opens its own place: the adhkar tab, or the mushaf at Al-Kahf.
+    val open=when(reminder) {
+        Reminder.MORNING_ADHKAR,Reminder.EVENING_ADHKAR,Reminder.SLEEP_ADHKAR -> openApp(206+reminder.ordinal,ACTION_ADHKAR) {
+            putExtra("adhkar",when(reminder) {Reminder.EVENING_ADHKAR->1;Reminder.SLEEP_ADHKAR->3;else->0})}
+        Reminder.KAHF -> openApp(206+reminder.ordinal,ACTION_QURAN) {putExtra("page",KAHF_PAGE)}
+        else -> openApp(206+reminder.ordinal,null)
     }
-    val open=PendingIntent.getActivity(context,206+reminder.ordinal,Intent(context,MainActivity::class.java).apply {
-            if(target!=null)action=target else putExtra("open_home",true)
-            putExtra("adhkar",if(reminder==Reminder.EVENING_ADHKAR)1 else 0)
-        }.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP),PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-    val notification=NotificationCompat.Builder(context,PrayerNotifications.REMINDERS).setSmallIcon(R.drawable.ic_notification)
-        .setContentTitle(title).setContentText(text).setStyle(NotificationCompat.BigTextStyle().bigText(text))
-        .setColor(Color.parseColor("#9F7535")).setCategory(NotificationCompat.CATEGORY_REMINDER)
-        .setContentIntent(open).setAutoCancel(true).setTimeoutAfter(3*3600_000L)
-        .setVisibility(if(p.showLockScreenDetails)NotificationCompat.VISIBILITY_PUBLIC else NotificationCompat.VISIBILITY_PRIVATE)
-        .build()
-    return runCatching {
-        context.getSystemService(NotificationManager::class.java).notify(540+reminder.ordinal,notification)
-        NotificationDelivery.POSTED
-    }.getOrDefault(NotificationDelivery.BLOCKED)
+    return postReminder(540+reminder.ordinal,reminderBuilder(ReminderChannels.of(reminder),title,text,open,p))
 }
 
-/** "Have you prayed Asr?" shortly before its time ends, only while the prayer is still unmarked in the log. */
+/** First and last pages of Surat Al-Kahf in the Madinah mushaf. */
+const val KAHF_PAGE=293
+const val KAHF_LAST_PAGE=304
+
+/**
+ * The day's Quran portion, while pages remain: what is left and when the khatma ends, a snooze of one hour, and
+ * gentler words after three days without reading.
+ */
+fun PrayerNotifications.showWird(p: Preferences,again: Boolean=false): NotificationDelivery {
+    val context=appContext
+    if(!enabled(ReminderChannels.QURAN))return NotificationDelivery.BLOCKED
+    val wird=QuranStore.wird(context)
+    if(wird.done)return NotificationDelivery.ALREADY_POSTED
+    val strings=context.prayerLanguage()
+    val today=WorshipDay.today(context)
+    val days=QuranStore.days(context)
+    val quiet=(1L..3L).all {(days[today.minusDays(it)] ?: 0)==0}
+    val text=if(quiet) strings.getString(R.string.reminder_wird_gentle)
+        else strings.getString(R.string.reminder_wird_text,Counts.pages(context,wird.left),
+            QuranStore.finishDate(context).format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.LONG)
+                .withLocale(strings.resources.configuration.locales[0])))
+    val page=(QuranStore.read(context).page+1).coerceIn(1,QuranStore.PAGES)
+    val open=openApp(206+Reminder.WIRD.ordinal,ACTION_QURAN) {putExtra("page",page)}
+    val snooze=PendingIntent.getBroadcast(context,760,Intent(context,NotificationActionReceiver::class.java).setAction(PrayerNotifications.SNOOZE_WIRD),
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+    val builder=reminderBuilder(ReminderChannels.QURAN,strings.getString(R.string.reminder_wird_title),text,open,p)
+        .addAction(NotificationCompat.Action.Builder(R.drawable.ic_notification,strings.getString(R.string.reminder_wird_open),open).build())
+        .addAction(NotificationCompat.Action.Builder(R.drawable.ic_notification,strings.getString(R.string.reminder_snooze_hour),snooze).build())
+    if(again)builder.setOnlyAlertOnce(true)
+    return postReminder(WIRD_ID,builder)
+}
+const val WIRD_ID=550
+
+/** Snooze: the wird reminder again in an hour (an inexact alarm; no extra permission). */
+fun PrayerNotifications.snoozeWird() {
+    val context=appContext
+    context.getSystemService(NotificationManager::class.java).cancel(WIRD_ID)
+    val again=PendingIntent.getBroadcast(context,761,Intent(context,NotificationActionReceiver::class.java).setAction(PrayerNotifications.WIRD_AGAIN),
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+    context.getSystemService(android.app.AlarmManager::class.java)
+        .setAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP,System.currentTimeMillis()+3600_000L,again)
+}
+
+/**
+ * Ramadan: the evening before it starts and on its first days, one card that turns on Ramadan mode with suhoor and
+ * taraweeh reminders and a khatma in thirty days. Asked once per Hijri year.
+ */
+private fun PrayerNotifications.showRamadan(task: ScheduledPrayer,p: Preferences): NotificationDelivery {
+    val context=appContext
+    if(p.ramadanMode)return NotificationDelivery.ALREADY_POSTED
+    val date=task.event.time.atZone(p.city.zoneId).toLocalDate()
+    val year=runCatching {java.time.chrono.HijrahDate.from(date.plusDays(1)).get(java.time.temporal.ChronoField.YEAR)}.getOrDefault(date.year)
+    val plan=context.getSharedPreferences("plan",Context.MODE_PRIVATE)
+    if(plan.getInt("ramadanAsked",0)==year)return NotificationDelivery.ALREADY_POSTED
+    plan.edit().putInt("ramadanAsked",year).apply()
+    val strings=context.prayerLanguage()
+    val enable=PendingIntent.getBroadcast(context,762,Intent(context,NotificationActionReceiver::class.java).setAction(PrayerNotifications.ENABLE_RAMADAN),
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+    val builder=reminderBuilder(ReminderChannels.SEASON,strings.getString(R.string.ramadan_prompt_title),strings.getString(R.string.ramadan_prompt_text),
+        openApp(206+Reminder.RAMADAN.ordinal,null),p)
+        .addAction(NotificationCompat.Action.Builder(R.drawable.ic_notification,strings.getString(R.string.ramadan_prompt_enable),enable).build())
+    return postReminder(552,builder)
+}
+
+/** Turns on Ramadan mode, its reminders and a thirty-day khatma plan (from the Ramadan card). */
+fun PrayerNotifications.enableRamadan(runtime: org.najwa.app.NajwaRuntime) {
+    runtime.update(runtime.preferences.copy(ramadanMode=true,suhoorReminder=true,taraweehReminder=true))
+    QuranStore.setPlan(appContext,30)
+    appContext.getSystemService(NotificationManager::class.java).cancel(552)
+    DayWidget.update(appContext)
+}
+
+/** After Jumu'ah: the week in one gentle line (prayers recorded, pages, adhkar days, khatma). */
+private fun PrayerNotifications.showWeekly(p: Preferences): NotificationDelivery {
+    val context=appContext
+    if(!p.weeklySummary)return NotificationDelivery.ALREADY_POSTED
+    val w=WeeklySummary.build(context)
+    val strings=context.prayerLanguage()
+    val text=strings.getString(R.string.weekly_text,Counts.format(context,w.prayers.toLong()),Counts.format(context,w.possible.toLong()),
+        Counts.pages(context,w.pages),Counts.format(context,w.adhkarDays.toLong()),Counts.format(context,w.khatmaPercent.toLong()))
+    return postReminder(553,reminderBuilder(ReminderChannels.PRAYER,strings.getString(R.string.weekly_title),text,openApp(206+Reminder.WEEKLY.ordinal,null),p))
+}
+
+/**
+ * "May Allah accept it": as a prayer's silence ends (or after the iqama when silence is off), one card to record it,
+ * alone or in congregation, and go on to the after-prayer adhkar. Not posted when the prayer is already marked.
+ */
+private fun PrayerNotifications.showAfterPrayer(task: ScheduledPrayer,p: Preferences): NotificationDelivery {
+    val context=appContext
+    val date=task.event.time.atZone(p.city.zoneId).toLocalDate()
+    if(!p.prayerLog || !p.afterPrayerCard || PrayerLogStore(context).read().status(date,task.event.prayer)!=null)return NotificationDelivery.ALREADY_POSTED
+    val strings=context.prayerLanguage()
+    val name=strings.prayerName(task.event,p)
+    val id=AFTER_PRAYER_ID+task.event.prayer.ordinal
+    // Opening the adhkar from the card also closes the card.
+    val adhkar=openApp(240+task.event.prayer.ordinal,ACTION_ADHKAR) {putExtra("adhkar",2);putExtra("cancel_notification",id)}
+    val text=strings.getString(R.string.after_prayer_text)
+    val builder=NotificationCompat.Builder(context,ReminderChannels.PRAYER).setSmallIcon(R.drawable.ic_notification)
+        .setContentTitle(strings.getString(R.string.after_prayer_title,name)).setContentText(text).setStyle(NotificationCompat.BigTextStyle().bigText(text))
+        .setColor(Color.parseColor("#3EB28C")).setCategory(NotificationCompat.CATEGORY_REMINDER)
+        .setContentIntent(adhkar).setAutoCancel(true).setTimeoutAfter(60*60_000L)
+        .addAction(prayedAction(task,id,org.najwa.core.PrayerStatus.JAMAAH))
+        .addAction(prayedAction(task,id))
+        .addAction(NotificationCompat.Action.Builder(R.drawable.ic_notification,strings.getString(R.string.action_after_adhkar),adhkar).build())
+        .setVisibility(if(p.showLockScreenDetails)NotificationCompat.VISIBILITY_PUBLIC else NotificationCompat.VISIBILITY_PRIVATE)
+    return postReminder(id,builder)
+}
+const val AFTER_PRAYER_ID=580
+const val LOG_CHECK_ID=600
+
+/** "Have you prayed Asr?" shortly before its time ends, only while the prayer is still unmarked; it replaces that prayer's "May Allah accept it" card. */
 private fun PrayerNotifications.showLogCheck(task: ScheduledPrayer,p: Preferences): NotificationDelivery {
     val context=appContext
     val date=task.event.time.atZone(p.city.zoneId).toLocalDate()
     if(!p.prayerLog || PrayerLogStore(context).read().status(date,task.event.prayer)!=null)return NotificationDelivery.ALREADY_POSTED
     val strings=context.prayerLanguage()
     val name=strings.prayerName(task.event,p)
-    val id=560+task.event.prayer.ordinal
-    val open=PendingIntent.getActivity(context,230+task.event.prayer.ordinal,Intent(context,MainActivity::class.java).setAction(ACTION_PRAYER_LOG)
-        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP),PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+    val id=LOG_CHECK_ID+task.event.prayer.ordinal
+    context.getSystemService(NotificationManager::class.java).cancel(AFTER_PRAYER_ID+task.event.prayer.ordinal)
+    val open=openApp(230+task.event.prayer.ordinal,ACTION_PRAYER_LOG)
     val text=strings.getString(if(task.event.prayer==Prayer.FAJR) R.string.log_check_fajr_text else R.string.log_check_text,name)
-    val notification=NotificationCompat.Builder(context,PrayerNotifications.REMINDERS).setSmallIcon(R.drawable.ic_notification)
+    val builder=NotificationCompat.Builder(context,ReminderChannels.PRAYER).setSmallIcon(R.drawable.ic_notification)
         .setContentTitle(strings.getString(R.string.log_check_title,name)).setContentText(text).setStyle(NotificationCompat.BigTextStyle().bigText(text))
         .setColor(Color.parseColor("#3EB28C")).setCategory(NotificationCompat.CATEGORY_REMINDER)
         .setContentIntent(open).setAutoCancel(true).setTimeoutAfter(40*60_000L)
         .addAction(prayedAction(task,id))
         .setVisibility(if(p.showLockScreenDetails)NotificationCompat.VISIBILITY_PUBLIC else NotificationCompat.VISIBILITY_PRIVATE)
-        .build()
-    return runCatching {
-        context.getSystemService(NotificationManager::class.java).notify(id,notification)
-        NotificationDelivery.POSTED
-    }.getOrDefault(NotificationDelivery.BLOCKED)
+    return postReminder(id,builder)
 }
 
 /** "I prayed" button: records the prayer in the private log and dismisses the card. */
-private fun PrayerNotifications.prayedAction(task: ScheduledPrayer,notificationId: Int): NotificationCompat.Action {
+private fun PrayerNotifications.prayedAction(task: ScheduledPrayer,notificationId: Int,status: org.najwa.core.PrayerStatus?=null): NotificationCompat.Action {
     val context=appContext
     val date=task.event.time.atZone(java.time.ZoneId.systemDefault()).toLocalDate()
     val intent=Intent(context,NotificationActionReceiver::class.java).setAction(PrayerNotifications.MARK_PRAYED)
         .putExtra("prayer",task.event.prayer.name).putExtra("eventAt",task.event.time.toEpochMilli()).putExtra("notification",notificationId)
-        .setData(android.net.Uri.parse("najwa://prayed/${task.event.prayer.name}/$date"))
-    val pending=PendingIntent.getBroadcast(context,700+notificationId,intent,PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-    return NotificationCompat.Action.Builder(R.drawable.ic_status_iqama,context.prayerLanguage().getString(R.string.action_prayed),pending).build()
+        .apply {if(status!=null)putExtra("status",status.name)}
+        .setData(android.net.Uri.parse("najwa://prayed/${task.event.prayer.name}/$date${if(status!=null)"/"+status.name else ""}"))
+    val pending=PendingIntent.getBroadcast(context,700+notificationId+(if(status!=null)50 else 0),intent,PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+    val label=context.prayerLanguage().getString(if(status==org.najwa.core.PrayerStatus.JAMAAH)R.string.action_prayed_jamaah else R.string.action_prayed)
+    return NotificationCompat.Action.Builder(R.drawable.ic_status_iqama,label,pending).build()
 }
 
 /** "It is now time for the Asr adhan", spoken before the adhan when enabled. */
@@ -407,9 +583,22 @@ fun PrayerNotifications.showTravel(context: Context,zone: String,city: String) {
     val notification=NotificationCompat.Builder(context,PrayerNotifications.STATUS).setSmallIcon(R.drawable.ic_notification)
         .setContentTitle(strings.getString(R.string.travel_title))
         .setContentText(strings.getString(R.string.travel_text,city,zone))
-        .setStyle(NotificationCompat.BigTextStyle().bigText(strings.getString(R.string.travel_text,city,zone)))
+        // The traveller's concession, pointed out without ruling on it.
+        .setStyle(NotificationCompat.BigTextStyle().bigText(strings.getString(R.string.travel_text,city,zone)+"\n"+strings.getString(R.string.travel_rukhsa)))
         .setContentIntent(open).setAutoCancel(true).build()
     runCatching {context.getSystemService(NotificationManager::class.java).notify(470,notification)}
+}
+
+/** Back home: the phone's clock matches the home city again while another city is chosen; one tap switches back. */
+fun PrayerNotifications.showHomeAgain(context: Context,home: String) {
+    val strings=context.prayerLanguage()
+    if(!enabled(PrayerNotifications.STATUS))return
+    val back=PendingIntent.getBroadcast(context,471,Intent(context,NotificationActionReceiver::class.java).setAction(PrayerNotifications.RETURN_HOME),
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+    val notification=NotificationCompat.Builder(context,PrayerNotifications.STATUS).setSmallIcon(R.drawable.ic_notification)
+        .setContentTitle(strings.getString(R.string.travel_home_title,home)).setContentText(strings.getString(R.string.travel_home_text))
+        .setContentIntent(back).setAutoCancel(true).build()
+    runCatching {context.getSystemService(NotificationManager::class.java).notify(472,notification)}
 }
 const val ACTION_CHOOSE_CITY="org.najwa.action.CHOOSE_CITY"
 const val ACTION_SILENCE_NOW="org.najwa.action.SILENCE_NOW"

@@ -63,7 +63,7 @@ internal fun Context.prayerTime(date: Instant, preferences: Preferences): String
 
 internal fun prayerTime(date: Instant, preferences: Preferences, locale: Locale): String =
     if(locale.language=="ar" || preferences.hour24)displayTime(date,preferences)
-    else date.atZone(preferences.city.zoneId).format(DateTimeFormatter.ofPattern("h:mm a",locale))
+    else preferences.digits.render(date.atZone(preferences.city.zoneId).format(DateTimeFormatter.ofPattern("h:mm a",locale)))
 
 private val hijriMonths=listOf("محرم","صفر","ربيع الأول","ربيع الآخر","جمادى الأولى","جمادى الآخرة",
     "رجب","شعبان","رمضان","شوال","ذو القعدة","ذو الحجة")
@@ -78,7 +78,10 @@ private fun arabicHijriLabel(date: LocalDate,offset: Int): String = try {
 } catch(_: java.time.DateTimeException) { "التاريخ الهجري غير متاح" }
 
 /** [offset] days are added to the Umm al-Qura date (local moon-sighting correction). */
-internal fun Context.hijriLabel(date: LocalDate,offset: Int=0): String {
+/** The Hijri date, in the digits chosen in Appearance. */
+internal fun Context.hijriLabel(date: LocalDate,offset: Int=0): String=WorshipDay.preferences(this).digits.render(hijriText(date,offset))
+
+private fun Context.hijriText(date: LocalDate,offset: Int): String {
     if(usesArabic)return arabicHijriLabel(date,offset)
     return try {
         val dateText=DateTimeFormatter.ofPattern("d/M/yyyy",resources.configuration.locales[0])
