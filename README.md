@@ -72,6 +72,18 @@ Pages that match the Madinah mushaf, with verse ornaments from the Complex's own
 
 ![مصحف نجوى · Najwa mushaf](docs/assets/najwa-mushaf-studio.png)
 
+### تلوين التجويد ومظهر القراءة · Tajweed colours and reading appearance
+
+<div dir="rtl">
+
+تلوين تقريبي للأحكام من علامات خط المجمع، مع دليل للألوان، واختيار الورقي أو الليلي أو ألوانك أنت للخلفية والخط.
+
+</div>
+
+Approximate rule colouring from the Complex's own marks, with a legend, and paper, night or your own background and text colours.
+
+![تلوين التجويد ومظهر القراءة · Tajweed colours and reading appearance](docs/assets/najwa-reading-studio.png)
+
 ### الأذكار · Adhkar
 
 ![أذكار نجوى · Najwa adhkar](docs/assets/najwa-adhkar-studio.png)
@@ -79,6 +91,10 @@ Pages that match the Madinah mushaf, with verse ornaments from the Complex's own
 ### يومك وويدجت «يومي» · Your day and the “My day” widget
 
 ![يومي والرئيسية والإعدادات · My day, home and settings](docs/assets/najwa-day-studio.png)
+
+### القبلة والكهف وويدجت «يومي» · Qibla, Al-Kahf and the “My day” widget
+
+![القبلة من موقعك وبطاقة الكهف وويدجت يومي · Qibla, Al-Kahf card and My day widget](docs/assets/najwa-tools-studio.png)
 
 ### مراحل الصلاة في الويدجت · Widget stages
 
