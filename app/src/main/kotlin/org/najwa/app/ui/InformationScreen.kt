@@ -88,7 +88,7 @@ import org.najwa.core.Screen
                 color=c.secondary,fontSize=12.sp,modifier=Modifier.padding(bottom=12.dp))
             InfoSection(R.string.privacy_short_title,R.string.privacy_short_body,highlight=true)
             InfoSection(R.string.privacy_stored_title,R.string.privacy_stored_body)
-            InfoSection(R.string.privacy_location_title,R.string.privacy_location)
+            InfoSection(R.string.privacy_location_title,R.string.privacy_location,extra=R.string.qibla_location_note)
             InfoSection(R.string.privacy_permissions_title,R.string.privacy_permissions_body)
             InfoSection(R.string.privacy_leaves_title,R.string.privacy_leaves_body)
             InfoSection(R.string.privacy_control_title,R.string.privacy_control_body)
@@ -99,12 +99,13 @@ import org.najwa.core.Screen
 }
 
 /** One titled section of the About and Privacy pages; bullet lines keep comfortable spacing. */
-@Composable private fun InfoSection(title: Int,body: Int,highlight: Boolean=false) {
+@Composable private fun InfoSection(title: Int,body: Int,highlight: Boolean=false,extra: Int?=null) {
     val c=LocalPalette.current
     Panel(Modifier.fillMaxWidth().padding(bottom=12.dp),radius=22,selected=highlight) {
         Column(Modifier.padding(18.dp),verticalArrangement=Arrangement.spacedBy(8.dp)) {
             Text(stringResource(title),color=c.text,fontSize=16.sp,fontWeight=androidx.compose.ui.text.font.FontWeight.Bold)
             Text(stringResource(body),color=if(highlight)c.text else c.secondary,fontSize=14.sp,lineHeight=24.sp)
+            if(extra!=null)Text(stringResource(R.string.qibla_title)+": "+stringResource(extra),color=c.secondary,fontSize=14.sp,lineHeight=24.sp)
         }
     }
 }

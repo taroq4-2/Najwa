@@ -323,7 +323,7 @@ Bu telefondaki verilerin yerini alacak.</string>
     <string name="privacy_stored_body">• Ayarlar: şehir veya koordinatlar, hesap yöntemi ve düzeltmeleri, camiler ve kamet dakikaları, uyarılar ve sessiz mod, görünüm, dil ve widget\'lar.\n• Küçük bir teknik kayıt: sessizden sonra zil sesini geri getirmek ve uyarıların tekrarını önlemek için.\n• Kullanırsan ibadetin: işaretlediğin namazlar ve kaza, mushafta okudukların ve hatim konumun, yer imleri ve vurgular, zikir ve tesbih ilerlemesi, hedeflerin. Umulan sevaplar bunlardan telefonda hesaplanır.\n• Dosyalarından seçtiğin ezan sesi: uygulama içinde özel bir kopya; dosyalarına genel erişim istemeyiz.</string>
     <string name="privacy_location_title">Konum</string>
     <string name="privacy_permissions_title">İzinler ve nedenleri</string>
-    <string name="privacy_permissions_body">• Bildirimler: ezan, kamet ve hatırlatmaları göstermek için. Android 16\'da kamet geri sayımı durum çubuğunda görünebilir.\n• Tam zamanlı alarmlar: ezan ve sessiz mod tam vaktinde gelsin diye.\n• Rahatsız Etmeyin erişimi ve ses ayarları: namazda telefonu susturup eski haline döndürmek için.\n• Yeniden başlatmadan sonra çalışma: uyarıları yeniden planlamak için.\n• Ön plan hizmeti ve medya oynatma: ezanı çalmak ve sessizliği sonuna dek sürdürmek için.\n• Titreşim: uyarılarla ve zikir sayarken.\n• Yaklaşık konum: yalnızca \"Şehrimi bul\"a dokunduğunda.</string>
+    <string name="privacy_permissions_body">• Bildirimler: ezan, kamet ve hatırlatmaları göstermek için. Android 16\'da kamet geri sayımı durum çubuğunda görünebilir.\n• Tam zamanlı alarmlar: ezan ve sessiz mod tam vaktinde gelsin diye.\n• Rahatsız Etmeyin erişimi ve ses ayarları: namazda telefonu susturup eski haline döndürmek için.\n• Yeniden başlatmadan sonra çalışma: uyarıları yeniden planlamak için.\n• Ön plan hizmeti ve medya oynatma: ezanı çalmak ve sessizliği sonuna dek sürdürmek için.\n• Titreşim: uyarılarla ve zikir sayarken.\n• Yaklaşık konum: yalnızca \"Şehrimi bul\"a ya da kıble sayfasında \"Daha doğru: şu anki konumumu kullan\"a dokunduğunda; yalnızca seçtiğin şehir saklanır.</string>
     <string name="privacy_leaves_title">Telefonundan çıkanlar, yalnızca senin seçiminle</string>
     <string name="privacy_leaves_body">• Yedek: seçtiğin yere kaydettiğin bir dosya; istersen parolayla korunur (AES-256-GCM şifreleme). Android\'in otomatik yedeklemesi kapalıdır.\n• Paylaşım: aylık tablo, günün duası veya bir caminin bilgileri, paylaş menüsüyle seçtiğin uygulamaya.\n• İletişim: e-posta uygulaman, kendin gözden geçirip gönderdiğin hazır bir mesajla açılır; bırakırsan telefon modelin de eklenir.\n• Uygulama bağlantısı (varsayılan kapalı): açıldığında Najwa namaz aşamalarını telefonundaki otomasyon uygulamalarına yayınlar; böylece onlar namaz vakitlerini bilir.\n• Widget ve saat: vakitler ve gün özetin ana ekranda görünür; uyarılar telefonun sistemi üzerinden eşleşmiş saatine ulaşır.</string>
     <string name="privacy_control_title">Denetim ve silme</string>
@@ -331,4 +331,13 @@ Bu telefondaki verilerin yerini alacak.</string>
     <string name="info_guide_body">Ayarlar\'da \"Namaz vakitleri\"nden şehrini ve yöntemini seç, vakitleri şehrinin takvimiyle karşılaştır. Kameti \"Cami ve kamet\"ten, sessizi \"Namazda sessiz\"den, widget\'ları \"Widget\'lar\"dan ayarla. Mushaf ve zikirler alt çubuktadır.</string>
     <string name="about_title_page">Hakkımızda</string>
     <string name="privacy_title_page">Gizlilik politikası</string>
+    <string name="qibla_cardinals">K,D,G,B</string>
+    <string name="qibla_use_location">Daha doğru: şu anki konumumu kullan</string>
+    <string name="qibla_locating">Konumun bulunuyor…</string>
+    <string name="qibla_location_note">Yaklaşık konumun yalnızca bu sayfa için bir kez kullanılır; kaydedilmez ve telefonundan çıkmaz.</string>
+    <string name="qibla_from_location">Yön şu anki konumundan hesaplandı (kaydedilmedi)</string>
+    <string name="qibla_use_city">%1$s üzerinden hesapla</string>
+    <string name="qibla_here">şu anki konumun</string>
+    <string name="qibla_near_makkah">Mekke\'ye yakınsın: şehir merkezinden hesaplamak birkaç derece sapabilir, şu anki konumunu kullan.</string>
+    <string name="qibla_interference">Manyetik parazit: metal, mıknatıs ve manyetik kılıflardan uzaklaş, sonra telefonu 8 çizerek hareket ettir.</string>
 </resources>

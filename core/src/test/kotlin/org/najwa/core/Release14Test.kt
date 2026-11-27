@@ -88,6 +88,10 @@ class Release14Test {
     @Test fun qiblaBearingMatchesKnownCities() {
         assertEquals(244.0,qiblaBearing(riyadh),1.0)
         assertEquals(119.0,qiblaBearing(City("London",51.5074,-0.1278,"Europe/London")),1.0)
+        // Near Makkah the point you stand on matters: two places in Jeddah, about 30 km apart, differ by over 20 degrees.
+        val north=qiblaBearing(City("North Jeddah",21.78,39.11,"Asia/Riyadh"))
+        val south=qiblaBearing(City("South Jeddah",21.35,39.20,"Asia/Riyadh"))
+        assertTrue(kotlin.math.abs(north-south)>20.0)
         assertEquals(136.0,qiblaBearing(City("Cairo",30.0444,31.2357,"Africa/Cairo")),1.0)
         assertEquals(790.0,qiblaDistanceKm(riyadh),15.0)
     }

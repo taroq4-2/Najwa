@@ -1,5 +1,7 @@
 package org.najwa.app.ui
 
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import android.Manifest
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.text.KeyboardOptions
@@ -60,28 +62,46 @@ import kotlin.math.roundToInt
 
 // ───────────────────────────── Qibla ─────────────────────────────
 
-/** Compass heading (true north, degrees) from the rotation-vector sensor; null without one. */
-@Composable private fun rememberHeading(city: City): Pair<Float?,Boolean> {
+/** What the compass reads: heading (true north, degrees; null without a sensor), and whether to warn. */
+private data class CompassReading(val heading: Float?,val calibrate: Boolean,val interference: Boolean)
+
+/**
+ * Compass heading from the rotation-vector sensor, corrected to true north for [lat],[lon]. The raw magnetometer is
+ * watched too: its accuracy says when to calibrate, and a field far from the Earth's (about 25–65 µT) means metal or a
+ * magnet nearby, which throws any compass off.
+ */
+@Composable private fun rememberHeading(lat: Double,lon: Double): CompassReading {
     val context=LocalContext.current
     var heading by remember {mutableStateOf<Float?>(null)}
     var calibrate by remember {mutableStateOf(false)}
-    DisposableEffect(city) {
+    var interference by remember {mutableStateOf(false)}
+    DisposableEffect(lat,lon) {
         val manager=context.getSystemService(SensorManager::class.java)
         val sensor=manager?.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
-        val declination=GeomagneticField(city.latitude.toFloat(),city.longitude.toFloat(),0f,System.currentTimeMillis()).declination
+        val magnetic=manager?.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+        val declination=GeomagneticField(lat.toFloat(),lon.toFloat(),0f,System.currentTimeMillis()).declination
         val rotation=FloatArray(9); val remapped=FloatArray(9); val orientation=FloatArray(3)
+        // The display rotation, read safely: a wrapped (language) context may have no display of its own.
+        fun displayRotation(): Int=runCatching {
+            if(Build.VERSION.SDK_INT>=30)(context.findActivity()?.display ?: context.display)?.rotation ?: Surface.ROTATION_0
+            else @Suppress("DEPRECATION") (context.getSystemService(android.view.WindowManager::class.java)?.defaultDisplay?.rotation ?: Surface.ROTATION_0)
+        }.getOrDefault(Surface.ROTATION_0)
         val listener=object: SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
+                if(event.sensor.type==Sensor.TYPE_MAGNETIC_FIELD) {
+                    val (x,y,z)=Triple(event.values[0],event.values[1],event.values[2])
+                    val strength=kotlin.math.sqrt(x*x+y*y+z*z)
+                    interference=strength<20f || strength>75f
+                    return
+                }
                 SensorManager.getRotationMatrixFromVector(rotation,event.values)
-                val display=if(Build.VERSION.SDK_INT>=30)context.display?.rotation ?: Surface.ROTATION_0
-                    else @Suppress("DEPRECATION") (context.getSystemService(android.view.WindowManager::class.java)?.defaultDisplay?.rotation ?: Surface.ROTATION_0)
-                val (x,y)=when(display) {
+                val (ax,ay)=when(displayRotation()) {
                     Surface.ROTATION_90 -> SensorManager.AXIS_Y to SensorManager.AXIS_MINUS_X
                     Surface.ROTATION_180 -> SensorManager.AXIS_MINUS_X to SensorManager.AXIS_MINUS_Y
                     Surface.ROTATION_270 -> SensorManager.AXIS_MINUS_Y to SensorManager.AXIS_X
                     else -> SensorManager.AXIS_X to SensorManager.AXIS_Y
                 }
-                SensorManager.remapCoordinateSystem(rotation,x,y,remapped)
+                SensorManager.remapCoordinateSystem(rotation,ax,ay,remapped)
                 SensorManager.getOrientation(remapped,orientation)
                 val raw=((Math.toDegrees(orientation[0].toDouble()).toFloat()+declination)+360f)%360f
                 // Low-pass across the 0/360 seam so the needle does not jitter.
@@ -91,26 +111,63 @@ import kotlin.math.roundToInt
                 } ?: raw
             }
             override fun onAccuracyChanged(sensor: Sensor,accuracy: Int) {
-                calibrate=accuracy<=SensorManager.SENSOR_STATUS_ACCURACY_LOW
+                if(sensor.type==Sensor.TYPE_MAGNETIC_FIELD)calibrate=accuracy<=SensorManager.SENSOR_STATUS_ACCURACY_LOW
             }
         }
         if(sensor!=null)manager.registerListener(listener,sensor,SensorManager.SENSOR_DELAY_UI)
+        if(magnetic!=null)manager.registerListener(listener,magnetic,SensorManager.SENSOR_DELAY_UI)
         onDispose {manager?.unregisterListener(listener)}
     }
-    return heading to calibrate
+    return CompassReading(heading,calibrate,interference)
 }
 
+private tailrec fun Context.findActivity(): android.app.Activity?=when(this) {
+    is android.app.Activity -> this
+    is android.content.ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
+/**
+ * The Qibla compass. By default the direction is worked out from the chosen city; one tap works it out from where you
+ * stand instead (approximate location, used on the device for this screen only and never stored), which matters near
+ * Makkah, where a city's centre can be many degrees off.
+ */
 @Composable fun QiblaScreen(p: Preferences,onBack: ()->Unit,onCity: ()->Unit) {
     val c=LocalPalette.current
     val context=LocalContext.current
+    val scope=rememberCoroutineScope()
+    val view=androidx.compose.ui.platform.LocalView.current
     val hasCompass=remember {context.getSystemService(SensorManager::class.java)?.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)!=null}
-    val bearing=remember(p.city) {qiblaBearing(p.city).toFloat()}
-    val distance=remember(p.city) {qiblaDistanceKm(p.city)}
-    val (heading,calibrate)=rememberHeading(p.city)
+    // Where you stand, for this visit only (not saved anywhere).
+    var here by remember {mutableStateOf<Location?>(null)}
+    var locating by remember {mutableStateOf(false)}
+    var locateError by remember {mutableStateOf<Int?>(null)}
+    val origin=here?.let {p.city.copy(latitude=it.latitude,longitude=it.longitude)} ?: p.city
+    val bearing=remember(origin) {qiblaBearing(origin).toFloat()}
+    val distance=remember(origin) {qiblaDistanceKm(origin)}
+    val reading=rememberHeading(origin.latitude,origin.longitude)
+    val heading=reading.heading
+    fun locate() {
+        locating=true;locateError=null
+        scope.launch {
+            try {
+                val found=currentLocation(context)
+                if(found==null)locateError=R.string.locate_unavailable else here=found
+            } catch(e: kotlinx.coroutines.CancellationException) {throw e}
+            catch(_: Exception) {locateError=R.string.locate_failed}
+            finally {locating=false}
+        }
+    }
+    val permission=rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {granted->
+        if(granted)locate() else locateError=R.string.locate_denied
+    }
     BackLink(stringResource(R.string.qibla_back),onBack)
     PageHeading(stringResource(R.string.qibla_title),stringResource(R.string.qibla_intro))
     val offset=heading?.let {((bearing-it+540f)%360f)-180f}
     val aligned=offset!=null && abs(offset)<=4f
+    // A short tick when you come round to face the Qibla.
+    LaunchedEffect(aligned) {if(aligned)view.performHapticFeedback(android.view.HapticFeedbackConstants.CONFIRM)}
+    val cardinals=stringResource(R.string.qibla_cardinals).split(",")
     Panel(Modifier.fillMaxWidth()) {
         Column(Modifier.fillMaxWidth().padding(20.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(14.dp)) {
             val ring=if(aligned)c.mint else c.border
@@ -120,6 +177,8 @@ import kotlin.math.roundToInt
                 offset!=null -> stringResource(if(offset>0)R.string.qibla_turn_right else R.string.qibla_turn_left,abs(offset).roundToInt())
                 else -> stringResource(R.string.qibla_degrees,bearing.roundToInt())
             }
+            val letterColor=c.secondary.toArgb()
+            val northColor=c.amber.toArgb()
             Box(Modifier.fillMaxWidth(.82f).aspectRatio(1f).semantics {contentDescription=description},contentAlignment=Alignment.Center) {
                 Canvas(Modifier.fillMaxSize()) {
                     val r=size.minDimension/2
@@ -137,15 +196,23 @@ import kotlin.math.roundToInt
                                 Offset(center.x+(r-6.dp.toPx())*Math.cos(a).toFloat(),center.y+(r-6.dp.toPx())*Math.sin(a).toFloat()),
                                 if(long)2.5f.dp.toPx() else 1.dp.toPx(),StrokeCap.Round)
                         }
-                        val n=Path();n.moveTo(center.x,center.y-r+22.dp.toPx());n.lineTo(center.x-7.dp.toPx(),center.y-r+36.dp.toPx());n.lineTo(center.x+7.dp.toPx(),center.y-r+36.dp.toPx());n.close()
-                        drawPath(n,c.amber)
                         // Qibla needle with the Kaaba at its tip.
                         rotate(bearing,center) {
-                            drawLine(accent,center,Offset(center.x,center.y-r+58.dp.toPx()),5.dp.toPx(),StrokeCap.Round)
-                            val k=16.dp.toPx()
-                            drawRect(accent,Offset(center.x-k/2,center.y-r+40.dp.toPx()-k),Size(k,k))
-                            drawLine(c.surface,Offset(center.x-k/2,center.y-r+40.dp.toPx()-k*.62f),Offset(center.x+k/2,center.y-r+40.dp.toPx()-k*.62f),2.dp.toPx())
+                            drawLine(accent,center,Offset(center.x,center.y-r+70.dp.toPx()),5.dp.toPx(),StrokeCap.Round)
+                            val k=18.dp.toPx()
+                            drawRoundRect(accent,Offset(center.x-k/2,center.y-r+52.dp.toPx()-k),Size(k,k),androidx.compose.ui.geometry.CornerRadius(2.dp.toPx()))
+                            drawLine(c.surface,Offset(center.x-k/2,center.y-r+52.dp.toPx()-k*.62f),Offset(center.x+k/2,center.y-r+52.dp.toPx()-k*.62f),2.dp.toPx())
                         }
+                    }
+                    // North, east, south and west, kept upright as the dial turns.
+                    val paint=android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                        textAlign=android.graphics.Paint.Align.CENTER;textSize=15.sp.toPx();isFakeBoldText=true}
+                    cardinals.take(4).forEachIndexed {i,letter->
+                        val a=Math.toRadians(i*90.0-(heading ?: 0f))
+                        val d=r-34.dp.toPx()
+                        paint.color=if(i==0)northColor else letterColor
+                        drawContext.canvas.nativeCanvas.drawText(letter,center.x+d*Math.sin(a).toFloat(),
+                            center.y-d*Math.cos(a).toFloat()+paint.textSize*.35f,paint)
                     }
                     drawCircle(accent,7.dp.toPx(),center)
                     // Fixed marker: the top of the phone.
@@ -154,14 +221,33 @@ import kotlin.math.roundToInt
                 }
             }
             Text(description,color=if(aligned)c.mint else c.text,fontSize=18.sp,fontWeight=FontWeight.Bold,textAlign=TextAlign.Center)
-            Text(stringResource(R.string.qibla_details,bearing.roundToInt(),String.format(Locale.US,"%,d",distance.roundToInt()),p.city.name),
+            Text(stringResource(R.string.qibla_details,bearing.roundToInt(),String.format(Locale.US,"%,d",distance.roundToInt()),
+                if(here!=null)stringResource(R.string.qibla_here) else p.city.name),
                 color=c.secondary,fontSize=13.sp,textAlign=TextAlign.Center)
         }
     }
     Spacer(Modifier.height(14.dp))
-    if(!hasCompass)Text(stringResource(R.string.qibla_no_compass,bearing.roundToInt()),color=c.amber,fontSize=13.sp)
-    else Text(stringResource(if(calibrate)R.string.qibla_calibrate_now else R.string.qibla_calibrate),color=if(calibrate)c.amber else c.secondary,fontSize=12.sp)
-    TextButton(onClick=onCity) {Text(stringResource(R.string.qibla_change_city))}
+    // Where the direction is measured from, and a one-tap way to measure it from where you stand.
+    if(here==null) {
+        if(qiblaDistanceKm(p.city)<250)Text(stringResource(R.string.qibla_near_makkah),color=c.amber,fontSize=13.sp,modifier=Modifier.padding(bottom=6.dp))
+        Action(stringResource(if(locating)R.string.qibla_locating else R.string.qibla_use_location),Modifier.fillMaxWidth(),!locating) {
+            if(context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)==PackageManager.PERMISSION_GRANTED)locate()
+            else permission.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+        }
+        Text(stringResource(R.string.qibla_location_note),color=c.secondary,fontSize=12.sp,modifier=Modifier.padding(top=6.dp))
+    } else {
+        Text(stringResource(R.string.qibla_from_location),color=c.mint,fontSize=13.sp)
+        TextButton(onClick={here=null}) {Text(stringResource(R.string.qibla_use_city,p.city.name))}
+    }
+    locateError?.let {Text(stringResource(it),color=c.amber,fontSize=12.sp,modifier=Modifier.padding(top=6.dp))}
+    Spacer(Modifier.height(10.dp))
+    when {
+        !hasCompass -> Text(stringResource(R.string.qibla_no_compass,bearing.roundToInt()),color=c.amber,fontSize=13.sp)
+        reading.interference -> Text(stringResource(R.string.qibla_interference),color=c.amber,fontSize=12.sp)
+        reading.calibrate -> Text(stringResource(R.string.qibla_calibrate_now),color=c.amber,fontSize=12.sp)
+        else -> Text(stringResource(R.string.qibla_calibrate),color=c.secondary,fontSize=12.sp)
+    }
+    if(here==null)TextButton(onClick=onCity) {Text(stringResource(R.string.qibla_change_city))}
 }
 
 // ───────────────────────────── Settings backup ─────────────────────────────

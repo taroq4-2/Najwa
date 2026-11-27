@@ -61,7 +61,7 @@ def manifest_issues(manifest, release=False):
     # Each service is pinned to its one purpose: running prayer work, playing the adhan, or the silence tile.
     expected_services = {
         "PrayerExecutionService": lambda s: s.get(NS + "foregroundServiceType") in {"specialUse", "0x40000000"} and s.get(NS + "exported") == "false",
-        "AdhanPlayer": lambda s: s.get(NS + "foregroundServiceType") in {"mediaPlayback", "0x2"} and s.get(NS + "exported") == "false",
+        "AdhanPlayer": lambda s: s.get(NS + "foregroundServiceType") in {"mediaPlayback", "0x2", "0x00000002"} and s.get(NS + "exported") == "false",
         "SilenceTileService": lambda s: s.get(NS + "foregroundServiceType") is None
             and s.get(NS + "permission") == "android.permission.BIND_QUICK_SETTINGS_TILE",
     }

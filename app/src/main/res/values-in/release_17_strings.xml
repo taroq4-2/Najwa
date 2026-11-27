@@ -323,7 +323,7 @@ Akan menggantikan data di ponsel ini.</string>
     <string name="privacy_stored_body">• Pengaturan: kota atau koordinat, metode perhitungan dan penyesuaiannya, masjid dan menit iqamah, pemberitahuan dan senyap, tampilan, bahasa dan widget.\n• Catatan teknis kecil: untuk mengembalikan dering setelah senyap dan mencegah pemberitahuan berulang.\n• Ibadahmu, bila kamu menggunakannya: shalat yang kamu tandai dan qadha, bacaan mushaf beserta posisi khatam, penanda dan sorotan, kemajuan zikir dan tasbih, serta targetmu. Kebaikan yang diharapkan dihitung dari data ini di ponsel.\n• Suara azan yang kamu pilih dari berkasmu: salinan pribadi di dalam aplikasi; kami tidak meminta akses umum ke berkas ponsel.</string>
     <string name="privacy_location_title">Lokasi</string>
     <string name="privacy_permissions_title">Izin dan alasannya</string>
-    <string name="privacy_permissions_body">• Notifikasi: untuk menampilkan azan, iqamah dan pengingat. Di Android 16 hitung mundur iqamah dapat muncul di bilah status.\n• Alarm tepat: agar azan dan senyap datang tepat waktu.\n• Akses Jangan Ganggu dan pengaturan audio: untuk menyenyapkan ponsel saat shalat lalu mengembalikannya seperti semula.\n• Berjalan setelah ponsel dinyalakan ulang: untuk menjadwalkan ulang pemberitahuan.\n• Layanan latar depan dan pemutaran media: untuk memutar azan dan menjaga senyap hingga selesai.\n• Getar: bersama pemberitahuan dan saat menghitung zikir.\n• Lokasi perkiraan: hanya saat kamu mengetuk \"Tentukan kotaku\".</string>
+    <string name="privacy_permissions_body">• Notifikasi: untuk menampilkan azan, iqamah dan pengingat. Di Android 16 hitung mundur iqamah dapat muncul di bilah status.\n• Alarm tepat: agar azan dan senyap datang tepat waktu.\n• Akses Jangan Ganggu dan pengaturan audio: untuk menyenyapkan ponsel saat shalat lalu mengembalikannya seperti semula.\n• Berjalan setelah ponsel dinyalakan ulang: untuk menjadwalkan ulang pemberitahuan.\n• Layanan latar depan dan pemutaran media: untuk memutar azan dan menjaga senyap hingga selesai.\n• Getar: bersama pemberitahuan dan saat menghitung zikir.\n• Lokasi perkiraan: hanya saat kamu mengetuk \"Tentukan kotaku\" atau \"Lebih tepat: gunakan lokasiku saat ini\" di halaman kiblat; hanya kota pilihanmu yang disimpan.</string>
     <string name="privacy_leaves_title">Yang keluar dari ponselmu, hanya atas pilihanmu</string>
     <string name="privacy_leaves_body">• Cadangan: berkas yang kamu simpan di tempat pilihanmu, bisa dilindungi kata sandi (enkripsi AES-256-GCM). Cadangan otomatis Android dinonaktifkan.\n• Berbagi: tabel bulanan, doa hari ini atau data masjid, lewat menu berbagi ke aplikasi yang kamu pilih.\n• Kontak: membuka aplikasi email dengan pesan siap yang kamu periksa dan kirim sendiri, termasuk tipe ponselmu bila kamu biarkan.\n• Tautan aplikasi (nonaktif secara bawaan): bila aktif, Najwa menyiarkan tahap shalat ke aplikasi otomatisasi di ponselmu, sehingga mereka mengetahui waktu shalatmu.\n• Widget dan jam: waktu dan ringkasan harimu tampil di layar utama, dan pemberitahuan sampai ke jam pasanganmu melalui sistem ponsel.</string>
     <string name="privacy_control_title">Kendali dan penghapusan</string>
@@ -331,4 +331,13 @@ Akan menggantikan data di ponsel ini.</string>
     <string name="info_guide_body">Pilih kota dan metode di \"Waktu shalat\" pada Pengaturan, lalu cocokkan dengan kalender kotamu. Atur iqamah di \"Masjid dan iqamah\", senyap di \"Senyap saat shalat\", dan widget di \"Widget\". Mushaf dan zikir ada di bilah bawah.</string>
     <string name="about_title_page">Tentang kami</string>
     <string name="privacy_title_page">Kebijakan privasi</string>
+    <string name="qibla_cardinals">U,T,S,B</string>
+    <string name="qibla_use_location">Lebih tepat: gunakan lokasiku saat ini</string>
+    <string name="qibla_locating">Mencari lokasimu…</string>
+    <string name="qibla_location_note">Lokasi perkiraanmu dipakai sekali, hanya untuk halaman ini; tidak disimpan dan tidak keluar dari ponselmu.</string>
+    <string name="qibla_from_location">Arah dihitung dari posisimu sekarang (tidak disimpan)</string>
+    <string name="qibla_use_city">Hitung dari %1$s</string>
+    <string name="qibla_here">lokasimu saat ini</string>
+    <string name="qibla_near_makkah">Kamu dekat Makkah: menghitung dari pusat kota bisa meleset banyak derajat, jadi gunakan lokasimu saat ini.</string>
+    <string name="qibla_interference">Gangguan magnetik: jauhi logam, magnet dan casing magnetik, lalu gerakkan ponsel membentuk angka 8.</string>
 </resources>
