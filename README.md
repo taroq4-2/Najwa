@@ -15,13 +15,23 @@ Accurate prayer times with adhan and iqama, a King Fahd Complex mushaf whose tex
 
 [الموقع العربي](https://taroq4-2.github.io/Najwa/) · [English website](https://taroq4-2.github.io/Najwa/en.html) · [الإصدارات · Releases](https://github.com/taroq4-2/Najwa/releases)
 
-![Version](https://img.shields.io/badge/version-1.7.0-0F5A43) ![Android](https://img.shields.io/badge/Android-8.0%2B-3EB28C) ![Offline](https://img.shields.io/badge/internet%20permission-none-997239) ![Languages](https://img.shields.io/badge/languages-7-193C30) [![Android verification](https://github.com/taroq4-2/Najwa/actions/workflows/android.yml/badge.svg)](https://github.com/taroq4-2/Najwa/actions/workflows/android.yml) [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-087A53)](LICENSE)
+![Version](https://img.shields.io/badge/version-1.7.1-0F5A43) ![Android](https://img.shields.io/badge/Android-8.0%2B-3EB28C) ![Offline](https://img.shields.io/badge/internet%20permission-none-997239) ![Languages](https://img.shields.io/badge/languages-7-193C30) [![Android verification](https://github.com/taroq4-2/Najwa/actions/workflows/android.yml/badge.svg)](https://github.com/taroq4-2/Najwa/actions/workflows/android.yml) [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-087A53)](LICENSE)
 
 ![نجوى — صلاتك وذكرك وقرآنك في يوم واحد · Najwa](docs/assets/najwa-share.jpg)
 
 </div>
 
-## ما الجديد في 1.7.0 · What's new
+## ما الجديد في 1.7.1 · What's new
+
+<div dir="rtl">
+
+- **عدّاد الحسنات مفعّل:** اعتمد مختص شرعي القواعد السبع عشرة كما هي، فصار الإصدار الرسمي يعرض الحسنات المرجوّة اليوم والمتبقي للهدف وأعمال رجاء المغفرة والفضائل بأدلتها، في «يومي» والويدجت والمصحف. [ملاحظات 1.7.1](docs/releases/1.7.1.md).
+
+</div>
+
+- **The hasanat counter is on:** a qualified scholar approved all 17 rules as written, so the official build shows today's hoped-for hasanat, what is left to your goal, actions hoped to expiate sins and the virtues with their evidence, on "My day", the widget and the mushaf. [1.7.1 notes](docs/releases/1.7.1.md).
+
+### وفي 1.7.0 · Also in 1.7.0
 
 <div dir="rtl">
 
@@ -51,8 +61,8 @@ This release brings together everything since 1.3.0 (versions 1.4 to 1.7).
 - **Clearer settings:** *Silence during prayer* and *Widgets* sections, an honest status when alerts are off, and digits that follow your choice everywhere.
 - **Also since 1.3.0:** a prayer log with congregation and sunnah prayers and a weekly map, the *Today's prayers* widget, a living tasbeeh with the after‑prayer sequence, sleep, waking and mosque adhkar, a khatma plan and the dua of the day. [Full notes](docs/releases/1.7.0.md).
 
-> **عن «الحسنات المرجوّة» · About “hoped‑for hasanat”** — <span dir="rtl">عدّاد الحسنات والمتبقي للهدف مبنيّ في التطبيق، لكن قواعده (17 قاعدة بنصوصها ومصادرها) **بانتظار مراجعة مختص شرعي**؛ لذلك **لا يظهر أي رقم أجر في هذا الإصدار الرسمي**، ويظهر فقط في نسخ التجربة مع علامة «غير معتمد». وما يُعرض بعد الاعتماد رجاءٌ مستند إلى النصوص، لا حسابٌ لأجرك عند الله.</span>  
-> The hasanat counter and “remaining to goal” are built in, but their 17 rules (with texts and sources) **await review by a qualified scholar**, so **no reward figure is shown in this official release**; it appears only in trial builds, marked *not approved*. Once approved, figures remain a hope based on the texts, not a measure of anyone's reward with Allah.
+> **عن «الحسنات المرجوّة» · About “hoped‑for hasanat”** — <span dir="rtl">قواعد العدّاد السبع عشرة **اعتمدها مختص شرعي كما هي** (27 نوفمبر 2026، والاسم محفوظ لدى المطوّر؛ [سجل الاعتماد](docs/worship/EVIDENCE.md)). تُحسب الحسنات على هاتفك من الأعمال التي تسجّلها فقط: كل حرف من المصحف بعشر، والأذكار التي ورد فيها عدد، دون مضاعِف عام. وما يُعرض رجاءٌ مستند إلى النصوص، لا حسابٌ لأجرك عند الله.</span>  
+> The counter's 17 rules were **approved as written by a qualified scholar** (27 November 2026; the name is kept by the developer; [approval log](docs/worship/EVIDENCE.md)). Hasanat are worked out on your phone only from what you record — ten per letter read from the mushaf, and adhkar whose number is narrated — with no general multiplier. Figures are a hope based on the texts, not a measure of anyone's reward with Allah.
 
 ## معاينة التطبيق · App preview
 
@@ -115,6 +125,7 @@ Approximate rule colouring from the Complex's own marks, with a legend, and pape
 | <div dir="rtl">أذانان مدمجان أو ملفك الخاص، وأذان مستقل للفجر، وتذكير الإقامة وقبل الأذان والجمعة، وعدّاد الإقامة الحي على شاشة القفل</div> | Two built‑in adhans or your own file, a separate Fajr adhan, iqama, pre‑adhan and Friday reminders, and a live iqama countdown on the lock screen |
 | <div dir="rtl">مصحف مجمع الملك فهد (حفص) بصفحات مطابقة، وتكبير يعيد ترتيب النص، وحفظ تلقائي للموضع، وختمة ووِرد يومي، وعلامات وتظليل وبحث</div> | King Fahd Complex mushaf (Hafs) with matching pages, reflowing zoom, automatic bookmark, khatma and daily portion, bookmarks, highlights and search |
 | <div dir="rtl">أذكار الصباح والمساء وبعد الصلاة والنوم والاستيقاظ والمسجد من «حصن المسلم»، ببطاقات وعدّاد أو بقائمة</div> | Morning, evening, after‑prayer, sleep, waking and mosque adhkar from *Hisn al‑Muslim*, as cards with a counter or as a list |
+| <div dir="rtl">عدّاد الحسنات المرجوّة والمتبقي للهدف بقواعد اعتمدها مختص شرعي، في «يومي» والويدجت والمصحف</div> | A hoped‑for hasanat counter and what is left to your goal, with scholar‑approved rules, on “My day”, the widget and the mushaf |
 | <div dir="rtl">سجل صلوات خاص بك مع الجماعة والسنن والقضاء وخريطة الأسابيع، ومسبحة بتسبيح ما بعد الصلاة</div> | A private prayer log with congregation, sunnah, qada and a weekly map, and a tasbeeh with the after‑prayer sequence |
 | <div dir="rtl">ويدجت «يومي» وسبعة مقاسات لويدجت الصلاة، وويدجت للمصحف وللسجل وللمسبحة، بشفافية تختارها</div> | The “My day” widget, a prayer widget in seven sizes, and mushaf, log and tasbeeh widgets, with the transparency you choose |
 | <div dir="rtl">صمت تلقائي أثناء الصلاة يعيد الرنين بعدها، و«صمت نجوى» من الإعدادات السريعة</div> | Auto‑silence during prayer that restores your ringer, plus “Silence now” in Quick Settings |
@@ -186,19 +197,19 @@ The APK is signed with the same official key, so it updates the previous version
 
 ## الإصدار والتحقق · Release verification
 
-**1.7.0 · Build 118** — SHA-256 · `Najwa.apk`:
+**1.7.1 · Build 119** — SHA-256 · `Najwa.apk`:
 
 ```text
-82c53b00bf0c7a8d8e254d98f75f05ab458f313e1700f40471beecfc54289ae0
+{{SHA256}}
 ```
 
 <div dir="rtl">
 
-نجح 317 اختبارًا (142 لحساب المواقيت والجدولة والمنطق، و175 على منصة Android للمصحف والأذكار والويدجت والسجل)، وفحص الخصوصية، وlint الإصدار. وجُرّبت الشاشات والويدجت على محاكي Android، والصفحات 1 و12 و604 مقابل مصحف المدينة المطبوع. [تفاصيل الإصدار](https://github.com/taroq4-2/Najwa/releases/tag/v1.7.0).
+نجح 329 اختبارًا (148 لحساب المواقيت والجدولة والمنطق والحسنات، و181 على منصة Android للمصحف والأذكار والويدجت والسجل)، وفحص الخصوصية، وlint الإصدار. وجُرّبت الشاشات والويدجت على محاكي Android، والصفحات 1 و12 و604 مقابل مصحف المدينة المطبوع. [تفاصيل الإصدار](https://github.com/taroq4-2/Najwa/releases/tag/v1.7.1).
 
 </div>
 
-All 317 tests passed (142 core tests for calculation, scheduling and logic; 175 Android platform tests for the mushaf, adhkar, widgets and log), along with the privacy audit and release lint. Screens and widgets were exercised on an Android emulator, and pages 1, 12 and 604 were compared with the printed Madinah mushaf. [Release notes](https://github.com/taroq4-2/Najwa/releases/tag/v1.7.0).
+All 329 tests passed (148 core tests for calculation, scheduling, logic and hasanat; 181 Android platform tests for the mushaf, adhkar, widgets and log), along with the privacy audit and release lint. Screens and widgets were exercised on an Android emulator, and pages 1, 12 and 604 were compared with the printed Madinah mushaf. [Release notes](https://github.com/taroq4-2/Najwa/releases/tag/v1.7.1).
 
 ## البناء والمساهمة · Build and contribute
 

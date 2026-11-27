@@ -242,7 +242,7 @@ private fun healthText(issue: HealthIssue)=when(issue) {
 
 @Composable fun WhatsNewDialog(onDismiss: ()->Unit) {
     val c=LocalPalette.current
-    val items=listOf(R.string.new17_0,R.string.new17_1,R.string.new17_2,R.string.new17_3,R.string.new16_1,R.string.new16_2,R.string.new16_3,R.string.new16_4,R.string.new16_5,R.string.new16_6,
+    val items=listOf(R.string.new171_0,R.string.new17_0,R.string.new17_1,R.string.new17_2,R.string.new17_3,R.string.new16_1,R.string.new16_2,R.string.new16_3,R.string.new16_4,R.string.new16_5,R.string.new16_6,
         R.string.new_1,R.string.new_2,R.string.new_3,R.string.new_5)
     AlertDialog(onDismissRequest=onDismiss,title={Text(stringResource(R.string.whats_new_heading,BuildConfig.VERSION_NAME))},text={
         Column(Modifier.verticalScroll(rememberScrollState()),verticalArrangement=Arrangement.spacedBy(10.dp)) {

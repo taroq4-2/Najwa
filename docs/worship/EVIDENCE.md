@@ -2,13 +2,9 @@
 
 Source of truth: `core/src/main/kotlin/org/najwa/core/WorshipCatalog.kt`. Display wording: `virtue_*` strings in `scripts/gen_release_17_strings.py`.
 
-**Approval status: no rule is approved.** Every rule is `UNREVIEWED`. It was prepared by an AI assistant from the cited collections and has not been checked by a qualified scholar. Release builds count only `APPROVED` rules (`RulePolicy.RELEASE`). Until a review approves rules, a release build shows:
+**Approval status: all 17 rules are approved as written** (2026-11-27). The app's owner reported that a qualified scholar reviewed the catalog and approved every rule, with its numbers, conditions and sources, unchanged; at the owner's request the reviewer's name is kept by the developer and not published. Release builds count `APPROVED` rules (`RulePolicy.RELEASE`), so from Najwa 1.7.1 the official build shows the hoped-for hasanat, the remaining to the goal, the expiation indicator and the virtue list.
 
-- no hasanat number;
-- no expiation count;
-- no virtue list.
-
-It shows only plain activity: prayers, pages, and completed adhkar. Debug and trial builds have a "preview" switch (`RulePolicy.REVIEW`) that marks everything "not approved". It lets a reviewer see the behaviour before deciding.
+Every figure remains a hope based on the texts and on what the person recorded, not a measure of anyone's reward with Allah; the app says so wherever a figure appears. Any later change to a rule raises its `version` and returns it to review. Debug and trial builds keep a "preview" switch (`RulePolicy.REVIEW`) for future reviews.
 
 ## Rules
 
@@ -58,4 +54,4 @@ To approve a rule, set `status = EvidenceStatus.APPROVED`. If the rule's meaning
 
 | Rule | Reviewer | Date | Decision |
 | :--- | :--- | :--- | :--- |
-| (none yet) | | | |
+| All 17 rules of `WorshipCatalog` (version 1), as written | Qualified scholar (name held by the developer, at the owner's request) | 2026-11-27 | Approved as written, unchanged; reported by the app's owner |

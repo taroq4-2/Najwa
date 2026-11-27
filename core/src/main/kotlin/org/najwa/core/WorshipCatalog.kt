@@ -6,10 +6,10 @@ import org.najwa.core.VirtueKind.PROTECTION
 import org.najwa.core.VirtueKind.VIRTUE
 
 /**
- * Evidence catalog. Every rule is UNREVIEWED: it was prepared from the cited collections and has not been
- * approved by a qualified scholar, so release builds count none of them. A reviewer approves a rule by setting
- * its status to APPROVED (and bumping [VirtueRule.version] whenever the rule itself changes); see docs/worship/EVIDENCE.md.
- * Wording shown to people lives in string resources keyed by rule id, also pending review.
+ * Evidence catalog. All 17 rules were approved as written by a qualified scholar on 2026-11-27 (approval reported by the
+ * app's owner; the reviewer's name is kept by the developer), so release builds count them. A later change to a rule
+ * bumps [VirtueRule.version] and goes back to review; see docs/worship/EVIDENCE.md for the log.
+ * Wording shown to people lives in string resources keyed by rule id.
  */
 object WorshipCatalog {
     val rules = listOf(
@@ -64,7 +64,7 @@ object WorshipCatalog {
             listOf(Outcome(VIRTUE)), listOf(Evidence("البخاري", "6306"))),
         VirtueRule("dhikr.sayyid_istighfar.evening", 1, WorshipActions.SAYYID_ISTIGHFAR, 1, TimeWindow.EVENING,
             listOf(Outcome(VIRTUE)), listOf(Evidence("البخاري", "6306"))),
-    )
+    ).map {it.copy(status = EvidenceStatus.APPROVED)}  // Approved as written, 2026-11-27 (docs/worship/EVIDENCE.md).
 
     fun rule(id: String) = rules.firstOrNull {it.id == id}
 }

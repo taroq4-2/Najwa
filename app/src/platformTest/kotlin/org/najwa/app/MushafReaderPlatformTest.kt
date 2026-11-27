@@ -115,12 +115,13 @@ class MushafReaderPlatformTest {
         assertTrue(s.hasanatTarget!!>=s.virtues.hasanat!!)
     }
 
-    @Test fun releaseSummaryHasNoTarget() {
+    @Test fun releaseSummaryCountsLettersAndTarget() {
         WorshipSettingsStore.write(app,WorshipSettings(preview=false))
         QuranStore.readPage(app,1,today)
         val s=WorshipSummary.build(app,WorshipSettingsStore.read(app),today)
-        assertNull(s.virtues.hasanat)
-        assertNull(s.hasanatTarget)
+        // Page 1 (139 letters) × 10 hoped-for hasanat; the target adds the rest of today's portion.
+        assertEquals(1390L,s.virtues.hasanat)
+        assertTrue(s.hasanatTarget!!>=1390L)
         assertNotNull(s.wirdLetters)
     }
 }

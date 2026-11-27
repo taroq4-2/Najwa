@@ -3,6 +3,7 @@ Najwa is a calm, private companion for your day: prayer, remembrance and Quran. 
 • Accurate prayer times for any city, with 12 calculation methods and per-prayer minute adjustments
 • Adhan alert with two built-in recordings or your own file, a separate Fajr adhan, and iqama, pre-adhan and Friday reminders
 • A King Fahd Complex mushaf (Hafs) with pages that match the Madinah mushaf, zoom that enlarges and reflows the text, an automatic bookmark and a khatma plan
+• A hoped-for hasanat counter and what is left to your goal, with scholar-approved rules
 • Morning, evening, after-prayer, sleep, waking and mosque adhkar on cards with a counter that moves on by itself
 • A "My day" widget with the next prayer, the prayers you recorded, your adhkar and your portion, with the transparency you choose, plus prayer widgets in every size
 • Auto silence during prayer that restores your ringer afterwards, plus "Silence now" from Quick Settings

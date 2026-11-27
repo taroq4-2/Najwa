@@ -66,7 +66,7 @@
     <string name="widget_day_forgiveness">Hope of forgiveness or Quran reading</string>
     <string name="widget_day_adhkar">Morning and evening adhkar</string>
     <string name="companion_review_title">Evidence and review</string>
-    <string name="companion_review_help">Every virtue is linked to a hadith or verse with its reference. No number or virtue counts in this version until a qualified scholar approves it.</string>
+    <string name="companion_review_help">Every virtue is linked to a hadith or verse with its reference, and a qualified scholar approved these rules as written. What is shown is a hope based on the texts, not a measure of your reward with Allah.</string>
     <string name="companion_preview">Preview unapproved rules</string>
     <string name="companion_preview_help">For testing and review only: numbers appear marked as not approved</string>
     <string name="companion_delete">Delete worship companion records</string>
@@ -111,10 +111,10 @@
     <string name="mushaf_meccan">Meccan</string>
     <string name="mushaf_medinan">Medinan</string>
     <string name="mushaf_page_short">p. %1$d</string>
-    <string name="new17_0">The full mushaf in the app: surah and juz index, and recording what you read</string>
-    <string name="new17_1">The luminous dhikr path, undo and a focus mode for adhkar</string>
-    <string name="new17_2">My day: your prayers, reading and adhkar at a glance, with an optional personal goal</string>
-    <string name="new17_3">My day widget: the prayer widget as it is, with a strip for your day</string>
+    <string name="new17_0">The King Fahd Complex mushaf with matching pages, zoom that reflows the text, and tajweed colours</string>
+    <string name="new17_1">Adhkar on cards with a large counter that moves on to the next dhikr by itself</string>
+    <string name="new17_2">Reading in your own colours, a Qibla worked out from where you are, and a Surah Al-Kahf card on Fridays</string>
+    <string name="new17_3">A new My day widget with 0-100% transparency, and clearer navigation with four tabs</string>
     <string name="mushaf_hint">Pinch or double-tap to enlarge the text itself, which flows anew; swipe to turn. A page joins your reading when you move on after reading it.</string>
     <string name="mushaf_source">Quran text and font from the King Fahd Glorious Quran Printing Complex (Hafs font, version 3.0), used with the Complex\'s permission. Each page starts and ends as in the Madinah mushaf.</string>
     <string name="mushaf_wird_title">Today\'s portion</string>
@@ -309,7 +309,7 @@ It will replace what is on this phone now.</string>
     <string name="about_what_title">About Najwa</string>
     <string name="about_what_body">Najwa is a daily companion for Muslims that brings together in one app: prayer times with adhan and iqama, silencing the phone during prayer and restoring the ringer as it was, the Madinah mushaf in the King Fahd Complex script, the day and night adhkar, a tasbeeh counter, a prayer and qada log, a khatma plan, and the \"My day\" home screen widget.</string>
     <string name="about_features_title">What sets Najwa apart</string>
-    <string name="about_features_body">• Works without internet: times are calculated on your phone, with no accounts and no ads.\n• A mushaf matching the King Fahd Complex edition (Hafs), in its script and text; zooming enlarges the text, which reflows.\n• Hoped-for hasanat are shown as a preview only until a qualified scholar approves their rules; they are a hope, not a reckoning.\n• Seven languages: Arabic, English, Indonesian, Urdu, Bengali, Hindi and Turkish.</string>
+    <string name="about_features_body">• Works without internet: times are calculated on your phone, with no accounts and no ads.\n• A mushaf matching the King Fahd Complex edition (Hafs), in its script and text; zooming enlarges the text, which reflows.\n• A counter of hoped-for hasanat and what is left to your goal, with rules approved as written by a qualified scholar; a hope, not a reckoning.\n• Seven languages: Arabic, English, Indonesian, Urdu, Bengali, Hindi and Turkish.</string>
     <string name="about_sources_title">Sources and credits</string>
     <string name="about_sources_body">• Quran text and script: King Fahd Glorious Quran Printing Complex, Madinah. All rights reserved by the Complex; used in Najwa with its permission.\n• Adhkar: \"Hisn al-Muslim\" by Shaykh Sa\'id ibn Ali ibn Wahf al-Qahtani (may Allah have mercy on him), with their hadith sources.\n• Surah and juz data: the Tanzil project. City directory: GeoNames, licensed CC BY 4.0.\n• Interface font: Noto Sans Arabic, SIL OFL. AndroidX and Kotlin components, Apache-2.0. The full licence texts are included in the app.</string>
     <string name="about_note_title">Please note</string>
@@ -365,4 +365,5 @@ It will replace what is on this phone now.</string>
     <string name="tajweed_madd">Red: the necessary and obligatory madd</string>
     <string name="tajweed_qalqalah">Blue: qalqalah</string>
     <string name="tajweed_note">An automatic aid for reading; it does not replace learning from a qualified teacher.</string>
+    <string name="new171_0">The hoped-for hasanat counter and what is left to your goal are now on, with rules approved as written by a qualified scholar</string>
 </resources>

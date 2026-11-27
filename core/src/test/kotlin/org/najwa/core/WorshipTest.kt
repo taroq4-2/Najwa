@@ -11,15 +11,26 @@ class WorshipTest {
     private fun rec(action: String, count: Long, window: TimeWindow = TimeWindow.DAY, id: String = "r${next++}") =
         WorshipRecord(id, action, count, window, day)
     private fun review(vararg r: WorshipRecord) = WorshipEngine.evaluate(r.toList(), rules, RulePolicy.REVIEW)
-    private fun approved(id: String) = rules.map {if(it.id == id) it.copy(status = EvidenceStatus.APPROVED) else it}
+    /** Only [id] approved, every other rule back to unreviewed. */
+    private fun approved(id: String) = rules.map {it.copy(status = if(it.id == id) EvidenceStatus.APPROVED else EvidenceStatus.UNREVIEWED)}
 
-    @Test fun catalogIsPendingReviewSoReleaseShowsNothing() {
-        assertTrue(rules.all {it.status == EvidenceStatus.UNREVIEWED})
+    @Test fun approvedCatalogCountsInRelease() {
+        // All 17 rules were approved as written (docs/worship/EVIDENCE.md).
+        assertEquals(17, rules.size)
+        assertTrue(rules.all {it.status == EvidenceStatus.APPROVED})
         val r = WorshipEngine.evaluate(listOf(rec(WorshipActions.TAHLIL, 100), rec(WorshipActions.QURAN_LETTER, 500, TimeWindow.ANY_TIME)), rules, RulePolicy.RELEASE)
+        // 500 letters × 10, plus the hundred hasanat of the full tahlil said a hundred times.
+        assertEquals(5100L, r.hasanat)
+        assertTrue(r.expiationActions >= 1)
+        assertEquals(rules.size, rules.map {it.id}.toSet().size)
+    }
+
+    @Test fun unreviewedRulesNeverCountInRelease() {
+        val pending = rules.map {it.copy(status = EvidenceStatus.UNREVIEWED)}
+        val r = WorshipEngine.evaluate(listOf(rec(WorshipActions.TAHLIL, 100), rec(WorshipActions.QURAN_LETTER, 500, TimeWindow.ANY_TIME)), pending, RulePolicy.RELEASE)
         assertNull("no number without an approved numeric rule", r.hasanat)
         assertTrue(r.qualified.isEmpty())
         assertEquals(0, r.expiationActions)
-        assertEquals(rules.size, rules.map {it.id}.toSet().size)
     }
 
     @Test fun onlyApprovedRulesCountInRelease() {

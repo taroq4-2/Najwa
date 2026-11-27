@@ -66,7 +66,7 @@
     <string name="widget_day_forgiveness">Harapan ampunan atau bacaan Qur\'an</string>
     <string name="widget_day_adhkar">Zikir pagi dan petang</string>
     <string name="companion_review_title">Dalil dan tinjauan</string>
-    <string name="companion_review_help">Setiap keutamaan terkait hadis atau ayat beserta rujukannya. Tidak ada angka atau keutamaan yang dihitung sampai disetujui ulama yang berkompeten.</string>
+    <string name="companion_review_help">Setiap keutamaan terkait hadis atau ayat beserta rujukannya, dan ulama berkompeten telah menyetujui aturan ini apa adanya. Yang ditampilkan adalah harapan dari dalil, bukan ukuran pahalamu di sisi Allah.</string>
     <string name="companion_preview">Pratinjau aturan belum disetujui</string>
     <string name="companion_preview_help">Hanya untuk uji dan tinjauan: angka tampil dengan tanda belum disetujui</string>
     <string name="companion_delete">Hapus catatan pendamping ibadah</string>
@@ -111,10 +111,10 @@
     <string name="mushaf_meccan">Makkiyah</string>
     <string name="mushaf_medinan">Madaniyah</string>
     <string name="mushaf_page_short">hlm %1$d</string>
-    <string name="new17_0">Mushaf lengkap di aplikasi: daftar surah dan juz, serta pencatatan bacaan</string>
-    <string name="new17_1">Jalur zikir bercahaya, urungkan dan mode fokus</string>
-    <string name="new17_2">Hariku: salat, bacaan dan zikir sekilas, dengan target pribadi opsional</string>
-    <string name="new17_3">Widget Hariku: widget salat seperti biasa dengan baris harimu</string>
+    <string name="new17_0">Mushaf Kompleks Raja Fahd dengan halaman sesuai, perbesaran yang menata ulang teks, dan warna tajwid</string>
+    <string name="new17_1">Zikir dalam kartu dengan penghitung besar yang berpindah sendiri</string>
+    <string name="new17_2">Tampilan baca dengan warnamu, kiblat dari posisimu, dan kartu Al-Kahfi di hari Jumat</string>
+    <string name="new17_3">Widget Hariku baru dengan transparansi 0-100%, dan navigasi empat tab yang lebih jelas</string>
     <string name="mushaf_hint">Cubit atau ketuk dua kali untuk memperbesar teks yang mengalir ulang; geser untuk membalik. Halaman tercatat saat kamu lanjut setelah membacanya.</string>
     <string name="mushaf_source">Teks dan huruf Qur\'an dari Kompleks Percetakan Al-Qur\'an Raja Fahd (huruf Hafs, versi 3.0), digunakan dengan izin Kompleks. Setiap halaman sesuai Mushaf Madinah.</string>
     <string name="mushaf_wird_title">Wirid hari ini</string>
@@ -309,7 +309,7 @@ Akan menggantikan data di ponsel ini.</string>
     <string name="about_what_title">Tentang Najwa</string>
     <string name="about_what_body">Najwa adalah pendamping harian Muslim yang menyatukan dalam satu aplikasi: waktu shalat dengan azan dan iqamah, menyenyapkan ponsel saat shalat lalu mengembalikan dering seperti semula, mushaf Madinah dengan khat Kompleks Raja Fahd, zikir pagi dan petang, tasbih, catatan shalat dan qadha, rencana khatam, serta widget \"Hariku\" di layar utama.</string>
     <string name="about_features_title">Keistimewaan Najwa</string>
-    <string name="about_features_body">• Bekerja tanpa internet: waktu dihitung di ponselmu, tanpa akun dan tanpa iklan.\n• Mushaf sesuai edisi Kompleks Raja Fahd (riwayat Hafs), dengan khat dan teksnya; perbesaran memperbesar teks yang tersusun ulang.\n• Kebaikan yang diharapkan hanya ditampilkan sebagai pratinjau sampai ulama yang berkompeten menyetujui aturannya; itu harapan, bukan perhitungan.\n• Tujuh bahasa: Arab, Inggris, Indonesia, Urdu, Bengali, Hindi dan Turki.</string>
+    <string name="about_features_body">• Bekerja tanpa internet: waktu dihitung di ponselmu, tanpa akun dan tanpa iklan.\n• Mushaf sesuai edisi Kompleks Raja Fahd (riwayat Hafs), dengan khat dan teksnya; perbesaran memperbesar teks yang tersusun ulang.\n• Penghitung kebaikan yang diharapkan dan sisa menuju target, dengan aturan yang disetujui ulama berkompeten apa adanya; harapan, bukan perhitungan.\n• Tujuh bahasa: Arab, Inggris, Indonesia, Urdu, Bengali, Hindi dan Turki.</string>
     <string name="about_sources_title">Sumber dan hak</string>
     <string name="about_sources_body">• Teks dan khat mushaf: Kompleks Raja Fahd untuk Percetakan Mushaf, Madinah. Semua hak milik Kompleks; digunakan di Najwa dengan izinnya.\n• Zikir: kitab \"Hisnul Muslim\" karya Syekh Sa\'id bin Ali bin Wahf al-Qahthani rahimahullah, beserta sumber hadisnya.\n• Data surah dan juz: proyek Tanzil. Direktori kota: GeoNames, lisensi CC BY 4.0.\n• Font antarmuka: Noto Sans Arabic, SIL OFL. Komponen AndroidX dan Kotlin, Apache-2.0. Teks lengkap lisensi ada di dalam aplikasi.</string>
     <string name="about_note_title">Catatan</string>
@@ -365,4 +365,5 @@ Akan menggantikan data di ponsel ini.</string>
     <string name="tajweed_madd">Merah: mad lazim, wajib dan jaiz</string>
     <string name="tajweed_qalqalah">Biru: qalqalah</string>
     <string name="tajweed_note">Bantuan baca otomatis; tidak menggantikan belajar dari guru yang mumpuni.</string>
+    <string name="new171_0">Penghitung kebaikan yang diharapkan dan sisa menuju target kini aktif, dengan aturan yang disetujui ulama berkompeten</string>
 </resources>

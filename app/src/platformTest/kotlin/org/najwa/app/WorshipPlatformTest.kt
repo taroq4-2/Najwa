@@ -98,14 +98,15 @@ class WorshipPlatformTest {
         assertEquals(1,WorshipStore.entries(app,today).count {it.action==WorshipStore.QURAN_RANGE})
     }
 
-    @Test fun releaseSummaryShowsNoNumbersWhileRulesArePending() {
+    @Test fun releaseSummaryCountsApprovedRules() {
         val items=Adhkar.morning
         WorshipRecorder.onAdhkar(app,"morning",items,items.map {0},today)
         app.getSharedPreferences("adhkar",0).edit().putString("p_morning","$today|${items.joinToString(",") {"0"}}").commit()
         val release=WorshipSummary.build(app,WorshipSettings(goalKind=GoalKind.HASANAT,goal=10_000),today)
-        assertNull(release.virtues.hasanat)
-        assertTrue(release.virtues.qualified.isEmpty())
-        assertNull("no honest number, so no hasanat goal",release.goal)
+        // Approved rules count in the official build: the hasanat goal follows the hoped-for hasanat.
+        assertNotNull(release.virtues.hasanat)
+        assertTrue(release.virtues.qualified.isNotEmpty())
+        assertEquals(release.virtues.hasanat,release.goal!!.value)
         assertTrue(release.morning.complete)
         val pages=WorshipSummary.build(app,WorshipSettings(goalKind=GoalKind.ADHKAR_ITEMS,goal=10),today)
         assertEquals(items.size.toLong(),pages.goal!!.value)
@@ -153,7 +154,7 @@ class WorshipPlatformTest {
         QuranStore.addPages(app,1,today)
         val s=WorshipSummary.build(app,WorshipSettings(),today)
         assertEquals(139L,s.letters)
-        assertNull("no approved rule, so no hasanat",s.virtues.hasanat)
+        assertEquals("139 letters × 10, now that the rule is approved",1390L,s.virtues.hasanat)
         val preview=WorshipEngine.evaluate(listOf(WorshipRecord("q",WorshipActions.QURAN_LETTER,139,TimeWindow.ANY_TIME,today)),WorshipCatalog.rules,RulePolicy.REVIEW)
         assertEquals(1390L,preview.hasanat)
     }

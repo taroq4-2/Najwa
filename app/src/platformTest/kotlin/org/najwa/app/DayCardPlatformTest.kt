@@ -53,13 +53,14 @@ class DayCardPlatformTest {
         assertEquals(View.GONE,v.findViewById<View>(R.id.day_stats).visibility)
     }
 
-    @Test fun withoutHasanatTheWideTileShowsTodaysPortion() {
-        // The official build until the rules are approved: no hasanat, no goal, so the wide tile is the Quran portion.
+    @Test fun officialBuildShowsTheHasanatCounter() {
+        // The rules are approved, so the official build (no preview) shows hasanat and the forgiveness tile, unmarked.
         WorshipSettingsStore.write(app,WorshipSettings(enabled=true,preview=false))
         val v=day(Preferences(prayerLog=true),Instant.now())
         assertEquals(View.VISIBLE,v.findViewById<View>(R.id.day_a).visibility)
-        assertEquals("وِرد اليوم",v.findViewById<TextView>(R.id.day_a_title).text.toString())
-        assertEquals("أذكار اليوم",v.findViewById<TextView>(R.id.day_b_title).text.toString())
+        assertEquals("حسنات اليوم",v.findViewById<TextView>(R.id.day_a_title).text.toString())
+        assertEquals(View.GONE,v.findViewById<View>(R.id.day_a_badge).visibility)
+        assertEquals("رجاء المغفرة",v.findViewById<TextView>(R.id.day_b_title).text.toString())
     }
 
     @Test fun launchTokenSeparatesNajwaFromOtherApps() {

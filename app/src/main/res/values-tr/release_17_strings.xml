@@ -66,7 +66,7 @@
     <string name="widget_day_forgiveness">Bağışlanma umudu veya Kur\'an okuma</string>
     <string name="widget_day_adhkar">Sabah ve akşam zikirleri</string>
     <string name="companion_review_title">Deliller ve inceleme</string>
-    <string name="companion_review_help">Her fazilet kaynağıyla bir hadise veya ayete bağlıdır. Yetkin bir âlim onaylayana kadar hiçbir sayı veya fazilet sayılmaz.</string>
+    <string name="companion_review_help">Her fazilet kaynağıyla bir hadise veya ayete bağlıdır ve yetkin bir âlim bu kuralları olduğu gibi onayladı. Gösterilen, delillere dayanan bir umuttur; Allah katındaki sevabının ölçüsü değildir.</string>
     <string name="companion_preview">Onaylanmamış kuralları önizle</string>
     <string name="companion_preview_help">Yalnızca deneme ve inceleme için: sayılar onaylanmadı işaretiyle görünür</string>
     <string name="companion_delete">İbadet arkadaşı kayıtlarını sil</string>
@@ -111,10 +111,10 @@
     <string name="mushaf_meccan">Mekkî</string>
     <string name="mushaf_medinan">Medenî</string>
     <string name="mushaf_page_short">s. %1$d</string>
-    <string name="new17_0">Uygulamada tam mushaf: sure ve cüz listesi, okunanların kaydı</string>
-    <string name="new17_1">Aydınlık zikir yolu, geri alma ve odak modu</string>
-    <string name="new17_2">Günüm: namaz, okuma ve zikirler bir bakışta, isteğe bağlı kişisel hedef</string>
-    <string name="new17_3">Günüm widget\'ı: namaz widget\'ı aynen, gününün şeridiyle</string>
+    <string name="new17_0">Kral Fahd Kompleksi mushafı: eşleşen sayfalar, metni yeniden dizen yakınlaştırma ve tecvid renkleri</string>
+    <string name="new17_1">Kartlarda zikirler ve kendiliğinden sonrakine geçen büyük sayaç</string>
+    <string name="new17_2">Kendi renklerinle okuma, bulunduğun yerden kıble ve cuma günü Kehf kartı</string>
+    <string name="new17_3">0-100% şeffaflıkla yeni Günüm widget\'ı ve dört sekmeyle daha net gezinme</string>
     <string name="mushaf_hint">Metni büyütmek için iki parmak veya çift dokunuş; satırlar yeniden dizilir. Çevirmek için kaydır.</string>
     <string name="mushaf_source">Kur\'an metni ve yazı tipi Kral Fahd Mushaf Basım Kompleksi\'nden (Hafs yazı tipi, sürüm 3.0), Kompleks\'in izniyle. Her sayfa Medine mushafına göredir.</string>
     <string name="mushaf_wird_title">Bugünün virdi</string>
@@ -309,7 +309,7 @@ Bu telefondaki verilerin yerini alacak.</string>
     <string name="about_what_title">Najwa hakkında</string>
     <string name="about_what_body">Najwa, bir Müslümanın günlük yol arkadaşıdır ve tek uygulamada şunları bir araya getirir: ezan ve kametle namaz vakitleri, namaz vaktinde telefonu susturup zil sesini eski haline döndürme, Kral Fahd Kompleksi hattıyla Medine mushafı, sabah-akşam zikirleri, tesbih, namaz ve kaza kaydı, hatim planı ve ana ekranda \"Günüm\" widget\'ı.</string>
     <string name="about_features_title">Najwa\'yı farklı kılanlar</string>
-    <string name="about_features_body">• İnternetsiz çalışır: vakitler telefonunda hesaplanır; hesap ve reklam yoktur.\n• Kral Fahd Kompleksi baskısına (Hafs rivayeti) uygun mushaf, kendi hattı ve metniyle; yakınlaştırınca metin büyür ve yeniden dizilir.\n• Umulan sevaplar, yetkin bir âlim kurallarını onaylayana dek yalnızca önizleme olarak gösterilir; bunlar hesap değil, umuttur.\n• Yedi dil: Arapça, İngilizce, Endonezce, Urduca, Bengalce, Hintçe ve Türkçe.</string>
+    <string name="about_features_body">• İnternetsiz çalışır: vakitler telefonunda hesaplanır; hesap ve reklam yoktur.\n• Kral Fahd Kompleksi baskısına (Hafs rivayeti) uygun mushaf, kendi hattı ve metniyle; yakınlaştırınca metin büyür ve yeniden dizilir.\n• Umulan sevapların ve hedefe kalanın sayacı; kuralları yetkin bir âlim olduğu gibi onayladı. Bu bir umuttur, hesap değil.\n• Yedi dil: Arapça, İngilizce, Endonezce, Urduca, Bengalce, Hintçe ve Türkçe.</string>
     <string name="about_sources_title">Kaynaklar ve haklar</string>
     <string name="about_sources_body">• Mushaf metni ve hattı: Kral Fahd Mushaf Basım Kompleksi, Medine. Tüm hakları Komplekse aittir; Najwa\'da izniyle kullanılır.\n• Zikirler: Şeyh Said b. Ali b. Vehf el-Kahtânî\'nin (Allah rahmet etsin) \"Hısnu\'l-Müslim\" kitabı, hadis kaynaklarıyla.\n• Sure ve cüz verileri: Tanzil projesi. Şehir rehberi: GeoNames, CC BY 4.0 lisanslı.\n• Arayüz yazı tipi: Noto Sans Arabic, SIL OFL. AndroidX ve Kotlin bileşenleri, Apache-2.0. Lisansların tam metinleri uygulamada yer alır.</string>
     <string name="about_note_title">Not</string>
@@ -365,4 +365,5 @@ Bu telefondaki verilerin yerini alacak.</string>
     <string name="tajweed_madd">Kırmızı: lazım, vacip ve caiz med</string>
     <string name="tajweed_qalqalah">Mavi: kalkale</string>
     <string name="tajweed_note">Okumaya otomatik bir yardım; usta bir hocadan öğrenmenin yerini tutmaz.</string>
+    <string name="new171_0">Umulan sevap sayacı ve hedefe kalan artık açık; kuralları yetkin bir âlim olduğu gibi onayladı</string>
 </resources>
