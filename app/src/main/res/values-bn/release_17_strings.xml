@@ -50,7 +50,7 @@
     <string name="companion_summary">হোমে দৈনিক সারাংশ</string>
     <string name="companion_summary_help">আজকের নামাজ, পাঠ ও যিকর এক কার্ডে</string>
     <string name="companion_focus">যিকরের জন্য মনোযোগ মোড</string>
-    <string name="companion_focus_help">শুধু বর্তমান যিকর বড় লেখায়, সংখ্যা বা পরিসংখ্যান ছাড়া</string>
+    <string name="companion_focus_help">যিকরের আশপাশের সংখ্যা ও পরিসংখ্যান লুকায়, শুধু কার্ড ও গণনা থাকে</string>
     <string name="goal_title">দৈনিক লক্ষ্য</string>
     <string name="goal_help">ব্যক্তিগত অনুপ্রেরণা, শরয়ি বাধ্যবাধকতা নয়। না পৌঁছালে কিছু হারায় না।</string>
     <string name="goal_kind_hasanat">আশাকৃত নেকি</string>
@@ -96,7 +96,7 @@
     <string name="mushaf_title">মুসহাফ</string>
     <string name="mushaf_intro">মুসহাফ থেকে পড়ুন, শেষ করা পৃষ্ঠা নিশ্চিত করুন যাতে দৈনিক পাঠ ও খতম এগোয়।</string>
     <string name="mushaf_continue">পড়া চালিয়ে যান</string>
-    <string name="mushaf_continue_hint">পৃষ্ঠা %1$s এ থেমেছিলেন · পারা %2$s</string>
+    <string name="mushaf_continue_hint">শেষ খোলা পৃষ্ঠা: %1$s · পারা %2$s</string>
     <string name="mushaf_index">সূরার তালিকা</string>
     <string name="mushaf_back">কুরআন পাঠে ফিরুন</string>
     <string name="mushaf_loading">মুসহাফ খুলছে…</string>
@@ -340,4 +340,29 @@
     <string name="qibla_here">আপনার বর্তমান অবস্থান</string>
     <string name="qibla_near_makkah">আপনি মক্কার কাছে: শহরের কেন্দ্র থেকে হিসাব কয়েক ডিগ্রি ভুল হতে পারে, তাই বর্তমান অবস্থান ব্যবহার করুন।</string>
     <string name="qibla_interference">চৌম্বক বাধা: ধাতু, চুম্বক ও চৌম্বক কভার থেকে দূরে যান, তারপর ফোনটি 8 আকারে ঘোরান।</string>
+    <string name="silence_confirm_title">এখন ফোন নীরব করবেন?</string>
+    <string name="silence_confirm_text">অন্য একটি অ্যাপ নাজওয়াকে ফোন নীরব করতে বলেছে। আপনি রাজি না হলে কিছু বদলাবে না।</string>
+    <string name="silence_confirm_yes">এখন নীরব করুন</string>
+    <string name="mushaf_surah_label">সূরা %1$s</string>
+    <string name="qibla_at_haram">আপনি মসজিদুল হারামের খুব কাছে: সরাসরি কাবার দিকে মুখ করুন; এখানে কম্পাস যথেষ্ট নির্ভুল নয়।</string>
+    <string name="mushaf_share_image">ছবি হিসেবে শেয়ার</string>
+    <string name="adhkar_share">এই যিকর শেয়ার করুন</string>
+    <string name="kahf_card_title">জুমার দিন · সূরা কাহফ</string>
+    <string name="kahf_card_text">আজ মুসহাফ থেকে পড়ুন, পৃষ্ঠা ২৯৩ থেকে</string>
+    <string name="kahf_card_done">আজ সূরা কাহফ পড়েছেন, আল্লাহ কবুল করুন</string>
+    <string name="reading_appearance">পড়ার রূপ</string>
+    <string name="reading_mode_paper">কাগজ</string>
+    <string name="reading_mode_night">রাত</string>
+    <string name="reading_mode_custom">আমার রং</string>
+    <string name="reading_background">পটভূমির রং</string>
+    <string name="reading_text_colour">লেখার রং</string>
+    <string name="reading_low_contrast">দুই রঙের পার্থক্য কম, পড়তে কষ্ট হতে পারে; হালকা বা গাঢ় রং বেছে নিন।</string>
+    <string name="reading_apply">প্রয়োগ</string>
+    <string name="tajweed_title">তাজবিদের রং</string>
+    <string name="tajweed_help">কমপ্লেক্সের চিহ্ন থেকে নিয়মগুলোর আনুমানিক রং</string>
+    <string name="tajweed_silent">ধূসর: লেখা হয় কিন্তু উচ্চারিত হয় না</string>
+    <string name="tajweed_nasal">সবুজ: গুন্নাহ, ইখফা, গুন্নাহসহ ইদগাম ও ইকলাব (তানবিনসহ)</string>
+    <string name="tajweed_madd">লাল: মাদ্দে লাজিম, ওয়াজিব ও জায়েজ</string>
+    <string name="tajweed_qalqalah">নীল: কলকলা</string>
+    <string name="tajweed_note">পড়ার স্বয়ংক্রিয় সহায়ক; দক্ষ শিক্ষকের কাছে শেখার বিকল্প নয়।</string>
 </resources>

@@ -50,7 +50,7 @@
     <string name="companion_summary">ملخص يومي في الرئيسية</string>
     <string name="companion_summary_help">صلواتك ووردك وأذكارك اليوم في بطاقة واحدة</string>
     <string name="companion_focus">وضع التركيز للأذكار</string>
-    <string name="companion_focus_help">الذكر الحالي فقط بخط كبير، دون أرقام أو إحصاءات</string>
+    <string name="companion_focus_help">يخفي الأرقام والإحصاءات حول الذكر، ويُبقي البطاقة والعدّاد فقط</string>
     <string name="goal_title">هدف الخير اليومي</string>
     <string name="goal_help">هدف شخصي للتحفيز، وليس واجبًا شرعيًا. لا خسارة إن لم تبلغه.</string>
     <string name="goal_kind_hasanat">حسنات مرجوة</string>
@@ -96,7 +96,7 @@
     <string name="mushaf_title">المصحف</string>
     <string name="mushaf_intro">اقرأ من المصحف، وسجّل ما أتممته ليتابع وِردك وختمتك.</string>
     <string name="mushaf_continue">تابع القراءة</string>
-    <string name="mushaf_continue_hint">وقفت عند صفحة %1$s · الجزء %2$s</string>
+    <string name="mushaf_continue_hint">آخر صفحة فتحتها: %1$s · الجزء %2$s</string>
     <string name="mushaf_index">فهرس السور</string>
     <string name="mushaf_back">الرجوع إلى وِرد القرآن</string>
     <string name="mushaf_loading">جارٍ فتح المصحف…</string>
@@ -340,4 +340,29 @@
     <string name="qibla_here">موقعك الحالي</string>
     <string name="qibla_near_makkah">أنت قريب من مكة: حساب الاتجاه من مركز المدينة قد يخطئ بدرجات كثيرة، فاستخدم موقعك الحالي.</string>
     <string name="qibla_interference">تداخل مغناطيسي: ابتعد عن المعادن والمغناطيس وغطاء الهاتف المغناطيسي، ثم حرّك الهاتف على شكل 8.</string>
+    <string name="silence_confirm_title">تصميت الهاتف الآن؟</string>
+    <string name="silence_confirm_text">طلب تطبيق آخر من نجوى تصميت هاتفك. لن يُصمَت إلا إذا وافقت.</string>
+    <string name="silence_confirm_yes">صمّت الآن</string>
+    <string name="mushaf_surah_label">سورة %1$s</string>
+    <string name="qibla_at_haram">أنت قريب جدًا من المسجد الحرام: استقبل الكعبة مباشرة، فالبوصلة لا تكفي للدقة هنا.</string>
+    <string name="mushaf_share_image">مشاركة كصورة</string>
+    <string name="adhkar_share">مشاركة الذكر</string>
+    <string name="kahf_card_title">يوم الجمعة · سورة الكهف</string>
+    <string name="kahf_card_text">اقرأها اليوم من المصحف، من الصفحة ٢٩٣</string>
+    <string name="kahf_card_done">قرأت الكهف اليوم، تقبّل الله منك</string>
+    <string name="reading_appearance">مظهر القراءة</string>
+    <string name="reading_mode_paper">ورقي</string>
+    <string name="reading_mode_night">ليلي</string>
+    <string name="reading_mode_custom">ألواني</string>
+    <string name="reading_background">لون الخلفية</string>
+    <string name="reading_text_colour">لون الخط</string>
+    <string name="reading_low_contrast">التباين بين اللونين ضعيف وقد تصعب القراءة؛ اختر لونًا أفتح أو أغمق.</string>
+    <string name="reading_apply">تطبيق</string>
+    <string name="tajweed_title">تلوين التجويد</string>
+    <string name="tajweed_help">تلوين تقريبي للأحكام من علامات خط المجمع</string>
+    <string name="tajweed_silent">رمادي: حروف تُكتب ولا تُنطق</string>
+    <string name="tajweed_nasal">أخضر: الغنة والإخفاء والإدغام بغنة والإقلاب (ومنها أحكام التنوين)</string>
+    <string name="tajweed_madd">أحمر: المدّ اللازم والواجب والجائز</string>
+    <string name="tajweed_qalqalah">أزرق: القلقلة</string>
+    <string name="tajweed_note">تلوين آلي مساعد للقراءة، ولا يغني عن التلقي من معلّم متقن.</string>
 </resources>

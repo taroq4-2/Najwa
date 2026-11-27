@@ -195,7 +195,9 @@ class PrayerWidget: AppWidgetProvider() {
         }
         fun updateAll(context: Context) {
             // The companion widgets follow the same theme and day changes.
-            PrayerLogWidget.update(context);TasbeehWidget.update(context);DayWidget.update(context)
+            PrayerLogWidget.update(context);TasbeehWidget.update(context)
+            // Off the main thread the day card is drawn right away (a receiver may end soon); on it, in the background.
+            if(android.os.Looper.myLooper()==android.os.Looper.getMainLooper())DayWidget.update(context) else {DaySnapshot.invalidate();DayWidget.refresh(context)}
             // A launcher or vendor widget error must never crash the main activity.
             runCatching {
                 val manager=AppWidgetManager.getInstance(context)

@@ -27,7 +27,7 @@
     <string name="iqama_section_title">इक़ामत</string>
     <string name="iqama_section_help">अज़ान के बाद गिनती, और लॉक स्क्रीन पर लाइव कार्ड</string>
     <string name="data_title">डेटा और ऑटोमेशन</string>
-    <string name="data_summary">बैकअप और ऐप ऑटोमेशन</string>
+    <string name="data_summary">ऑटोमेशन, ऐप जोड़ना और स्मार्टवॉच</string>
     <string name="data_intro">सेटिंग्स सहेजें या नजवा को ऑटोमेशन ऐप से जोड़ें</string>
     <string name="tasbeeh_after_prayer">नमाज़ के बाद तस्बीह</string>
     <string name="tasbeeh_of">%1$s में से</string>

@@ -32,6 +32,7 @@ Accurate prayer times with adhan and iqama, a King Fahd Complex mushaf whose tex
 - **ويدجت «يومي»:** بطاقة واحدة فيها الصلاة القادمة وعدّادها، ومواقيت اليوم مع علامة تحت كل صلاة سجّلتها، ثم صلواتك وأذكار الوقت ووِردك، مع **شفافية للخلفية من 0 إلى 100%**.
 - **تنقّل جديد:** شريط سفلي عائم بأربعة تبويبات: الرئيسية، والمصحف، والأذكار، والإعدادات. وانتقل «الصمت» إلى الإعدادات.
 - **رئيسية مرتّبة:** حالة الصمت داخل بطاقة العدّاد، والأدوات صفًّا واحدًا، وشريط يمتلئ من اليمين إلى اليسار كلما اقتربت الصلاة.
+- **تلوين التجويد ومظهر بألوانك:** تلوين تقريبي للأحكام من علامات خط المجمع (اختياري، مع دليل)، واختيار لون الخلفية والخط في القراءة.
 - **قبلة أدق:** احسب الاتجاه من موقعك الحالي بلمسة بدل مركز المدينة (لا يُحفظ)، مع حروف الجهات وتنبيه التداخل المغناطيسي.
 - **إعدادات أوضح:** قسما «الصمت أثناء الصلاة» و«الويدجت»، وحالة صادقة حين تكون التنبيهات متوقفة، وأرقام تتبع اختيارك في كل مكان.
 - **ومنذ 1.3.0 أيضًا:** سجل صلوات بالجماعة والسنن وخريطة الأسابيع، وويدجت «صلواتي اليوم»، ومسبحة حيّة بتسبيح ما بعد الصلاة، وأذكار النوم والاستيقاظ والمسجد، وخطة ختمة، ودعاء اليوم. [كل التفاصيل](docs/releases/1.7.0.md).
@@ -45,6 +46,7 @@ This release brings together everything since 1.3.0 (versions 1.4 to 1.7).
 - **“My day” widget:** one card with the next prayer and its countdown, today's times with a mark under each prayer you recorded, then your prayers, the adhkar of the moment and your portion — with **background transparency from 0 to 100%**.
 - **New navigation:** a floating bottom bar with four tabs — Home, Mushaf, Adhkar, Settings. Silence now lives in Settings.
 - **A tidier home:** silence status inside the countdown card, tools in one row, and a bar that fills from right to left as the prayer approaches.
+- **Tajweed colours and your own reading colours:** optional approximate rule colouring from the Complex's own marks, with a legend, and your choice of background and text colours.
 - **A more precise Qibla:** one tap works the direction out from where you stand instead of the city centre (never saved), with cardinal points and a magnetic interference warning.
 - **Clearer settings:** *Silence during prayer* and *Widgets* sections, an honest status when alerts are off, and digits that follow your choice everywhere.
 - **Also since 1.3.0:** a prayer log with congregation and sunnah prayers and a weekly map, the *Today's prayers* widget, a living tasbeeh with the after‑prayer sequence, sleep, waking and mosque adhkar, a khatma plan and the dua of the day. [Full notes](docs/releases/1.7.0.md).

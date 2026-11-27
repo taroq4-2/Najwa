@@ -61,6 +61,8 @@ class MainActivity: ComponentActivity() {
         val requested=intent.action?.takeIf {it in setOf(ACTION_SILENCE_NOW,ACTION_QIBLA,ACTION_CHOOSE_CITY,ACTION_ADHKAR,ACTION_HEALTH,ACTION_PRAYER_LOG,ACTION_TASBEEH,ACTION_QURAN)} ?: return
         action.value=requested
         actionData.value=when(requested) {
+            // Silencing on request of another app needs your confirmation; Najwa's own shortcut and tile go straight through.
+            ACTION_SILENCE_NOW -> if(org.najwa.app.platform.LaunchToken.matches(this,intent)) null else "confirm"
             ACTION_ADHKAR -> (if(intent.getBooleanExtra("now",false)) {
                 val (day,_)=org.najwa.app.platform.WorshipDay.times(this,org.najwa.app.platform.WorshipDay.today(this))
                 val fajr=day.events.firstOrNull {it.prayer==org.najwa.core.Prayer.FAJR}?.time
@@ -137,6 +139,7 @@ internal fun publishShortcuts(context: Context) {
             .setShortLabel(strings.getString(short)).setLongLabel(strings.getString(long))
             .setIcon(IconCompat.createWithResource(context,icon))
             .setIntent(Intent(context,MainActivity::class.java).setAction(action).apply {if(extra!=null)putExtra(extra,true)}
+                .putExtra(org.najwa.app.platform.LaunchToken.EXTRA,org.najwa.app.platform.LaunchToken.get(context))
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP))
             .build()
         ShortcutManagerCompat.setDynamicShortcuts(context,listOf(

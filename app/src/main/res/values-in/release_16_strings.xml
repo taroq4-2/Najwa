@@ -27,7 +27,7 @@
     <string name="iqama_section_title">Iqamah</string>
     <string name="iqama_section_help">Hitung mundur setelah azan dan kartu langsung di layar kunci</string>
     <string name="data_title">Data dan otomatisasi</string>
-    <string name="data_summary">Cadangan dan otomatisasi aplikasi</string>
+    <string name="data_summary">Otomatisasi, tautan aplikasi dan jam pintar</string>
     <string name="data_intro">Simpan pengaturan, atau hubungkan Najwa ke aplikasi otomatisasi</string>
     <string name="tasbeeh_after_prayer">Tasbih setelah salat</string>
     <string name="tasbeeh_of">dari %1$s</string>

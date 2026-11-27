@@ -53,6 +53,29 @@ class DayCardPlatformTest {
         assertEquals(View.GONE,v.findViewById<View>(R.id.day_stats).visibility)
     }
 
+    @Test fun withoutHasanatTheWideTileShowsTodaysPortion() {
+        // The official build until the rules are approved: no hasanat, no goal, so the wide tile is the Quran portion.
+        WorshipSettingsStore.write(app,WorshipSettings(enabled=true,preview=false))
+        val v=day(Preferences(prayerLog=true),Instant.now())
+        assertEquals(View.VISIBLE,v.findViewById<View>(R.id.day_a).visibility)
+        assertEquals("وِرد اليوم",v.findViewById<TextView>(R.id.day_a_title).text.toString())
+        assertEquals("أذكار اليوم",v.findViewById<TextView>(R.id.day_b_title).text.toString())
+    }
+
+    @Test fun launchTokenSeparatesNajwaFromOtherApps() {
+        val token=LaunchToken.get(app)
+        assertEquals(token,LaunchToken.get(app))
+        assertTrue(LaunchToken.matches(app,android.content.Intent().putExtra(LaunchToken.EXTRA,token)))
+        assertFalse(LaunchToken.matches(app,android.content.Intent()))
+        assertFalse(LaunchToken.matches(app,android.content.Intent().putExtra(LaunchToken.EXTRA,"guess")))
+    }
+
+    @Test fun warmedSearchIndexFindsVerses() {
+        val d=Mushaf.load(app)
+        MushafSearch.warm(d)
+        assertTrue(MushafSearch.search(d,"الرحمن").isNotEmpty())
+    }
+
     @Test fun backgroundTransparencyCoversTheWholeRange() {
         assertEquals(0,Preferences(widgetOpacity=0).widgetOpacity)
         assertEquals(100,Preferences(widgetOpacity=100).widgetOpacity)

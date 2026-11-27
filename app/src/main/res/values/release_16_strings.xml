@@ -27,7 +27,7 @@
     <string name="iqama_section_title">الإقامة</string>
     <string name="iqama_section_help">العدّاد بعد الأذان، والبطاقة الحيّة على شاشة القفل</string>
     <string name="data_title">البيانات والأتمتة</string>
-    <string name="data_summary">النسخ الاحتياطي وربط التطبيقات</string>
+    <string name="data_summary">الأتمتة وربط التطبيقات والساعة الذكية</string>
     <string name="data_intro">احفظ إعداداتك، أو اربط نجوى بتطبيقات الأتمتة</string>
     <string name="tasbeeh_after_prayer">تسبيح ما بعد الصلاة</string>
     <string name="tasbeeh_of">من %1$s</string>

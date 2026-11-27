@@ -27,7 +27,7 @@
     <string name="iqama_section_title">Iqama</string>
     <string name="iqama_section_help">The countdown after adhan, and the live card on the lock screen</string>
     <string name="data_title">Data and automation</string>
-    <string name="data_summary">Backup and app automation</string>
+    <string name="data_summary">Automation, app linking and smartwatches</string>
     <string name="data_intro">Save your settings, or connect Najwa to automation apps</string>
     <string name="tasbeeh_after_prayer">After-prayer tasbeeh</string>
     <string name="tasbeeh_of">of %1$s</string>

@@ -38,6 +38,9 @@ object MushafSearch {
 
     @Volatile private var index: List<String>?=null
 
+    /** Builds the normalised index ahead of the first search. */
+    fun warm(d: Mushaf.Data) {if(index==null)index=d.verses.map {normalize(d.displayText(it))}}
+
     fun search(d: Mushaf.Data,query: String,limit: Int=200): List<Hit> {
         val q=normalize(query)
         if(q.length<2)return emptyList()

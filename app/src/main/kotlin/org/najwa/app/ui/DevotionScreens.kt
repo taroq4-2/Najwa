@@ -283,7 +283,8 @@ enum class AdhkarCategory(val key: String,val title: Int,val glyph: String,val t
     // Dhikr texts use the calm reading colours (paper or night), like the mushaf.
     val appDark=LocalPalette.current.dark
     var mode by remember(appDark) {mutableStateOf(ReadingPrefs.resolve(context,appDark))}
-    val r=readingColors(mode)
+    var styleTick by remember {mutableIntStateOf(0)}
+    val r=remember(mode,styleTick) {readingColors(mode)}
     val a=accent("teal")
     val pager=key(tab) {rememberPagerState(remaining.indexOfFirst {it>0}.coerceAtLeast(0)) {items.size}}
     fun save(next: List<Int>) {
@@ -424,7 +425,14 @@ enum class AdhkarCategory(val key: String,val title: Int,val glyph: String,val t
             contentPadding=PaddingValues(0.dp)) {Text("أ−",color=c.mint,fontSize=15.sp,modifier=Modifier.semantics {contentDescription=context.getString(R.string.adhkar_smaller)})}
         TextButton(onClick={scale=(scale+.1f).coerceAtMost(1.6f);AdhkarProgressStore.setTextScale(context,scale)},Modifier.size(48.dp),
             contentPadding=PaddingValues(0.dp)) {Text("أ+",color=c.mint,fontSize=19.sp,modifier=Modifier.semantics {contentDescription=context.getString(R.string.adhkar_larger)})}
-        ReadingModeButton(mode) {mode=it}
+        ReadingModeButton(mode) {mode=it;styleTick++}
+        val shareLabel=stringResource(R.string.adhkar_share)
+        TextButton(onClick={
+            val d=items[(if(listView) remaining.indexOfFirst {it>0}.coerceAtLeast(0) else pager.currentPage).coerceIn(0,items.lastIndex)]
+            val send=android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain")
+                .putExtra(android.content.Intent.EXTRA_TEXT,"${d.text}\n\n${d.source}\n— ${context.getString(R.string.system_brand)}")
+            runCatching {context.startActivity(android.content.Intent.createChooser(send,shareLabel))}
+        },Modifier.semantics {contentDescription=shareLabel}) {Glyph("share",c.mint,Modifier.size(18.dp))}
         val restartLabel=stringResource(R.string.adhkar_restart)
         TextButton(onClick={
             // Starting over loses today's progress in this category, so ask first when there is any.

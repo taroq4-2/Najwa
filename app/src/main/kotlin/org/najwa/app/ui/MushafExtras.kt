@@ -92,7 +92,11 @@ object MushafViewPrefs {
                         else -> androidx.compose.ui.graphics.Color.Unspecified
                     }
                     val start=length
-                    withStyle(SpanStyle(background=tone)) {append(d.displayText(v))}
+                    val verseStart=length
+                    val verseText=d.displayText(v)
+                    withStyle(SpanStyle(background=tone)) {append(verseText)}
+                    if(marks.tajweed)org.najwa.core.Tajweed.spans(verseText,verseEnd=true).forEach {s->
+                        addStyle(SpanStyle(color=tajweedColor(s.rule,r)),verseStart+s.start,verseStart+s.end)}
                     // The Complex font's own verse ornament.
                     withStyle(SpanStyle(color=r.marker,background=tone)) {append(MushafLayout.VERSE_MARK_GAP+MushafLayout.verseMark(v.aya))}
                     if(index in marks.bookmarked)withStyle(SpanStyle(color=r.marker)) {append(" ◆")}
@@ -148,7 +152,39 @@ object MushafViewPrefs {
     }
 }
 
-/** What a long press on a verse offers: bookmark, highlight, copy. */
+/**
+ * A verse as a shareable card: the text in the King Fahd Complex font on mushaf paper, its reference and the app's
+ * name, drawn on the device (nothing is uploaded) and shared through the share sheet you choose.
+ */
+internal fun verseCard(context: android.content.Context,text: String,reference: String): java.io.File {
+    val typeface=androidx.core.content.res.ResourcesCompat.getFont(context,R.font.kfgqpc_hafs) ?: android.graphics.Typeface.SERIF
+    val width=1080;val pad=110
+    val ink=android.text.TextPaint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {this.typeface=typeface;textSize=60f;color=0xFF2A2418.toInt()}
+    val layout=android.text.StaticLayout.Builder.obtain(text,0,text.length,ink,width-pad*2)
+        .setAlignment(android.text.Layout.Alignment.ALIGN_CENTER).setLineSpacing(26f,1f)
+        .setTextDirection(android.text.TextDirectionHeuristics.RTL).build()
+    val height=pad*2+layout.height+190
+    val bitmap=android.graphics.Bitmap.createBitmap(width,height,android.graphics.Bitmap.Config.ARGB_8888)
+    val canvas=android.graphics.Canvas(bitmap)
+    canvas.drawColor(0xFFF8F3E6.toInt())
+    val frame=android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {style=android.graphics.Paint.Style.STROKE;color=0xFFC9A86A.toInt();strokeWidth=4f}
+    canvas.drawRoundRect(36f,36f,width-36f,height-36f,34f,34f,frame)
+    frame.strokeWidth=1.5f
+    canvas.drawRoundRect(52f,52f,width-52f,height-52f,26f,26f,frame)
+    canvas.save();canvas.translate(pad.toFloat(),pad.toFloat());layout.draw(canvas);canvas.restore()
+    val small=android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {this.typeface=typeface;textAlign=android.graphics.Paint.Align.CENTER}
+    small.textSize=40f;small.color=0xFF8A6A2F.toInt()
+    canvas.drawText(reference,width/2f,(pad+layout.height+90).toFloat(),small)
+    small.textSize=28f;small.color=0xFF9C927E.toInt();small.typeface=android.graphics.Typeface.DEFAULT
+    canvas.drawText("نجوى · Najwa",width/2f,(height-70).toFloat(),small)
+    val dir=java.io.File(context.cacheDir,"shared").apply {mkdirs()}
+    val file=java.io.File(dir,"najwa-verse.png")
+    file.outputStream().use {bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG,100,it)}
+    bitmap.recycle()
+    return file
+}
+
+/** What a long press on a verse offers: bookmark, highlight, share as an image, copy. */
 @Composable fun VerseActions(d: Mushaf.Data,verse: Int,r: ReadingColors,onDismiss: ()->Unit,onChanged: ()->Unit) {
     val context=LocalContext.current
     val v=d.verses[verse]
@@ -165,6 +201,11 @@ object MushafViewPrefs {
                         AyahMarks.toggle(context,AyahMarks.Kind.BOOKMARK,verse);marked=!marked;onChanged()}
                     VerseChip(stringResource(R.string.mushaf_highlight),lit,r,Modifier.weight(1f)) {
                         AyahMarks.toggle(context,AyahMarks.Kind.HIGHLIGHT,verse);lit=!lit;onChanged()}
+                }
+                VerseChip(stringResource(R.string.mushaf_share_image),false,r,Modifier.fillMaxWidth()) {
+                    val reference="${surah.name} ${Mushaf.arabicDigits(v.aya)}"
+                    runCatching {shareImage(context,verseCard(context,d.displayText(v)+" "+MushafLayout.verseMark(v.aya),reference),reference)}
+                    onDismiss()
                 }
                 VerseChip(stringResource(R.string.mushaf_copy),false,r,Modifier.fillMaxWidth()) {
                     val clip=context.getSystemService(android.content.ClipboardManager::class.java)

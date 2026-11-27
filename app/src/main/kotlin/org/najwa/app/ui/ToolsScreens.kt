@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -151,7 +152,8 @@ private tailrec fun Context.findActivity(): android.app.Activity?=when(this) {
         locating=true;locateError=null
         scope.launch {
             try {
-                val found=currentLocation(context)
+                // A fix from the last hour is fine here; a fresh one is waited for briefly per source.
+                val found=currentLocation(context,maxAgeMinutes=60,timeoutMs=8_000)
                 if(found==null)locateError=R.string.locate_unavailable else here=found
             } catch(e: kotlinx.coroutines.CancellationException) {throw e}
             catch(_: Exception) {locateError=R.string.locate_failed}
@@ -220,7 +222,8 @@ private tailrec fun Context.findActivity(): android.app.Activity?=when(this) {
                     drawPath(top,c.text)
                 }
             }
-            Text(description,color=if(aligned)c.mint else c.text,fontSize=18.sp,fontWeight=FontWeight.Bold,textAlign=TextAlign.Center)
+            Text(description,color=if(aligned)c.mint else c.text,fontSize=18.sp,fontWeight=FontWeight.Bold,textAlign=TextAlign.Center,
+                modifier=Modifier.semantics {liveRegion=androidx.compose.ui.semantics.LiveRegionMode.Polite})
             Text(stringResource(R.string.qibla_details,bearing.roundToInt(),String.format(Locale.US,"%,d",distance.roundToInt()),
                 if(here!=null)stringResource(R.string.qibla_here) else p.city.name),
                 color=c.secondary,fontSize=13.sp,textAlign=TextAlign.Center)
@@ -237,6 +240,7 @@ private tailrec fun Context.findActivity(): android.app.Activity?=when(this) {
         Text(stringResource(R.string.qibla_location_note),color=c.secondary,fontSize=12.sp,modifier=Modifier.padding(top=6.dp))
     } else {
         Text(stringResource(R.string.qibla_from_location),color=c.mint,fontSize=13.sp)
+        if(distance<3)Text(stringResource(R.string.qibla_at_haram),color=c.amber,fontSize=13.sp,modifier=Modifier.padding(top=4.dp))
         TextButton(onClick={here=null}) {Text(stringResource(R.string.qibla_use_city,p.city.name))}
     }
     locateError?.let {Text(stringResource(it),color=c.amber,fontSize=12.sp,modifier=Modifier.padding(top=6.dp))}
@@ -439,19 +443,19 @@ internal fun Context.ignoresBatteryOptimizations(): Boolean =
 }
 
 @Suppress("MissingPermission")
-private suspend fun currentLocation(context: Context): Location? {
+private suspend fun currentLocation(context: Context,maxAgeMinutes: Int=15,timeoutMs: Long=15_000): Location? {
     val manager=context.getSystemService(LocationManager::class.java) ?: return null
     val providers=listOfNotNull(
         if(Build.VERSION.SDK_INT>=31)LocationManager.FUSED_PROVIDER else null,
         LocationManager.NETWORK_PROVIDER,LocationManager.GPS_PROVIDER
     ).filter {runCatching {manager.isProviderEnabled(it)}.getOrDefault(false)}
     if(providers.isEmpty())return null
-    // A fix from the last quarter hour is accurate enough for choosing a city, and instant.
+    // A recent fix is accurate enough (a city, or the Qibla within a degree or two), and instant.
     providers.mapNotNull {runCatching {manager.getLastKnownLocation(it)}.getOrNull()}
-        .filter {System.currentTimeMillis()-it.time<15*60_000L}.maxByOrNull {it.time}?.let {return it}
+        .filter {System.currentTimeMillis()-it.time<maxAgeMinutes*60_000L}.maxByOrNull {it.time}?.let {return it}
     if(Build.VERSION.SDK_INT>=30) {
         for(provider in providers) {
-            val found=withTimeoutOrNull(15_000) {
+            val found=withTimeoutOrNull(timeoutMs) {
                 suspendCancellableCoroutine<Location?> {cont->
                     val signal=android.os.CancellationSignal()
                     cont.invokeOnCancellation {signal.cancel()}

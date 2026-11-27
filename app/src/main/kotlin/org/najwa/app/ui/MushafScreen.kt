@@ -104,10 +104,16 @@ val QuranFont=FontFamily(Font(R.font.kfgqpc_hafs))
     val context=LocalContext.current
     val scope=rememberCoroutineScope()
     val data by produceState<Mushaf.Data?>(null) {value=withContext(Dispatchers.IO) {runCatching {Mushaf.load(context)}.getOrNull()}}
+    // The first search builds a normalised index of every verse; prepare it quietly while you read.
+    LaunchedEffect(data) {data?.let {d: Mushaf.Data->withContext(Dispatchers.Default) {runCatching {org.najwa.app.platform.MushafSearch.warm(d)}}}}
     val english=LocalConfiguration.current.locales[0].language!="ar"
     val appDark=LocalPalette.current.dark
     var mode by remember(appDark) {mutableStateOf(ReadingPrefs.resolve(context,appDark))}
-    val r=readingColors(mode)
+    // Bumped when custom colours change while the mode stays "custom".
+    var styleTick by remember {mutableIntStateOf(0)}
+    val r=remember(mode,styleTick) {readingColors(mode)}
+    var tajweed by remember {mutableStateOf(ReadingPrefs.tajweed(context))}
+    var appearance by remember {mutableStateOf(false)}
     var index by rememberSaveable {mutableStateOf(openIndex)}
     var plan by rememberSaveable {mutableStateOf(false)}
     var search by rememberSaveable {mutableStateOf(false)}
@@ -211,7 +217,7 @@ val QuranFont=FontFamily(Font(R.font.kfgqpc_hafs))
             // Pages always turn right to left, whatever the interface language.
             HorizontalPager(pager,modifier=Modifier.fillMaxSize(),beyondViewportPageCount=1,key={it}) {i->
                 val p=i+1
-                val decor=PageDecor(bookmarked,highlighted,flash,if(memorize) revealed[p] ?: 0 else null)
+                val decor=PageDecor(bookmarked,highlighted,flash,if(memorize) revealed[p] ?: 0 else null,tajweed)
                 // Pinch out on the printed page and the verses flow in large text; pinch in far enough and the page returns.
                 Box(Modifier.fillMaxSize().pointerInput(Unit) {detectTapGestures(onTap={chrome=!chrome})}
                     .textPinch(onStart={pinchBase=if(view==MushafView.LARGE) largeSize else MushafViewPrefs.PAGE_SIZE},
@@ -245,7 +251,7 @@ val QuranFont=FontFamily(Font(R.font.kfgqpc_hafs))
                 modifier=Modifier.fillMaxWidth()) {
                 Column(Modifier.statusBarsPadding().padding(bottom=12.dp)) {
                     ReaderTopBar(d,page,r,english,mode,onBack=onBack,onIndex={index=true},onPlan={plan=true},onSearch={search=true},
-                        onMode={mode=it;ReadingPrefs.setMode(context,it)})
+                        onAppearance={appearance=true})
                     if(view==MushafView.LARGE)Row(Modifier.padding(horizontal=16.dp,vertical=4.dp),verticalAlignment=Alignment.CenterVertically) {
                         Text(stringResource(R.string.mushaf_text_size),color=r.muted,fontSize=12.sp,modifier=Modifier.weight(1f))
                         RoundAction("minus",stringResource(R.string.adhkar_smaller),r) {largeSize=(largeSize-3f).coerceAtLeast(MushafViewPrefs.MIN_SIZE);MushafViewPrefs.setLargeSize(context,largeSize)}
@@ -285,6 +291,7 @@ val QuranFont=FontFamily(Font(R.font.kfgqpc_hafs))
         if(search)MushafSearchDialog(d,r,onDismiss={search=false}) {hit->
             search=false;flash=hit.verse;scope.launch {pager.scrollToPage(hit.page-1)}}
         verseAction?.let {v->VerseActions(d,v,r,onDismiss={verseAction=null}) {marksVersion++}}
+        if(appearance)ReadingAppearanceDialog(mode,tajweed,onMode={mode=it;styleTick++},onTajweed={tajweed=it}) {appearance=false}
         if(khatmaMoment)KhatmaMoment(r,onNext={khatmaMoment=false;scope.launch {pager.scrollToPage(0)};plan=true}) {khatmaMoment=false}
     }
 }
@@ -299,23 +306,22 @@ val QuranFont=FontFamily(Font(R.font.kfgqpc_hafs))
 }
 
 @Composable private fun ReaderTopBar(d: Mushaf.Data,page: Int,r: ReadingColors,english: Boolean,mode: ReadingMode,
-                                    onBack: ()->Unit,onIndex: ()->Unit,onPlan: ()->Unit,onSearch: ()->Unit,onMode: (ReadingMode)->Unit) {
+                                    onBack: ()->Unit,onIndex: ()->Unit,onPlan: ()->Unit,onSearch: ()->Unit,onAppearance: ()->Unit) {
     val context=LocalContext.current
     Row(Modifier.fillMaxWidth().padding(start=12.dp,end=12.dp,top=8.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(8.dp)) {
         RoundAction("back",stringResource(R.string.mushaf_back),r,onBack)
         Column(Modifier.weight(1f).padding(horizontal=4.dp)) {
             val surahs=d.surahsOn(page)
             val title=if(english) surahs.joinToString(" · ") {it.latin}
-                else if(surahs.size==1) "سورة ${surahs[0].name}" else surahs.joinToString(" · ") {it.name}
+                else if(surahs.size==1) context.getString(R.string.mushaf_surah_label,surahs[0].name) else surahs.joinToString(" · ") {it.name}
             Text(title,color=r.ink,fontSize=if(english)17.sp else 21.sp,fontFamily=if(english)null else QuranFont,
                 fontWeight=if(english)FontWeight.Bold else null,maxLines=1,overflow=TextOverflow.Ellipsis)
             Text(Counts.digits(context,stringResource(R.string.mushaf_where,d.juzOf(page),page)),color=r.muted,fontSize=12.sp)
         }
         RoundAction("search",stringResource(R.string.mushaf_search),r,onSearch)
         RoundAction("mushaf",stringResource(R.string.mushaf_index),r,onIndex)
-        val next=if(mode==ReadingMode.PAPER) ReadingMode.NIGHT else ReadingMode.PAPER
-        RoundAction(if(next==ReadingMode.NIGHT)"moon" else "sun",
-            context.getString(if(next==ReadingMode.NIGHT)R.string.reading_night else R.string.reading_paper),r) {onMode(next)}
+        // Reading appearance: paper, night or your colours, and tajweed colouring.
+        RoundAction("palette",stringResource(R.string.reading_appearance),r,onAppearance)
         RoundAction("calendar",stringResource(R.string.mushaf_settings),r,onPlan)
     }
 }
@@ -541,7 +547,8 @@ private object PageCache {
 }
 
 /** What the reader adds to a page: verse marks and highlights, a search result to flash, and memorization progress. */
-data class PageDecor(val bookmarked: Set<Int> = emptySet(),val highlighted: Set<Int> = emptySet(),val flash: Int? = null,val revealed: Int? = null)
+data class PageDecor(val bookmarked: Set<Int> = emptySet(),val highlighted: Set<Int> = emptySet(),val flash: Int? = null,val revealed: Int? = null,
+                     /** Colour the letters by tajweed rule (see [org.najwa.core.Tajweed]). */ val tajweed: Boolean=false)
 
 @Composable private fun MushafSheet(d: Mushaf.Data,page: Int,r: ReadingColors,bookmark: Boolean,read: Boolean,decor: PageDecor,
                                    onDoubleTap: ()->Unit,
@@ -568,7 +575,7 @@ data class PageDecor(val bookmarked: Set<Int> = emptySet(),val highlighted: Set<
         val wDp=with(LocalDensity.current) {w.toDp()};val hDp=with(LocalDensity.current) {h.toDp()}
         // For screen readers: the page, its surahs and its verses, read in order.
         val description=remember(page) {
-            val names=d.surahsOn(page).joinToString("، ") {"سورة ${it.name}"}
+            val names=d.surahsOn(page).joinToString("، ") {context.getString(R.string.mushaf_surah_label,it.name)}
             val text=d.page(page).joinToString(" ") {"${d.displayText(it)} (${it.aya})"}
             context.getString(R.string.mushaf_page_desc,Counts.format(context,page.toLong()),names,text)
         }
@@ -588,6 +595,37 @@ private class SheetPaints(typeface: Typeface,r: ReadingColors) {
     val margin=Paint(Paint.ANTI_ALIAS_FLAG).apply {this.typeface=typeface;color=r.muted.toArgb()}
     val heading=Paint(Paint.ANTI_ALIAS_FLAG).apply {this.typeface=typeface;color=r.accentInk.toArgb();textAlign=Paint.Align.CENTER}
     val ornament=Paint(Paint.ANTI_ALIAS_FLAG or Paint.SUBPIXEL_TEXT_FLAG).apply {this.typeface=typeface;color=r.marker.toArgb()}
+}
+
+/**
+ * One word in tajweed colours: each coloured letter group is drawn as a run shaped with the whole word as context, so
+ * the letters stay joined; the next word on the page is read for noon and tanween rules at the word's end.
+ */
+private fun drawTajweedWord(nc: android.graphics.Canvas,w: Placed,set: Typeset,baseline: Float,paint: Paint,r: ReadingColors) {
+    val text=w.text
+    val words=set.rows.filterNotNull().flatten()
+    val at=words.indexOf(w)
+    val following=words.getOrNull(at+1)?.text
+    val spans=org.najwa.core.Tajweed.spans(text,following,verseEnd=w.token.aya!=null)
+    if(spans.isEmpty()) {nc.drawText(text,w.wordLeft,baseline,paint);return}
+    val base=paint.color
+    val width=paint.getRunAdvance(text,0,text.length,0,text.length,true,text.length)
+    // Runs in logical order: plain stretches between the coloured spans.
+    val runs=ArrayList<Triple<Int,Int,Int>>()
+    var pos=0
+    spans.forEach {s->
+        if(s.start>pos)runs+=Triple(pos,s.start,base)
+        runs+=Triple(s.start,s.end,tajweedColor(s.rule,r).toArgb())
+        pos=s.end
+    }
+    if(pos<text.length)runs+=Triple(pos,text.length,base)
+    runs.forEach {(start,end,color)->
+        // Right to left: a run's right edge is the advance from the word's start to the run's start.
+        val left=w.wordLeft+width-paint.getRunAdvance(text,0,text.length,0,text.length,true,end)
+        paint.color=color
+        nc.drawTextRun(text,start,end,0,text.length,left,baseline,true,paint)
+    }
+    paint.color=base
 }
 
 /** Paper, binding shade, the ornamented frame, margin titles, page number, bookmark ribbon and the read seal. */
@@ -705,7 +743,8 @@ private fun DrawScope.drawPageText(set: Typeset,d: Mushaf.Data,r: ReadingColors,
                             // Memorization: the word's place, without the word.
                             drawRoundRect(r.band,Offset(w.wordLeft,cy-fontSize*.32f),Size(w.right-w.wordLeft,fontSize*.5f),CornerRadius(fontSize*.25f))
                             drawRoundRect(r.frame,Offset(w.wordLeft,cy-fontSize*.32f),Size(w.right-w.wordLeft,fontSize*.5f),CornerRadius(fontSize*.25f),style=Stroke(.8f*dp))
-                        } else nc.drawText(w.text,w.wordLeft,baseline,p.text)
+                        } else if(decor.tajweed) drawTajweedWord(nc,w,set,baseline,p.text,r)
+                        else nc.drawText(w.text,w.wordLeft,baseline,p.text)
                         val aya=w.token.aya
                         if(aya!=null && w.mark!=null && w.markerX!=null) {
                             // The verse ornament from the Complex's font, in the marker colour.

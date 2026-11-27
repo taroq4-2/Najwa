@@ -27,7 +27,7 @@
     <string name="iqama_section_title">Kamet</string>
     <string name="iqama_section_help">Ezandan sonra sayaç ve kilit ekranında canlı kart</string>
     <string name="data_title">Veri ve otomasyon</string>
-    <string name="data_summary">Yedekleme ve uygulama otomasyonu</string>
+    <string name="data_summary">Otomasyon, uygulama bağlantısı ve akıllı saatler</string>
     <string name="data_intro">Ayarlarınızı kaydedin veya Najwa\'yı otomasyon uygulamalarına bağlayın</string>
     <string name="tasbeeh_after_prayer">Namaz sonrası tesbih</string>
     <string name="tasbeeh_of">%1$s içinden</string>

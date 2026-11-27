@@ -50,7 +50,7 @@
     <string name="companion_summary">Daily summary on home</string>
     <string name="companion_summary_help">Today\'s prayers, reading and adhkar in one card</string>
     <string name="companion_focus">Focus mode for adhkar</string>
-    <string name="companion_focus_help">Only the current dhikr in large text, without numbers or statistics</string>
+    <string name="companion_focus_help">Hides the numbers and statistics around the dhikr, keeping only the card and its counter</string>
     <string name="goal_title">Daily goal</string>
     <string name="goal_help">A personal motivation, not a religious requirement. Nothing is lost if you do not reach it.</string>
     <string name="goal_kind_hasanat">Hoped-for hasanat</string>
@@ -96,7 +96,7 @@
     <string name="mushaf_title">The mushaf</string>
     <string name="mushaf_intro">Read from the mushaf and confirm what you finish to follow your daily portion and khatma.</string>
     <string name="mushaf_continue">Continue reading</string>
-    <string name="mushaf_continue_hint">You stopped at page %1$s · juz %2$s</string>
+    <string name="mushaf_continue_hint">Last page you opened: %1$s · juz %2$s</string>
     <string name="mushaf_index">Surah index</string>
     <string name="mushaf_back">Back to Qur\'an reading</string>
     <string name="mushaf_loading">Opening the mushaf…</string>
@@ -340,4 +340,29 @@ It will replace what is on this phone now.</string>
     <string name="qibla_here">your current location</string>
     <string name="qibla_near_makkah">You are close to Makkah: working the direction out from the city centre can be many degrees off, so use your current location.</string>
     <string name="qibla_interference">Magnetic interference: move away from metal, magnets and magnetic phone cases, then move the phone in a figure 8.</string>
+    <string name="silence_confirm_title">Silence the phone now?</string>
+    <string name="silence_confirm_text">Another app asked Najwa to silence your phone. It stays as it is unless you agree.</string>
+    <string name="silence_confirm_yes">Silence now</string>
+    <string name="mushaf_surah_label">Surah %1$s</string>
+    <string name="qibla_at_haram">You are very close to the Grand Mosque: face the Kaaba directly; a compass is not precise enough here.</string>
+    <string name="mushaf_share_image">Share as image</string>
+    <string name="adhkar_share">Share this dhikr</string>
+    <string name="kahf_card_title">Friday · Surah Al-Kahf</string>
+    <string name="kahf_card_text">Read it today in the mushaf, from page 293</string>
+    <string name="kahf_card_done">You read Al-Kahf today. May Allah accept it</string>
+    <string name="reading_appearance">Reading appearance</string>
+    <string name="reading_mode_paper">Paper</string>
+    <string name="reading_mode_night">Night</string>
+    <string name="reading_mode_custom">My colours</string>
+    <string name="reading_background">Background colour</string>
+    <string name="reading_text_colour">Text colour</string>
+    <string name="reading_low_contrast">The contrast between the two colours is low and may be hard to read; pick a lighter or darker colour.</string>
+    <string name="reading_apply">Apply</string>
+    <string name="tajweed_title">Tajweed colours</string>
+    <string name="tajweed_help">Approximate colouring of the rules, from the Complex\'s own marks</string>
+    <string name="tajweed_silent">Grey: letters written but not pronounced</string>
+    <string name="tajweed_nasal">Green: ghunnah, ikhfa, idgham with ghunnah and iqlab (including tanween)</string>
+    <string name="tajweed_madd">Red: the necessary and obligatory madd</string>
+    <string name="tajweed_qalqalah">Blue: qalqalah</string>
+    <string name="tajweed_note">An automatic aid for reading; it does not replace learning from a qualified teacher.</string>
 </resources>

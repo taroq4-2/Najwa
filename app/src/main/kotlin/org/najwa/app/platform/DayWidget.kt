@@ -40,9 +40,25 @@ class DayWidget: AppWidgetProvider() {
         private fun component(context: Context)=ComponentName(context,DayWidget::class.java)
         fun present(context: Context)=runCatching {AppWidgetManager.getInstance(context).getAppWidgetIds(component(context)).isNotEmpty()}.getOrDefault(false)
 
-        /** Re-renders after a worship record changes. */
+        // Rendering rebuilds the day (stores, prayer times, letters): never on the UI thread, and a burst of taps
+        // (counting adhkar) becomes a single refresh.
+        private val worker=java.util.concurrent.Executors.newSingleThreadExecutor {r->Thread(r,"najwa-day-widget").apply {isDaemon=true}}
+        private val pending=java.util.concurrent.atomic.AtomicBoolean(false)
+
+        /** Re-renders after a worship record changes: the snapshot is dropped now, the widgets are redrawn in the background. */
         fun update(context: Context) {
             DaySnapshot.invalidate()
+            val app=context.applicationContext
+            if(!pending.compareAndSet(false,true))return
+            worker.execute {
+                runCatching {Thread.sleep(150)}
+                pending.set(false)
+                refresh(app)
+            }
+        }
+
+        /** Draws the Quran widget and every placed day card now, on the calling thread. */
+        fun refresh(context: Context) {
             QuranWidget.update(context)
             runCatching {
                 val manager=AppWidgetManager.getInstance(context)
@@ -63,6 +79,10 @@ class DayWidget: AppWidgetProvider() {
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
+        private val cellIds=listOf(
+            Triple(R.id.widget_p0,R.id.widget_p0_name,R.id.widget_p0_time),Triple(R.id.widget_p1,R.id.widget_p1_name,R.id.widget_p1_time),
+            Triple(R.id.widget_p2,R.id.widget_p2_name,R.id.widget_p2_time),Triple(R.id.widget_p3,R.id.widget_p3_name,R.id.widget_p3_time),
+            Triple(R.id.widget_p4,R.id.widget_p4_name,R.id.widget_p4_time))
         private val marks=listOf(R.id.widget_p0_done,R.id.widget_p1_done,R.id.widget_p2_done,R.id.widget_p3_done,R.id.widget_p4_done)
 
         /**
@@ -97,8 +117,26 @@ class DayWidget: AppWidgetProvider() {
             // A mark under each prayer of today's list: prayed (gold in congregation), missed, or passed unrecorded.
             val zone=p.city.zoneId
             val data=widgetPrayer(now,p)
-            val listDate=(data?.time ?: now).atZone(zone).toLocalDate()
-            val events=runCatching {PrayerCalculator().calculate(listDate,p).events.filter {it.prayer.isPrayer}}.getOrDefault(emptyList())
+            var listDate=(data?.time ?: now).atZone(zone).toLocalDate()
+            var events=runCatching {PrayerCalculator().calculate(listDate,p).events.filter {it.prayer.isPrayer}}.getOrDefault(emptyList())
+            // After Isha (and until Fajr) the classic list moves to the next day. The day card keeps the worship day's
+            // prayers with their marks instead, and shows the coming Fajr in its cell.
+            if(listDate!=date && log!=null) {
+                val today=runCatching {PrayerCalculator().calculate(date,p).events.filter {it.prayer.isPrayer}}.getOrDefault(emptyList())
+                if(today.size==5) {
+                    val highlight=if(colors.light)R.drawable.widget_cell_adhan_light else R.drawable.widget_cell_adhan
+                    today.forEachIndexed {i,event->
+                        val (cell,name,time)=cellIds[i]
+                        val next=event.prayer==data?.prayer
+                        v.setTextViewText(name,strings.prayerName(event,p))
+                        v.setTextViewText(time,strings.prayerTime(if(next && data!=null) data.time else event.time,p))
+                        v.setTextColor(name,if(next)colors.adhan else colors.secondary)
+                        v.setTextColor(time,if(next)colors.adhan else colors.secondary)
+                        v.setInt(cell,"setBackgroundResource",if(next)highlight else 0)
+                    }
+                    events=today;listDate=date
+                }
+            }
             events.forEachIndexed {i,event->
                 val id=marks.getOrNull(i) ?: return@forEachIndexed
                 val status=if(log!=null && listDate==date) log.status(date,event.prayer) else null
@@ -128,7 +166,10 @@ class DayWidget: AppWidgetProvider() {
             // Hasanat of the day and what is left to the goal (the personal goal when it counts hasanat, else today's portion).
             val goal=s.goal
             val hasanat=s.virtues.hasanat
-            val showA=settings.widgetReward && (hasanat!=null || goal!=null)
+            // Without hasanat or a goal (the official build until the rules are approved), the wide tile shows today's
+            // Quran portion with its bar, so the card never has an empty gap.
+            val wirdInA=hasanat==null && goal==null
+            val showA=settings.widgetReward
             v.setViewVisibility(R.id.day_a,if(showA)View.VISIBLE else View.GONE)
             if(showA) {
                 v.setViewVisibility(R.id.day_a_badge,if(s.preview)View.VISIBLE else View.GONE)
@@ -151,8 +192,15 @@ class DayWidget: AppWidgetProvider() {
                     v.setProgressBar(R.id.day_a_bar,1000,goal.permille,false)
                     v.setTextViewText(R.id.day_a_note,if(goal.reached)strings.getString(R.string.day_goal_reached)
                         else strings.getString(R.string.day_goal_remaining,num.format(goal.remaining),num.format(goal.target)))
+                } else {
+                    val left=(s.pageGoal-s.pages).coerceAtLeast(0)
+                    v.setTextViewText(R.id.day_a_title,strings.getString(R.string.day_wird_title))
+                    v.setTextViewText(R.id.day_a_value,strings.getString(R.string.day_of_five,num.format(s.pages),num.format(s.pageGoal)))
+                    v.setProgressBar(R.id.day_a_bar,1000,(s.pages.coerceAtMost(s.pageGoal)*1000/s.pageGoal.coerceAtLeast(1)),false)
+                    v.setTextViewText(R.id.day_a_note,if(left==0)strings.getString(R.string.day_wird_done)
+                        else strings.getString(R.string.next_left,Counts.pages(strings,left)))
                 }
-                v.setOnClickPendingIntent(R.id.day_a,openApp(context,250,null))
+                v.setOnClickPendingIntent(R.id.day_a,if(wirdInA)openApp(context,256,ACTION_QURAN) else openApp(context,250,null))
             }
 
             // Prayers done today.
@@ -179,6 +227,11 @@ class DayWidget: AppWidgetProvider() {
                 v.setTextViewText(R.id.day_b_title,strings.getString(R.string.day_forgiveness_title))
                 v.setTextViewText(R.id.day_b_value,num.format(s.virtues.expiationActions))
                 v.setOnClickPendingIntent(R.id.day_b,openApp(context,251,null))
+            } else if(wirdInA && settings.widgetReward) {
+                // The portion is already in the wide tile: this one counts the adhkar completed today.
+                v.setTextViewText(R.id.day_b_title,strings.getString(R.string.day_adhkar_today))
+                v.setTextViewText(R.id.day_b_value,Counts.adhkar(strings,s.adhkarItems))
+                v.setOnClickPendingIntent(R.id.day_b,openApp(context,251,ACTION_ADHKAR,0))
             } else {
                 v.setTextViewText(R.id.day_b_title,strings.getString(R.string.day_wird_title))
                 v.setTextViewText(R.id.day_b_value,if(s.pages>=s.pageGoal) strings.getString(R.string.day_wird_done)

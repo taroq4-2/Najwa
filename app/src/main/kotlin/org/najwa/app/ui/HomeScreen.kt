@@ -32,7 +32,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.semantics.Role
 
 @Composable fun HomeScreen(p: Preferences,now: Instant,day: PrayerDay,t: Timeline?,capable: Boolean,onCity: ()->Unit,onSilence: ()->Unit,activeUntil: Instant?=null,onQibla: ()->Unit={},
-    tomorrow: PrayerDay?=null,logged: Set<Prayer> = emptySet(),onTogglePrayed: ((Prayer)->Unit)?=null,onTool: (Screen)->Unit={},mosqueName: String?=null,onAdhkar: (Int)->Unit={}) {
+    tomorrow: PrayerDay?=null,logged: Set<Prayer> = emptySet(),onTogglePrayed: ((Prayer)->Unit)?=null,onTool: (Screen)->Unit={},mosqueName: String?=null,onAdhkar: (Int)->Unit={},onKahf: ()->Unit={}) {
     val c=LocalPalette.current
     val largeText=LocalDensity.current.fontScale>1.4f
     val focus=t?.let {prayerCountdown(listOf(it.previous,it.next),now,p)}
@@ -164,6 +164,7 @@ import androidx.compose.ui.semantics.Role
     Spacer(Modifier.height(14.dp))
     ToolsGrid(p) {if(it==Screen.QIBLA)onQibla() else onTool(it)}
     RamadanCard(p,now,day,tomorrow)
+    KahfCard(day,onKahf)
     Spacer(Modifier.height(16.dp))
     // Worship companion: one optional card summarising today's confirmed records (off restores the 1.6 home).
     val context=androidx.compose.ui.platform.LocalContext.current
@@ -248,6 +249,25 @@ import androidx.compose.ui.semantics.Role
                 }
                 Text(title,color=c.text,fontSize=12.sp,lineHeight=16.sp,maxLines=2,textAlign=androidx.compose.ui.text.style.TextAlign.Center,overflow=TextOverflow.Ellipsis)
             }
+        }
+    }
+}
+
+/** On Friday, Surah Al-Kahf: opens the mushaf at its first page, and gives thanks once its pages are read today. */
+@Composable private fun KahfCard(day: PrayerDay,onKahf: ()->Unit) {
+    if(day.date.dayOfWeek!=java.time.DayOfWeek.FRIDAY)return
+    val c=LocalPalette.current
+    val context=androidx.compose.ui.platform.LocalContext.current
+    val read=remember(day.date) {org.najwa.app.platform.QuranStore.readToday(context).let {pages->(org.najwa.app.platform.KAHF_PAGE..org.najwa.app.platform.KAHF_LAST_PAGE).all {it in pages}}}
+    Spacer(Modifier.height(12.dp))
+    Surface(onClick=onKahf,color=c.surface,shape=RoundedCornerShape(20.dp),border=BorderStroke(1.dp,if(read)c.green else c.border)) {
+        Row(Modifier.fillMaxWidth().padding(14.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+            Box(Modifier.size(40.dp).background(c.selected,RoundedCornerShape(14.dp)),contentAlignment=Alignment.Center) {Glyph(if(read)"check" else "mushaf",c.mint,Modifier.size(20.dp))}
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.kahf_card_title),color=c.text,fontSize=14.sp,fontWeight=FontWeight.Bold)
+                Text(stringResource(if(read)R.string.kahf_card_done else R.string.kahf_card_text),color=c.secondary,fontSize=12.sp)
+            }
+            Glyph("chevron",modifier=Modifier.size(16.dp))
         }
     }
 }

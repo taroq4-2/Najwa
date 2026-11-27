@@ -27,7 +27,7 @@
     <string name="iqama_section_title">اقامت</string>
     <string name="iqama_section_help">اذان کے بعد گنتی، اور لاک اسکرین پر لائیو کارڈ</string>
     <string name="data_title">ڈیٹا اور آٹومیشن</string>
-    <string name="data_summary">بیک اپ اور ایپ آٹومیشن</string>
+    <string name="data_summary">آٹومیشن، ایپ ربط اور سمارٹ واچ</string>
     <string name="data_intro">ترتیبات محفوظ کریں یا نجویٰ کو آٹومیشن ایپس سے جوڑیں</string>
     <string name="tasbeeh_after_prayer">نماز کے بعد تسبیح</string>
     <string name="tasbeeh_of">%1$s میں سے</string>

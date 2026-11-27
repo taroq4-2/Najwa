@@ -50,7 +50,7 @@
     <string name="companion_summary">Ringkasan harian di beranda</string>
     <string name="companion_summary_help">Salat, bacaan dan zikir hari ini dalam satu kartu</string>
     <string name="companion_focus">Mode fokus untuk zikir</string>
-    <string name="companion_focus_help">Hanya zikir saat ini dengan teks besar, tanpa angka atau statistik</string>
+    <string name="companion_focus_help">Menyembunyikan angka dan statistik di sekitar zikir, hanya kartu dan penghitungnya</string>
     <string name="goal_title">Target harian</string>
     <string name="goal_help">Motivasi pribadi, bukan kewajiban agama. Tidak ada yang hilang jika tidak tercapai.</string>
     <string name="goal_kind_hasanat">Kebaikan yang diharapkan</string>
@@ -96,7 +96,7 @@
     <string name="mushaf_title">Mushaf</string>
     <string name="mushaf_intro">Baca dari mushaf dan konfirmasi yang selesai untuk mengikuti wirid dan khatammu.</string>
     <string name="mushaf_continue">Lanjut membaca</string>
-    <string name="mushaf_continue_hint">Terakhir di halaman %1$s · juz %2$s</string>
+    <string name="mushaf_continue_hint">Halaman terakhir dibuka: %1$s · juz %2$s</string>
     <string name="mushaf_index">Daftar surah</string>
     <string name="mushaf_back">Kembali ke bacaan Qur\'an</string>
     <string name="mushaf_loading">Membuka mushaf…</string>
@@ -340,4 +340,29 @@ Akan menggantikan data di ponsel ini.</string>
     <string name="qibla_here">lokasimu saat ini</string>
     <string name="qibla_near_makkah">Kamu dekat Makkah: menghitung dari pusat kota bisa meleset banyak derajat, jadi gunakan lokasimu saat ini.</string>
     <string name="qibla_interference">Gangguan magnetik: jauhi logam, magnet dan casing magnetik, lalu gerakkan ponsel membentuk angka 8.</string>
+    <string name="silence_confirm_title">Senyapkan ponsel sekarang?</string>
+    <string name="silence_confirm_text">Aplikasi lain meminta Najwa menyenyapkan ponselmu. Ponsel tetap seperti semula kecuali kamu setuju.</string>
+    <string name="silence_confirm_yes">Senyapkan sekarang</string>
+    <string name="mushaf_surah_label">Surah %1$s</string>
+    <string name="qibla_at_haram">Kamu sangat dekat Masjidil Haram: hadaplah Ka\'bah langsung; kompas tidak cukup tepat di sini.</string>
+    <string name="mushaf_share_image">Bagikan sebagai gambar</string>
+    <string name="adhkar_share">Bagikan zikir ini</string>
+    <string name="kahf_card_title">Hari Jumat · Surah Al-Kahfi</string>
+    <string name="kahf_card_text">Baca hari ini di mushaf, mulai halaman 293</string>
+    <string name="kahf_card_done">Kamu membaca Al-Kahfi hari ini. Semoga diterima</string>
+    <string name="reading_appearance">Tampilan baca</string>
+    <string name="reading_mode_paper">Kertas</string>
+    <string name="reading_mode_night">Malam</string>
+    <string name="reading_mode_custom">Warnaku</string>
+    <string name="reading_background">Warna latar</string>
+    <string name="reading_text_colour">Warna teks</string>
+    <string name="reading_low_contrast">Kontras kedua warna rendah dan mungkin sulit dibaca; pilih warna lebih terang atau gelap.</string>
+    <string name="reading_apply">Terapkan</string>
+    <string name="tajweed_title">Warna tajwid</string>
+    <string name="tajweed_help">Pewarnaan perkiraan hukum dari tanda mushaf Kompleks</string>
+    <string name="tajweed_silent">Abu-abu: huruf yang ditulis tapi tidak dibaca</string>
+    <string name="tajweed_nasal">Hijau: ghunnah, ikhfa, idgham bighunnah dan iqlab (termasuk tanwin)</string>
+    <string name="tajweed_madd">Merah: mad lazim, wajib dan jaiz</string>
+    <string name="tajweed_qalqalah">Biru: qalqalah</string>
+    <string name="tajweed_note">Bantuan baca otomatis; tidak menggantikan belajar dari guru yang mumpuni.</string>
 </resources>

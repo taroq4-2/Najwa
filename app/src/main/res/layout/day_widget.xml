@@ -6,7 +6,7 @@
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/widget_root" android:layout_width="match_parent" android:layout_height="match_parent" android:layoutDirection="inherit">
 <ImageView android:id="@+id/widget_backdrop" android:layout_width="match_parent" android:layout_height="match_parent" android:src="@drawable/widget_background" android:scaleType="fitXY" android:importantForAccessibility="no" />
-<LinearLayout android:id="@+id/widget_content" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:gravity="center_vertical" android:layoutDirection="inherit" android:paddingStart="16dp" android:paddingEnd="16dp" android:paddingTop="12dp" android:paddingBottom="12dp">
+<LinearLayout android:id="@+id/widget_content" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:layoutDirection="inherit" android:paddingStart="16dp" android:paddingEnd="16dp" android:paddingTop="12dp" android:paddingBottom="12dp">
 
 <!-- Header: mark, brand and Hijri date, city, refresh. -->
 <LinearLayout android:layout_width="match_parent" android:layout_height="26dp" android:orientation="horizontal" android:gravity="center_vertical">
@@ -20,7 +20,8 @@
 <ImageView android:id="@+id/widget_refresh" android:layout_width="28dp" android:layout_height="28dp" android:layout_marginStart="2dp" android:padding="6dp" android:src="@drawable/ic_widget_refresh" android:contentDescription="@string/system_refresh" />
 </LinearLayout>
 
-<FrameLayout android:layout_width="match_parent" android:layout_height="10dp" />
+<!-- Extra height is shared between the sections, never left as empty bands at the top or bottom. -->
+<FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:minHeight="8dp" />
 
 <!-- The next prayer and its countdown. -->
 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="bottom">
@@ -68,7 +69,8 @@
 </LinearLayout>
 
 <!-- The day: hasanat with what is left to the goal, then prayers, adhkar and the Quran portion. -->
-<LinearLayout android:id="@+id/day_stats" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginTop="8dp">
+<FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:minHeight="8dp" />
+<LinearLayout android:id="@+id/day_stats" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
 <LinearLayout android:id="@+id/day_a" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="@drawable/day_tile" android:paddingStart="12dp" android:paddingEnd="12dp" android:paddingTop="8dp" android:paddingBottom="8dp">
 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
 <TextView android:id="@+id/day_a_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" android:textColor="#B8CBC0" android:textSize="11sp" android:fontFamily="@font/noto_sans_arabic_regular" android:includeFontPadding="false" android:maxLines="1" />

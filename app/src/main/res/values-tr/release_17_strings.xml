@@ -50,7 +50,7 @@
     <string name="companion_summary">Ana sayfada günlük özet</string>
     <string name="companion_summary_help">Bugünün namaz, okuma ve zikirleri tek kartta</string>
     <string name="companion_focus">Zikir için odak modu</string>
-    <string name="companion_focus_help">Yalnızca şimdiki zikir büyük yazıyla, sayı ve istatistik olmadan</string>
+    <string name="companion_focus_help">Zikrin çevresindeki sayıları ve istatistikleri gizler; yalnızca kart ve sayaç kalır</string>
     <string name="goal_title">Günlük hedef</string>
     <string name="goal_help">Kişisel bir motivasyon, dinî bir yükümlülük değil. Ulaşamazsan hiçbir şey kaybolmaz.</string>
     <string name="goal_kind_hasanat">Umulan sevaplar</string>
@@ -96,7 +96,7 @@
     <string name="mushaf_title">Mushaf</string>
     <string name="mushaf_intro">Mushaftan oku, bitirdiğini onayla; günlük virdin ve hatmin ilerlesin.</string>
     <string name="mushaf_continue">Okumaya devam</string>
-    <string name="mushaf_continue_hint">%1$s. sayfada kaldın · %2$s. cüz</string>
+    <string name="mushaf_continue_hint">Son açtığın sayfa: %1$s · cüz %2$s</string>
     <string name="mushaf_index">Sure listesi</string>
     <string name="mushaf_back">Kur\'an okumaya dön</string>
     <string name="mushaf_loading">Mushaf açılıyor…</string>
@@ -340,4 +340,29 @@ Bu telefondaki verilerin yerini alacak.</string>
     <string name="qibla_here">şu anki konumun</string>
     <string name="qibla_near_makkah">Mekke\'ye yakınsın: şehir merkezinden hesaplamak birkaç derece sapabilir, şu anki konumunu kullan.</string>
     <string name="qibla_interference">Manyetik parazit: metal, mıknatıs ve manyetik kılıflardan uzaklaş, sonra telefonu 8 çizerek hareket ettir.</string>
+    <string name="silence_confirm_title">Telefon şimdi susturulsun mu?</string>
+    <string name="silence_confirm_text">Başka bir uygulama Najwa\'dan telefonunu susturmasını istedi. Sen onaylamadıkça değişmez.</string>
+    <string name="silence_confirm_yes">Şimdi sustur</string>
+    <string name="mushaf_surah_label">%1$s Suresi</string>
+    <string name="qibla_at_haram">Mescid-i Haram\'a çok yakınsın: doğrudan Kâbe\'ye yönel; burada pusula yeterince hassas değil.</string>
+    <string name="mushaf_share_image">Görsel olarak paylaş</string>
+    <string name="adhkar_share">Bu zikri paylaş</string>
+    <string name="kahf_card_title">Cuma · Kehf Suresi</string>
+    <string name="kahf_card_text">Bugün mushaftan oku, 293. sayfadan</string>
+    <string name="kahf_card_done">Bugün Kehf\'i okudun, Allah kabul etsin</string>
+    <string name="reading_appearance">Okuma görünümü</string>
+    <string name="reading_mode_paper">Kâğıt</string>
+    <string name="reading_mode_night">Gece</string>
+    <string name="reading_mode_custom">Renklerim</string>
+    <string name="reading_background">Arka plan rengi</string>
+    <string name="reading_text_colour">Yazı rengi</string>
+    <string name="reading_low_contrast">İki renk arasındaki kontrast düşük, okumak zor olabilir; daha açık veya koyu bir renk seç.</string>
+    <string name="reading_apply">Uygula</string>
+    <string name="tajweed_title">Tecvid renkleri</string>
+    <string name="tajweed_help">Kompleksin işaretlerinden kuralların yaklaşık renklendirmesi</string>
+    <string name="tajweed_silent">Gri: yazılıp okunmayan harfler</string>
+    <string name="tajweed_nasal">Yeşil: gunne, ihfa, gunneli idgam ve iklab (tenvin dahil)</string>
+    <string name="tajweed_madd">Kırmızı: lazım, vacip ve caiz med</string>
+    <string name="tajweed_qalqalah">Mavi: kalkale</string>
+    <string name="tajweed_note">Okumaya otomatik bir yardım; usta bir hocadan öğrenmenin yerini tutmaz.</string>
 </resources>

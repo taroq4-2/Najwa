@@ -27,7 +27,7 @@
     <string name="iqama_section_title">ইকামত</string>
     <string name="iqama_section_help">আজানের পর কাউন্টডাউন ও লক স্ক্রিনে লাইভ কার্ড</string>
     <string name="data_title">ডেটা ও অটোমেশন</string>
-    <string name="data_summary">ব্যাকআপ ও অ্যাপ অটোমেশন</string>
+    <string name="data_summary">অটোমেশন, অ্যাপ সংযোগ ও স্মার্টওয়াচ</string>
     <string name="data_intro">সেটিংস সংরক্ষণ করুন বা নাজওয়াকে অটোমেশন অ্যাপে যুক্ত করুন</string>
     <string name="tasbeeh_after_prayer">নামাজের পর তাসবিহ</string>
     <string name="tasbeeh_of">%1$s-এর মধ্যে</string>

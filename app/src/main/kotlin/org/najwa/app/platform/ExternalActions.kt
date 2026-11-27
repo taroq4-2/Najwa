@@ -13,6 +13,22 @@ fun launchExternal(context: Context,intent: Intent): Boolean = runCatching {
     context.startActivity(Intent(intent).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));true
 }.getOrDefault(false)
 
+/**
+ * A random secret made on first use and kept on the device. Najwa's own shortcut and quick-settings tile carry it;
+ * an intent without it (from another app) asks before silencing the phone.
+ */
+object LaunchToken {
+    const val EXTRA="najwa_token"
+    fun get(context: Context): String {
+        val prefs=context.getSharedPreferences("security",Context.MODE_PRIVATE)
+        prefs.getString("launch",null)?.let {return it}
+        val token=java.util.UUID.randomUUID().toString()
+        prefs.edit().putString("launch",token).apply()
+        return token
+    }
+    fun matches(context: Context,intent: Intent?): Boolean=intent?.getStringExtra(EXTRA)?.let {it==get(context)}==true
+}
+
 const val CONTACT_EMAIL="contact@os73.com"
 fun contactEmailIntent(category: String,device: String,details: String): Intent {
     val subject="نجوى · "+category

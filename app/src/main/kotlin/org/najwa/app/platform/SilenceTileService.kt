@@ -59,6 +59,7 @@ class SilenceTileService: TileService() {
     /** Permissions are missing: open Najwa's silence screen to set them up. */
     private fun openApp() {
         val intent=Intent(this,MainActivity::class.java).setAction(ACTION_SILENCE_NOW).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            .putExtra(LaunchToken.EXTRA,LaunchToken.get(this))
         if(Build.VERSION.SDK_INT>=34) {
             startActivityAndCollapse(PendingIntent.getActivity(this,704,intent,PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
         } else @Suppress("DEPRECATION","StartActivityAndCollapseDeprecated") startActivityAndCollapse(intent)

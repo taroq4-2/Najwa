@@ -50,7 +50,7 @@
     <string name="companion_summary">ہوم پر روزانہ خلاصہ</string>
     <string name="companion_summary_help">آج کی نمازیں، تلاوت اور اذکار ایک کارڈ میں</string>
     <string name="companion_focus">اذکار کے لیے توجہ موڈ</string>
-    <string name="companion_focus_help">صرف موجودہ ذکر بڑے حروف میں، بغیر اعداد و شمار</string>
+    <string name="companion_focus_help">ذکر کے اردگرد اعداد و شمار چھپاتا ہے، صرف کارڈ اور گنتی رہتی ہے</string>
     <string name="goal_title">روزانہ نیکی کا ہدف</string>
     <string name="goal_help">ذاتی حوصلہ افزائی، شرعی فرض نہیں۔ نہ پہنچنے پر کچھ ضائع نہیں ہوتا۔</string>
     <string name="goal_kind_hasanat">متوقع نیکیاں</string>
@@ -96,7 +96,7 @@
     <string name="mushaf_title">مصحف</string>
     <string name="mushaf_intro">مصحف سے پڑھیں اور مکمل صفحہ درج کریں تاکہ روزانہ کا ورد اور ختم آگے بڑھے۔</string>
     <string name="mushaf_continue">پڑھنا جاری رکھیں</string>
-    <string name="mushaf_continue_hint">صفحہ %1$s پر رکے · پارہ %2$s</string>
+    <string name="mushaf_continue_hint">آخری کھولا گیا صفحہ: %1$s · پارہ %2$s</string>
     <string name="mushaf_index">سورتوں کی فہرست</string>
     <string name="mushaf_back">تلاوت پر واپس</string>
     <string name="mushaf_loading">مصحف کھل رہا ہے…</string>
@@ -340,4 +340,29 @@
     <string name="qibla_here">آپ کا موجودہ مقام</string>
     <string name="qibla_near_makkah">آپ مکہ کے قریب ہیں: شہر کے مرکز سے حساب کئی درجے غلط ہو سکتا ہے، اس لیے موجودہ مقام استعمال کریں۔</string>
     <string name="qibla_interference">مقناطیسی مداخلت: دھات، مقناطیس اور مقناطیسی کور سے دور ہوں، پھر فون کو 8 کی شکل میں گھمائیں۔</string>
+    <string name="silence_confirm_title">فون ابھی خاموش کریں؟</string>
+    <string name="silence_confirm_text">کسی اور ایپ نے نجویٰ سے فون خاموش کرنے کو کہا۔ آپ کی رضامندی کے بغیر ایسا نہیں ہوگا۔</string>
+    <string name="silence_confirm_yes">ابھی خاموش کریں</string>
+    <string name="mushaf_surah_label">سورۃ %1$s</string>
+    <string name="qibla_at_haram">آپ مسجد الحرام کے بہت قریب ہیں: براہِ راست کعبہ کی طرف رخ کریں؛ یہاں قطب نما کافی درست نہیں۔</string>
+    <string name="mushaf_share_image">تصویر کے طور پر شیئر کریں</string>
+    <string name="adhkar_share">یہ ذکر شیئر کریں</string>
+    <string name="kahf_card_title">جمعہ · سورۃ الکہف</string>
+    <string name="kahf_card_text">آج مصحف سے پڑھیں، صفحہ 293 سے</string>
+    <string name="kahf_card_done">آپ نے آج الکہف پڑھ لی، اللہ قبول فرمائے</string>
+    <string name="reading_appearance">پڑھنے کی شکل</string>
+    <string name="reading_mode_paper">کاغذی</string>
+    <string name="reading_mode_night">رات</string>
+    <string name="reading_mode_custom">میرے رنگ</string>
+    <string name="reading_background">پس منظر کا رنگ</string>
+    <string name="reading_text_colour">متن کا رنگ</string>
+    <string name="reading_low_contrast">دونوں رنگوں میں فرق کم ہے، پڑھنا مشکل ہو سکتا ہے؛ ہلکا یا گہرا رنگ چنیں۔</string>
+    <string name="reading_apply">لاگو کریں</string>
+    <string name="tajweed_title">تجوید کے رنگ</string>
+    <string name="tajweed_help">کمپلیکس کے نشانات سے احکام کی تقریبی رنگت</string>
+    <string name="tajweed_silent">سرمئی: لکھے گئے مگر نہ پڑھے جانے والے حروف</string>
+    <string name="tajweed_nasal">سبز: غنہ، اخفاء، ادغام بالغنہ اور اقلاب (تنوین سمیت)</string>
+    <string name="tajweed_madd">سرخ: مدِ لازم، واجب اور جائز</string>
+    <string name="tajweed_qalqalah">نیلا: قلقلہ</string>
+    <string name="tajweed_note">پڑھنے میں خودکار مدد ہے؛ ماہر استاد سے سیکھنے کا متبادل نہیں۔</string>
 </resources>

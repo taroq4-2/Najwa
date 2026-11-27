@@ -43,6 +43,8 @@ import java.time.Instant
     var saving by remember {mutableStateOf(false)}
     var trail by rememberSaveable {mutableStateOf(listOf(Screen.HOME.name))}
     var cityDialog by rememberSaveable {mutableStateOf(false)}
+    // Another app asked Najwa to silence the phone: only on your confirmation.
+    var confirmSilence by rememberSaveable {mutableStateOf(false)}
     var secondCityDialog by rememberSaveable {mutableStateOf(false)}
     var adhkarTab by rememberSaveable {mutableIntStateOf(0)}
     // The mushaf reader opens at a chosen page (0 = where you left off), or on its index.
@@ -76,7 +78,7 @@ import java.time.Instant
     // Shortcuts, the quick-settings tile and the travel notification open the app with an action.
     LaunchedEffect(actionRequest) {
         when(action) {
-            org.najwa.app.platform.ACTION_SILENCE_NOW -> {trail=navigateScreens(trail,Screen.SILENCE,true);silenceNow()}
+            org.najwa.app.platform.ACTION_SILENCE_NOW -> {trail=navigateScreens(trail,Screen.SILENCE,true);if(actionData=="confirm")confirmSilence=true else silenceNow()}
             org.najwa.app.platform.ACTION_QIBLA -> trail=navigateScreens(navigateScreens(trail,Screen.HOME,true),Screen.QIBLA)
             org.najwa.app.platform.ACTION_CHOOSE_CITY -> cityDialog=true
             org.najwa.app.platform.ACTION_ADHKAR -> {adhkarTab=actionData?.toIntOrNull() ?: 0;trail=navigateScreens(navigateScreens(trail,Screen.HOME,true),Screen.ADHKAR)}
@@ -195,7 +197,7 @@ import java.time.Instant
                                 onSilence={navigate(Screen.SILENCE)},onQibla={navigate(Screen.QIBLA)},activeUntil=session?.takeIf {it.state==SessionState.ACTIVE}?.let {Instant.ofEpochMilli(it.deadline)},
                                 tomorrow=days.firstOrNull {it.date==current.date.plusDays(1)},logged=if(prefs.prayerLog)log.days[current.date].orEmpty() else emptySet(),
                                 onTogglePrayed=if(prefs.prayerLog) {prayer->scope.launch {withContext(prayerDispatcher) {runtime.setPrayed(current.date,prayer,!log.prayed(current.date,prayer))};log=runtime.log()}} else null,
-                                onTool={navigate(it)},mosqueName=prefs.activeMosque?.let {id->mosques.firstOrNull {it.id==id}?.name},onAdhkar={adhkarTab=it;navigate(Screen.ADHKAR)})
+                                onTool={navigate(it)},mosqueName=prefs.activeMosque?.let {id->mosques.firstOrNull {it.id==id}?.name},onAdhkar={adhkarTab=it;navigate(Screen.ADHKAR)},onKahf={mushafPage=org.najwa.app.platform.KAHF_PAGE;mushafIndex=false;navigate(Screen.MUSHAF)})
                         }
                         Screen.SILENCE -> SilenceScreen(runtime,prefs,session,now,onBack=::back,onSave={save(it)},onAccess={navigate(Screen.PERMISSIONS)},onRestore={
                             scope.launch { withContext(prayerDispatcher) {runtime.restore()};session=runtime.displayedSession() }
@@ -237,6 +239,10 @@ import java.time.Instant
                 if(!onboarding)whatsNewStore.edit().putInt("seen",org.najwa.app.BuildConfig.VERSION_CODE).apply()
             }
             if(whatsNew)WhatsNewDialog {whatsNew=false}
+            if(confirmSilence)AlertDialog(onDismissRequest={confirmSilence=false},
+                title={Text(stringResource(R.string.silence_confirm_title))},text={Text(stringResource(R.string.silence_confirm_text))},
+                confirmButton={TextButton(onClick={confirmSilence=false;silenceNow()}) {Text(stringResource(R.string.silence_confirm_yes))}},
+                dismissButton={TextButton(onClick={confirmSilence=false}) {Text(stringResource(R.string.action_cancel))}})
         }
     }
 }
@@ -282,7 +288,7 @@ import java.time.Instant
                         Text(label,Modifier.padding(start=8.dp),color=c.mint,fontSize=13.sp,fontWeight=FontWeight.Bold,maxLines=1)
                     } else Column(horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(3.dp)) {
                         Glyph(glyph,c.secondary,Modifier.size(21.dp))
-                        Text(label,color=c.secondary,fontSize=10.sp,maxLines=1)
+                        Text(label,color=c.secondary,fontSize=11.sp,maxLines=1)
                     }
                 }
             }
