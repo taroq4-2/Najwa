@@ -173,7 +173,7 @@ The APK is signed with the same official key, so it updates the previous version
 **1.7.0 · Build 118** — SHA-256 · `Najwa.apk`:
 
 ```text
-{{SHA256}}
+82c53b00bf0c7a8d8e254d98f75f05ab458f313e1700f40471beecfc54289ae0
 ```
 
 <div dir="rtl">
